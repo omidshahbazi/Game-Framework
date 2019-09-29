@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Compile">
+      <UniqueIdentifier>{aac5a6a7-dd78-4081-a04a-e4a59f9aa5d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compile\Syntax">
+      <UniqueIdentifier>{3bc8cd2d-21d6-4288-b209-3f4c27c77490}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{e34115b7-eef2-43a7-b3ef-08e63a1a033d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Syntax">
+      <UniqueIdentifier>{5fba9a1a-c7a6-4ed9-8f5e-fdc0e10fa1cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\SyntaxTree">
+      <UniqueIdentifier>{6563ae1e-3cc0-4413-9acb-f5662805402e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\Expression.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Syntax\Lexer.h">
+      <Filter>Include\Syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SyntaxTree\TreeNode.h">
+      <Filter>Include\SyntaxTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Syntax\Token.h">
+      <Filter>Include\Syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Syntax\Tokenizer.h">
+      <Filter>Include\Syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SyntaxTree\ArithmeticOperatorNode.h">
+      <Filter>Include\SyntaxTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SyntaxTree\FunctionNode.h">
+      <Filter>Include\SyntaxTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SyntaxTree\LogicalOperatorNode.h">
+      <Filter>Include\SyntaxTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SyntaxTree\NumberNode.h">
+      <Filter>Include\SyntaxTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SyntaxTree\ParameterNode.h">
+      <Filter>Include\SyntaxTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SyntaxTree\OperatorNode.h">
+      <Filter>Include\SyntaxTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Argument.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\FunctionDefinition.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\TreeNodeCalculator.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\PredefinedFunctions.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Compile\Expression.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\Syntax\Lexer.cpp">
+      <Filter>Compile\Syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\Syntax\Tokenizer.cpp">
+      <Filter>Compile\Syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\Syntax\Token.cpp">
+      <Filter>Compile\Syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\TreeNodeCalculator.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\PredefinedFunctions.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

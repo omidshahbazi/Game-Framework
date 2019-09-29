@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{26568521-9093-4208-9BAC-10F5B123BFFB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Zorvan.Framework.Common</RootNamespace>
+    <AssemblyName>CommonManaged</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Binaries\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Binaries\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Arithmetic\Math.cs" />
+    <Compile Include="Arithmetic\PrimitivesInterpolation.cs" />
+    <Compile Include="Compression\Compressor.cs" />
+    <Compile Include="Cryptography\Encryptor.cs" />
+    <Compile Include="Cryptography\HMAC.cs" />
+    <Compile Include="Extensions\ListExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="FileManagement\FileSystem.cs" />
+    <Compile Include="MemoryManagement\Singleton.cs" />
+    <Compile Include="Pool\DefaultObjectHolder.cs" />
+    <Compile Include="Pool\IObject.cs" />
+    <Compile Include="Pool\IObjectFactory.cs" />
+    <Compile Include="Pool\IObjectHolder.cs" />
+    <Compile Include="Pool\ObjectPool.cs" />
+    <Compile Include="Arithmetic\Interpolation.cs" />
+    <Compile Include="Reflection\AttributeUtils.cs" />
+    <Compile Include="Reflection\TypeExtensions.cs" />
+    <Compile Include="Reflection\TypeUtils.cs" />
+    <Compile Include="SystemController\Orders.cs" />
+    <Compile Include="SystemController\SystemInstance.cs" />
+    <Compile Include="SystemController\ISystem.cs" />
+    <Compile Include="SystemController\SystemManager.cs" />
+    <Compile Include="Threading\ThreadManager.cs" />
+    <Compile Include="Timing\Time.cs" />
+    <Compile Include="Utilities\BitwiseHelper.cs" />
+    <Compile Include="Utilities\DateTimeHelper.cs" />
+    <Compile Include="Utilities\FileHelper.cs" />
+    <Compile Include="Utilities\CRC32.cs" />
+    <Compile Include="FileManagement\LogManager.cs" />
+    <Compile Include="Utilities\MathHelper.cs" />
+    <Compile Include="Utilities\OUID.cs" />
+    <Compile Include="Utilities\Random.cs" />
+    <Compile Include="Diagnostics\Development.cs" />
+    <Compile Include="Reflection\MethodMetaData.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\RoundBehaviors.cs" />
+    <Compile Include="Utilities\SystemInfo.cs" />
+    <Compile Include="Utilities\Version.cs" />
+    <Compile Include="WebRequest\WebRequestManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

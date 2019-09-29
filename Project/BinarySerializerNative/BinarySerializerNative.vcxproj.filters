@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Include">
+      <UniqueIdentifier>{1cbe73d2-ab04-4f46-8c85-6b29b1bf8009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compile">
+      <UniqueIdentifier>{2482a8c7-493f-4ff5-9b3b-15804c727ce7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\Serializer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Compile\Serializer.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
