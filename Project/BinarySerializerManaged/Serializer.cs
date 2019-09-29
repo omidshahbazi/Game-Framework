@@ -1,6 +1,6 @@
 ﻿// Copyright 2015-2017 Zorvan Game Studio. All Rights Reserved.
 using System;
-using Zorvan.Framework.Common.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 
 namespace Zorvan.Framework.BinarySerializer
@@ -161,7 +161,7 @@ namespace Zorvan.Framework.BinarySerializer
 
 		public void WriteBytes(byte[] Value, int Index, int Length)
 		{
-			Development.Assert(Data.CanWrite, "Data Can not Write");
+			Debug.Assert(Data.CanWrite, "Data Can not Write");
 
 			Data.Write(Value, Index, Length);
 		}
@@ -173,7 +173,7 @@ namespace Zorvan.Framework.BinarySerializer
 
 		public byte[] ReadBytes(int Length)
 		{
-			Development.Assert(Data.CanRead, "Data Can not Read");
+			Debug.Assert(Data.CanRead, "Data Can not Read");
 
 			byte[] result = new byte[Length];
 
@@ -181,7 +181,7 @@ namespace Zorvan.Framework.BinarySerializer
 			{
 				int value = Data.ReadByte();
 
-				Development.Assert(value != -1, "End Of Stream");
+				Debug.Assert(value != -1, "End Of Stream");
 
 				result[i] = (byte)value;
 			}

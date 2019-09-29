@@ -1,6 +1,6 @@
 // Copyright 2015-2017 Zorvan Game Studio. All Rights Reserved.
 using System.Collections.Generic;
-using Zorvan.Framework.Common.Diagnostics;
+using System.Diagnostics;
 using Zorvan.Framework.Common.Pool;
 
 namespace Zorvan.Framework.Common.Extensions
@@ -25,7 +25,7 @@ namespace Zorvan.Framework.Common.Extensions
 				a.RemoveRange(NewSize, -diff);
 			}
 
-			Development.Assert(a.Count == NewSize, "");
+			Debug.Assert(a.Count == NewSize);
 		}
 
 		public static void Resize<T>(this List<T> a, int NewSize)
