@@ -85,7 +85,7 @@ namespace Zorvan.Framework.BinarySerializer
 
 		public byte ReadByte()
 		{
-			return (byte)stream.ReadByte();
+			return Convert.ToByte(stream.ReadByte());
 		}
 
 		public void ReadBytes(byte[] Data, int Index, int Length)
