@@ -1,4 +1,4 @@
-// Copyright 2015-2017 Zorvan Game Studio. All Rights Reserved.
+// Copyright 2019. All Rights Reserved.
 #pragma once
 
 #ifndef TOKENIZER_H

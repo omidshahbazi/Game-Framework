@@ -1,4 +1,4 @@
-// Copyright 2015-2017 Zorvan Game Studio. All Rights Reserved.
+// Copyright 2019. All Rights Reserved.
 #include "..\Include\TreeNodeCalculator.h"
 #include "..\Include\SyntaxTree\ArithmeticOperatorNode.h"
 #include "..\Include\SyntaxTree\FunctionNode.h"

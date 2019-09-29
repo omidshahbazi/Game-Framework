@@ -40,6 +40,7 @@
     <Compile Include="Compression\Compressor.cs" />
     <Compile Include="Cryptography\Encryptor.cs" />
     <Compile Include="Cryptography\HMAC.cs" />
+    <Compile Include="Extensions\ArrayUtilities.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="FileManagement\FileSystem.cs" />
