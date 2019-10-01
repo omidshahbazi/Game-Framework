@@ -16,6 +16,11 @@ namespace GameFramework.BinarySerializer
 			get { return stream.ToArray(); }
 		}
 
+		public int Size
+		{
+			get { return (int)stream.Position; }
+		}
+
 		public BufferStream(byte[] Buffer)
 		{
 			stream = new MemoryStream(Buffer, true);
