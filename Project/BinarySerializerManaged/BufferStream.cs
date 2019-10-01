@@ -26,6 +26,16 @@ namespace GameFramework.BinarySerializer
 			stream = new MemoryStream(Buffer, true);
 		}
 
+		public BufferStream(byte[] Buffer, int Length)
+		{
+			stream = new MemoryStream(Buffer, 0, Length, true);
+		}
+
+		public BufferStream(byte[] Buffer, int Index, int Length)
+		{
+			stream = new MemoryStream(Buffer, Index, Length, true);
+		}
+
 		public BufferStream(MemoryStream Stream)
 		{
 			stream = Stream;

@@ -11,8 +11,13 @@ namespace GameFramework.Common.Compression
 
 		public static byte[] Compress(byte[] Input)
 		{
-			byte[] processed = new byte[Input.Length];
-			int length = Compress(Input, Input.Length, processed, processed.Length);
+			return Compress(Input, Input.Length);
+		}
+
+		public static byte[] Compress(byte[] Input, int Length)
+		{
+			byte[] processed = new byte[Length];
+			int length = Compress(Input, Length, processed, processed.Length);
 
 			byte[] output = new byte[length];
 			System.Array.Copy(processed, 0, output, 0, length);
@@ -137,8 +142,13 @@ namespace GameFramework.Common.Compression
 
 		public static byte[] Decompress(byte[] Input)
 		{
-			byte[] processed = new byte[Input.Length * 1000];
-			int length = Decompress(Input, Input.Length, processed, processed.Length);
+			return Decompress(Input, Input.Length);
+		}
+
+		public static byte[] Decompress(byte[] Input, int Length)
+		{
+			byte[] processed = new byte[Length * 1000];
+			int length = Decompress(Input, Length, processed, processed.Length);
 
 			byte[] output = new byte[length];
 			System.Array.Copy(processed, 0, output, 0, length);
