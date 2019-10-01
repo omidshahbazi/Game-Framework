@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Zorvan.Framework.ASCIISerializer.JSONSerializer
+namespace GameFramework.ASCIISerializer.JSONSerializer
 {
 	class JSONSerializeObject : ISerializeObject
 	{

@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using Zorvan.Framework.MathParser.SyntaxTree;
+using GameFramework.MathParser.SyntaxTree;
 
-namespace Zorvan.Framework.MathParser
+namespace GameFramework.MathParser
 {
 	public static class TreeNodeCalculator
 	{

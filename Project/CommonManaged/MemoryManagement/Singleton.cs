@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
 
-namespace Zorvan.Framework.Common.MemoryManagement
+namespace GameFramework.Common.MemoryManagement
 {
 	public class Singleton<T> where T : class
 	{

@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace Zorvan.Framework.Common.FileLayer
+namespace GameFramework.Common.FileLayer
 {
 	public class LogManager
 	{

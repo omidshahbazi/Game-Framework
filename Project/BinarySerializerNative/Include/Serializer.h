@@ -7,7 +7,7 @@
 #include <streambuf>
 #include <vector>
 
-namespace Zorvan::Framework::BinarySerializer
+namespace GameFramework::BinarySerializer
 {
 	class Serializer
 	{

@@ -1,4 +1,4 @@
-﻿using Zorvan.Framework.BinarySerializer;
+﻿using GameFramework.BinarySerializer;
 
 namespace EntitySystemTest
 {

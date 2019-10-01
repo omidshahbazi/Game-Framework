@@ -1,5 +1,5 @@
 ﻿using System;
-using Zorvan.Framework.MathParser;
+using GameFramework.MathParser;
 
 namespace MathParserTest
 {

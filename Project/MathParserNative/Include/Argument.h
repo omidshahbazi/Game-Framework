@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace Zorvan::Framework::MathParser
+namespace GameFramework::MathParser
 {
 	class Argument
 	{

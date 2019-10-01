@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Zorvan.Framework.Common.Utilities
+namespace GameFramework.Common.Utilities
 {
 	public static class FileHelper
 	{

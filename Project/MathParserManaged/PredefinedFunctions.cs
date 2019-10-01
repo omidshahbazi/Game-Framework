@@ -1,9 +1,9 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
 using System.Collections.Generic;
-using Zorvan.Framework.MathParser.SyntaxTree;
+using GameFramework.MathParser.SyntaxTree;
 
-namespace Zorvan.Framework.MathParser
+namespace GameFramework.MathParser
 {
 	public static class PredefinedFunctions
 	{

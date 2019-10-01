@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.Text;
 
-namespace Zorvan.Framework.ASCIISerializer.JSONSerializer
+namespace GameFramework.ASCIISerializer.JSONSerializer
 {
 	class JSONParser
 	{

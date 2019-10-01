@@ -7,7 +7,7 @@
 #include <string>
 #include <map>
 
-namespace Zorvan::Framework::MathParser::Syntax
+namespace GameFramework::MathParser::Syntax
 {
 	class Token
 	{

@@ -2,7 +2,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Zorvan.Framework.Common.Cryptography
+namespace GameFramework.Common.Cryptography
 {
 	public static class HMAC
 	{

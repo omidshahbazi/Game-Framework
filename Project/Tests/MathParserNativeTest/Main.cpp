@@ -3,7 +3,7 @@
 #include <PredefinedFunctions.h>
 #include <iostream>
 
-using namespace Zorvan::Framework::MathParser;
+using namespace GameFramework::MathParser;
 
 void main()
 {

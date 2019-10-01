@@ -2,7 +2,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Zorvan.Framework.Common.Extensions
+namespace GameFramework.Common.Extensions
 {
 	public static class ArrayUtilities
 	{

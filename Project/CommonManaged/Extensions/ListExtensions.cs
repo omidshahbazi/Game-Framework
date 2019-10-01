@@ -1,9 +1,9 @@
 // Copyright 2019. All Rights Reserved.
 using System.Collections.Generic;
 using System.Diagnostics;
-using Zorvan.Framework.Common.Pool;
+using GameFramework.Common.Pool;
 
-namespace Zorvan.Framework.Common.Extensions
+namespace GameFramework.Common.Extensions
 {
 	public static class ListExtensions
 	{

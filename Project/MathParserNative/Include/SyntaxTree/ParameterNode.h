@@ -7,7 +7,7 @@
 #include "..\SyntaxTree\TreeNode.h"
 #include <string>
 
-namespace Zorvan::Framework::MathParser::SyntaxTree
+namespace GameFramework::MathParser::SyntaxTree
 {
 	class ParameterNode : public TreeNode
 	{

@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
 
-namespace Zorvan.Framework.Common.Timing
+namespace GameFramework.Common.Timing
 {
 	public class Time
 	{

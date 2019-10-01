@@ -7,7 +7,7 @@
     <ProjectGuid>{26568521-9093-4208-9BAC-10F5B123BFFB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zorvan.Framework.Common</RootNamespace>
+    <RootNamespace>GameFramework.Common</RootNamespace>
     <AssemblyName>CommonManaged</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -8,9 +8,9 @@
 #include <map>
 #include <string>
 
-using namespace Zorvan::Framework::MathParser::SyntaxTree;
+using namespace GameFramework::MathParser::SyntaxTree;
 
-namespace Zorvan::Framework::MathParser
+namespace GameFramework::MathParser
 {
 	class TreeNodeCalculator
 	{

@@ -7,7 +7,7 @@
 #include "..\Syntax\Token.h"
 #include <string>
 
-namespace Zorvan::Framework::MathParser::Syntax
+namespace GameFramework::MathParser::Syntax
 {
 	class Tokenizer
 	{

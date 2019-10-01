@@ -1,5 +1,5 @@
 // Copyright 2019. All Rights Reserved.
-namespace Zorvan.Framework.Common.Pool
+namespace GameFramework.Common.Pool
 {
 	public interface IObjectFactory<T> where T : class, IObject
 	{

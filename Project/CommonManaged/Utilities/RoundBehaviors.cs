@@ -1,5 +1,5 @@
 // Copyright 2019. All Rights Reserved.
-namespace Zorvan.Framework.Common.Utilities
+namespace GameFramework.Common.Utilities
 {
 	public enum RoundBehaviors
 	{

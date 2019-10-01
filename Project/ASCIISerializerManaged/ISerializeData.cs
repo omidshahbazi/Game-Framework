@@ -1,5 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
-namespace Zorvan.Framework.ASCIISerializer
+namespace GameFramework.ASCIISerializer
 {
 	public interface ISerializeData
 	{

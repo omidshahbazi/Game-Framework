@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using Zorvan.Framework.ASCIISerializer.JSONSerializer;
+using GameFramework.ASCIISerializer.JSONSerializer;
 
-namespace Zorvan.Framework.ASCIISerializer
+namespace GameFramework.ASCIISerializer
 {
 	public static class Creator
 	{

@@ -6,7 +6,7 @@
 
 #include <list>
 
-namespace Zorvan::Framework::MathParser::SyntaxTree
+namespace GameFramework::MathParser::SyntaxTree
 {
 	class TreeNode
 	{

@@ -1,9 +1,9 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.Text;
-using Zorvan.Framework.MathParser.Syntax;
-using Zorvan.Framework.MathParser.SyntaxTree;
+using GameFramework.MathParser.Syntax;
+using GameFramework.MathParser.SyntaxTree;
 
-namespace Zorvan.Framework.MathParser
+namespace GameFramework.MathParser
 {
 	public class Expression
 	{

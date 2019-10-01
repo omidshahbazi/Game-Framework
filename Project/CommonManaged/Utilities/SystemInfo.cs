@@ -1,7 +1,7 @@
 // Copyright 2019. All Rights Reserved.
 using System.Net.NetworkInformation;
 
-namespace Zorvan.Framework.Common.Utilities
+namespace GameFramework.Common.Utilities
 {
 	public static class SystemInfo
 	{

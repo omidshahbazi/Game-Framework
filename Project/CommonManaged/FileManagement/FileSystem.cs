@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.IO;
 
-namespace Zorvan.Framework.Common.FileLayer
+namespace GameFramework.Common.FileLayer
 {
 	public static class FileSystem
 	{

@@ -10,7 +10,7 @@
 #include <list>
 #include <sstream>
 
-namespace Zorvan::Framework::MathParser::Syntax
+namespace GameFramework::MathParser::Syntax
 {
 	// Shunting Yard
 	// https://en.wikipedia.org/wiki/Shunting-yard_algorithm

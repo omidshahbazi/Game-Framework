@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.Security.Cryptography;
 
-namespace Zorvan.Framework.Common.Cryptography
+namespace GameFramework.Common.Cryptography
 {
 	public class Encryptor
 	{

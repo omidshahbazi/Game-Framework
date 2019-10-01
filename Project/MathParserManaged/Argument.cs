@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-namespace Zorvan.Framework.MathParser
+namespace GameFramework.MathParser
 {
 	public class Argument
 	{

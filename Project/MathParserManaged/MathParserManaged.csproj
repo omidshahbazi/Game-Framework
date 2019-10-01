@@ -7,7 +7,7 @@
     <ProjectGuid>{A4111CB2-D06B-405A-8A4C-381C99FE161C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zorvan.Framework.MathParser</RootNamespace>
+    <RootNamespace>GameFramework.MathParser</RootNamespace>
     <AssemblyName>MathParserManaged</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

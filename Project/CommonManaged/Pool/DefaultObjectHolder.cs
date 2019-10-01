@@ -1,7 +1,7 @@
 // Copyright 2019. All Rights Reserved.
 using System.Collections.Generic;
 
-namespace Zorvan.Framework.Common.Pool
+namespace GameFramework.Common.Pool
 {
 	class DefaultObjectHolder<T> : IObjectHolder<T> where T : class, IObject
 	{

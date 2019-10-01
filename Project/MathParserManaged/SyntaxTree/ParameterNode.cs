@@ -1,6 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 
-namespace Zorvan.Framework.MathParser.SyntaxTree
+namespace GameFramework.MathParser.SyntaxTree
 {
 	class ParameterNode : TreeNode
 	{

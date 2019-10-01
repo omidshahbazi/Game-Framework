@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-namespace Zorvan.Framework.MathParser.SyntaxTree
+namespace GameFramework.MathParser.SyntaxTree
 {
 	public abstract class TreeNode
 	{

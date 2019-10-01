@@ -10,7 +10,7 @@
 #include <map>
 #include <sstream>
 
-namespace Zorvan::Framework::MathParser
+namespace GameFramework::MathParser
 {
 	namespace SyntaxTree
 	{

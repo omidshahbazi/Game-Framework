@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
 
-namespace Zorvan.Framework.ASCIISerializer
+namespace GameFramework.ASCIISerializer
 {
 	public interface ISerializeArray : ISerializeData
 	{

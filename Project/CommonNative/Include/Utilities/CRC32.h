@@ -4,7 +4,7 @@
 #ifndef CRC32_H
 #define CRC32_H
 
-namespace Zorvan::Framework::Common::Utilities
+namespace GameFramework::Common::Utilities
 {
 	class CRC32
 	{

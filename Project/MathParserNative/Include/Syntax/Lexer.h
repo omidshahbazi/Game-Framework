@@ -8,14 +8,14 @@
 #include <list>
 #include <stack>
 
-namespace Zorvan::Framework::MathParser::SyntaxTree
+namespace GameFramework::MathParser::SyntaxTree
 {
 	class TreeNode;
 }
 
-using namespace Zorvan::Framework::MathParser::SyntaxTree;
+using namespace GameFramework::MathParser::SyntaxTree;
 
-namespace Zorvan::Framework::MathParser::Syntax
+namespace GameFramework::MathParser::Syntax
 {
 	class Token;
 

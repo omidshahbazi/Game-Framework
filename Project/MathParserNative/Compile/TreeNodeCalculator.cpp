@@ -8,7 +8,7 @@
 #include "..\Include\PredefinedFunctions.h"
 #include <sstream>
 
-namespace Zorvan::Framework::MathParser
+namespace GameFramework::MathParser
 {
 	double TreeNodeCalculator::Calculate(TreeNode *Node, ArgumentsMap Arguments)
 	{

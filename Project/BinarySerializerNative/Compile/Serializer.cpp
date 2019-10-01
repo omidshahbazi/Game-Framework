@@ -1,7 +1,7 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\Serializer.h"
 
-namespace Zorvan::Framework::BinarySerializer
+namespace GameFramework::BinarySerializer
 {
 	Serializer::Serializer(char *Buffer, unsigned int Size) :
 		m_Buffer(Buffer),

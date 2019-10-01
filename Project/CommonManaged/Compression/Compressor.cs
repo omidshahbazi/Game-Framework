@@ -1,5 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
-namespace Zorvan.Framework.Common.Compression
+namespace GameFramework.Common.Compression
 {
 	public static class Compressor
 	{

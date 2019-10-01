@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Zorvan.Framework.MathParser.SyntaxTree;
+using GameFramework.MathParser.SyntaxTree;
 
-namespace Zorvan.Framework.MathParser.Syntax
+namespace GameFramework.MathParser.Syntax
 {
 	// Shunting Yard
 	// https://en.wikipedia.org/wiki/Shunting-yard_algorithm

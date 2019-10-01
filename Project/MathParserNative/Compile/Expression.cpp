@@ -7,9 +7,9 @@
 #include "..\Include\SyntaxTree\NumberNode.h"
 #include "..\Include\SyntaxTree\ParameterNode.h"
 
-using namespace Zorvan::Framework::MathParser::Syntax;
+using namespace GameFramework::MathParser::Syntax;
 
-namespace Zorvan::Framework::MathParser
+namespace GameFramework::MathParser
 {
 	Expression::Expression(const std::string & Expr)
 	{

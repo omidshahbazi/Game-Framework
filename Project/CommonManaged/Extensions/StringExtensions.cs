@@ -1,7 +1,7 @@
 // Copyright 2019. All Rights Reserved.
 using System;
 
-namespace Zorvan.Framework.Common.Extensions
+namespace GameFramework.Common.Extensions
 {
 	public static class StringExtensions
 	{

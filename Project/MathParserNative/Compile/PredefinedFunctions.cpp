@@ -2,7 +2,7 @@
 #include "..\Include\PredefinedFunctions.h"
 #include <sstream>
 
-namespace Zorvan::Framework::MathParser
+namespace GameFramework::MathParser
 {
 	bool PredefinedFunctions::m_Initialized = false;
 	PredefinedFunctions::FunctionsMap PredefinedFunctions::m_Functions;

@@ -6,7 +6,7 @@
 
 #include "..\SyntaxTree\TreeNode.h"
 
-namespace Zorvan::Framework::MathParser::SyntaxTree
+namespace GameFramework::MathParser::SyntaxTree
 {
 	class OperatorNode : public TreeNode
 	{

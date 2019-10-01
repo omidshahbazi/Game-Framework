@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Zorvan.Framework.BinarySerializer
+namespace GameFramework.BinarySerializer
 {
 	//|value|
 	//|array|count|element-1|element-n|

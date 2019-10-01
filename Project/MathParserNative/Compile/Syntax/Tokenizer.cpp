@@ -2,7 +2,7 @@
 #include "..\..\Include\Syntax\Tokenizer.h"
 #include <sstream>
 
-namespace Zorvan::Framework::MathParser::Syntax
+namespace GameFramework::MathParser::Syntax
 {
 	Tokenizer::Tokenizer(const std::string &Expr) :
 		m_Expr(Expr.c_str()),

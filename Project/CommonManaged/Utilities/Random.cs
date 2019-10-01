@@ -2,7 +2,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Zorvan.Framework.Common.Utilities
+namespace GameFramework.Common.Utilities
 {
 	public class Random
 	{

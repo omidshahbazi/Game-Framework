@@ -7,7 +7,7 @@
     <ProjectGuid>{C4F68DA6-6645-46A1-8481-DFE4F1DC9075}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zorvan.Framework.BinarySerializer</RootNamespace>
+    <RootNamespace>GameFramework.BinarySerializer</RootNamespace>
     <AssemblyName>BinarySerializerManaged</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
