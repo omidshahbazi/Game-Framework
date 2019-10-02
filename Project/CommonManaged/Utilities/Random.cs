@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 
 namespace GameFramework.Common.Utilities
 {
+	[Serializable]
 	public class Random
 	{
 		private CSPRNG randomGenerator = null;
@@ -23,12 +24,12 @@ namespace GameFramework.Common.Utilities
 		{
 			this.Seed = Seed;
 
-			byte[] seed = new byte[48];
+			byte[] bytes = BitConverter.GetBytes(Seed);
 
+			byte[] seed = new byte[48];
 			int index = 0;
 			for (int i = 0; i < 12; ++i)
 			{
-				byte[] bytes = BitConverter.GetBytes(Seed);
 				seed[index++] = bytes[0];
 				seed[index++] = bytes[1];
 				seed[index++] = bytes[2];
@@ -50,6 +51,7 @@ namespace GameFramework.Common.Utilities
 		}
 	}
 
+	[Serializable]
 	class CSPRNG
 	{
 		private UInt32[] _key;
