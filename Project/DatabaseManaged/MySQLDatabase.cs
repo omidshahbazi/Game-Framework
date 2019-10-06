@@ -55,6 +55,7 @@ namespace GameFramework.DatabaseManaged
 			Debug.Assert(Parameters == null || Parameters.Length % 2 == 0, "Parameters count must be even");
 
 			MySqlCommand command = new MySqlCommand(Query, connection);
+			command.CommandType = CommandType.Text;
 
 			if (Parameters != null)
 				for (int i = 0; i < Parameters.Length; i += 2)

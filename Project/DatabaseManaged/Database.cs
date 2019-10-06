@@ -35,7 +35,7 @@ namespace GameFramework.DatabaseManaged
 
 				for (int j = 0; j < Table.Columns.Count; ++j)
 				{
-					string colName = Table.Columns[i].ColumnName;
+					string colName = Table.Columns[j].ColumnName;
 
 					obj.Set(colName, row[colName]);
 				}
