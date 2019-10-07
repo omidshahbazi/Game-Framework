@@ -193,7 +193,7 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 
 		ISerializeArray ISerializeArray.Clone()
 		{
-			return (ISerializeArray)MemberwiseClone();
+			return Creator.Create<ISerializeArray>(((ISerializeData)this).Content);
 		}
 	}
 }

@@ -7,8 +7,6 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 {
 	class JSONSerializeObject : ISerializeObject
 	{
-		private static readonly JSONParser parser = new JSONParser();
-
 		private class Map : Dictionary<string, object>
 		{ }
 
@@ -189,14 +187,9 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 			return map.GetEnumerator();
 		}
 
-		public static T Deserialize<T>(string JSON) where T : ISerializeData
-		{
-			return (T)parser.Parse(ref JSON);
-		}
-
 		ISerializeObject ISerializeObject.Clone()
 		{
-			return (ISerializeObject)MemberwiseClone();
+			return Creator.Create<ISerializeObject>(((ISerializeData)this).Content);
 		}
 	}
 }
