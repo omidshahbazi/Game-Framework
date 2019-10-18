@@ -52,7 +52,7 @@ namespace GameFramework.Common.Extensions
 
 		public static void RemoveAt<T>(ref T[] Arr, int Index)
 		{
-			Debug.Assert(Index < Arr.Length, "Index cannot be greater than length of array");
+			Debug.Assert(0 <= Index && Index < Arr.Length, "Index cannot be negative or greater than length of array");
 
 			T[] newArr = new T[Arr.Length - 1];
 
@@ -61,6 +61,21 @@ namespace GameFramework.Common.Extensions
 
 			if (Index < newArr.Length)
 				Array.Copy(Arr, Index + 1, newArr, Index, newArr.Length - Index);
+
+			Arr = newArr;
+		}
+
+		public static void RemoveRange<T>(ref T[] Arr, int Index, int Count)
+		{
+			Debug.Assert(0 <= Index && Index + Count <= Arr.Length, "Index cannot be negative or greater than length of array");
+
+			T[] newArr = new T[Arr.Length - Count];
+
+			if (Index > 0)
+				Array.Copy(Arr, 0, newArr, 0, Index);
+
+			if (Index < newArr.Length)
+				Array.Copy(Arr, Index + Count, newArr, Index, newArr.Length - Index);
 
 			Arr = newArr;
 		}

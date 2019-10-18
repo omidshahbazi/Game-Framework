@@ -51,6 +51,7 @@
     <Compile Include="Pool\IObjectHolder.cs" />
     <Compile Include="Pool\ObjectPool.cs" />
     <Compile Include="Timing\Time.cs" />
+    <Compile Include="Utilities\ConsoleHelper.cs" />
     <Compile Include="Utilities\BitwiseHelper.cs" />
     <Compile Include="Utilities\DateTimeHelper.cs" />
     <Compile Include="Utilities\FileHelper.cs" />
