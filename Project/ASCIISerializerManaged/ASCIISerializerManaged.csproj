@@ -35,7 +35,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -53,10 +52,6 @@
     <ProjectReference Include="..\CommonManaged\CommonManaged.csproj">
       <Project>{26568521-9093-4208-9BAC-10F5B123BFFB}</Project>
       <Name>CommonManaged</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Reflection\Reflection.csproj">
-      <Project>{39f79a2c-581f-4d5d-afdc-501e9de6b343}</Project>
-      <Name>Reflection</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
