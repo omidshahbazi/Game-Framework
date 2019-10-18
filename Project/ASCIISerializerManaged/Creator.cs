@@ -5,6 +5,8 @@ namespace GameFramework.ASCIISerializer
 {
 	public static class Creator
 	{
+		private static readonly JSONParser parser = new JSONParser();
+
 		public static T Create<T>() where T : ISerializeData
 		{
 			if (typeof(T) == typeof(ISerializeObject))
@@ -15,7 +17,7 @@ namespace GameFramework.ASCIISerializer
 
 		public static T Create<T>(string Data) where T : ISerializeData
 		{
-			return JSONSerializeObject.Deserialize<T>(Data);
+			return (T)parser.Parse(ref Data);
 		}
 	}
 }
