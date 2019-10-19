@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.ASCIISerializer;
+using System;
 using System.Data;
 
 namespace GameFramework.DatabaseManaged
@@ -37,7 +38,12 @@ namespace GameFramework.DatabaseManaged
 				{
 					string colName = Table.Columns[j].ColumnName;
 
-					obj.Set(colName, row[colName]);
+					object value = row[colName];
+
+					if (value == DBNull.Value)
+						value = null;
+
+					obj.Set(colName, value);
 				}
 			}
 
