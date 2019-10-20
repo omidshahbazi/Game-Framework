@@ -64,6 +64,7 @@
     <Compile Include="Utilities\RoundBehaviors.cs" />
     <Compile Include="Utilities\SystemInfo.cs" />
     <Compile Include="Utilities\Version.cs" />
+    <Compile Include="Web\Requests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
