@@ -49,7 +49,7 @@ namespace GameFramework.CommonAPIManaged.PurchaseValidation
 			}
 		}
 
-		public void Validate(int Price, string SKU, string Token, Action<bool, string> Callback)
+		public void Validate(uint Price, string SKU, string Token, Action<bool, string> Callback)
 		{
 			try
 			{

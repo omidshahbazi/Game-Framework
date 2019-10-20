@@ -5,6 +5,6 @@ namespace GameFramework.CommonAPIManaged.PurchaseValidation
 {
 	public interface IPurchaseValidator
 	{
-		void Validate(int Price, string SKU, string Token, Action<bool, string> Callback);
+		void Validate(uint Price, string SKU, string Token, Action<bool, string> Callback);
 	}
 }
