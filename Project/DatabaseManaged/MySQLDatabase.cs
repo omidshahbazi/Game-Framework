@@ -1,5 +1,4 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using GameFramework.ASCIISerializer;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
