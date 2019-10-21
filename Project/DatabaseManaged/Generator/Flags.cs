@@ -4,7 +4,7 @@ using System;
 namespace GameFramework.DatabaseManaged.Generator
 {
     [Flags]
-    public enum Constraints
+    public enum Flags
     {
         NotNull = 1,
         AutoIncrement = 2,

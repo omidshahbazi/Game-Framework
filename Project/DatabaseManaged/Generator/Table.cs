@@ -5,20 +5,20 @@ namespace GameFramework.DatabaseManaged.Generator
 {
 	public class Table
 	{
+		private List<Column> columns;
+
 		public string Name
 		{
 			get;
 			private set;
 		}
 
-		private List<Column> columns;
-
 		public Column[] Columns
 		{
 			get { return columns.ToArray(); }
 		}
 
-		public Index Index
+		public IndexGroup IndexGroup
 		{
 			get;
 			set;
@@ -36,49 +36,47 @@ namespace GameFramework.DatabaseManaged.Generator
 			set;
 		}
 
-		public Table(string name, Engines Engine = Engines.InnoDB)
+		public Table(string Name, Collates Collate = Collates.Defualt, Engines Engine = Engines.InnoDB)
 		{
-			this.Name = name;
-			this.columns = new List<Column>();
-			this.Collate = Collates.Server_Defualt;
+			this.Name = Name;
+			this.Collate = Collate;
 			this.Engine = Engine;
+
+			columns = new List<Column>();
 		}
 
-		public Table(string name, Collates collate, Engines Engine = Engines.InnoDB) : this(name, Engine)
+		public Table(string Name, params Column[] Columns) : this(Name)
 		{
-			this.Collate = collate;
+			columns.AddRange(Columns);
 		}
 
-		public Table(string name, params Column[] columns) : this(name)
+		public Table(string Name, Engines Engine, params Column[] Columns) : this(Name, Collates.Defualt, Engine)
 		{
-			this.columns.AddRange(columns);
+			columns.AddRange(Columns);
 		}
 
-		public Table(string name, Engines Engine, params Column[] columns) : this(name, Engine)
+		public Table(string name, IndexGroup IndexGroup, params Column[] Columns) : this(name)
 		{
-			this.columns.AddRange(columns);
+			columns.AddRange(Columns);
+
+			this.IndexGroup = IndexGroup;
 		}
 
-		public Table(string name, Index index, params Column[] columns) : this(name)
+		public Table(string name, Engines Engine, IndexGroup IndexGroup, params Column[] Columns) : this(name, Engine)
 		{
-			this.columns.AddRange(columns);
-			this.Index = index;
+			columns.AddRange(Columns);
+
+			this.IndexGroup = IndexGroup;
 		}
 
-		public Table(string name, Engines Engine, Index index, params Column[] columns) : this(name, Engine)
+		public Table(string name, Collates Collate, params Column[] Columns) : this(name, Collate)
 		{
-			this.columns.AddRange(columns);
-			this.Index = index;
+			columns.AddRange(Columns);
 		}
 
-		public Table(string name, Collates collate, params Column[] columns) : this(name, collate)
+		public Table(string name, Collates Collate, Engines Engine, params Column[] Columns) : this(name, Collate, Engine)
 		{
-			this.columns.AddRange(columns);
-		}
-
-		public Table(string name, Collates collate, Engines Engine, params Column[] columns) : this(name, collate, Engine)
-		{
-			this.columns.AddRange(columns);
+			columns.AddRange(Columns);
 		}
 
 		public void AddColumn(Column col)

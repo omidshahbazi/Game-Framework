@@ -46,9 +46,9 @@
     <Compile Include="Generator\Database.cs" />
     <Compile Include="Generator\Engines.cs" />
     <Compile Include="Generator\Flags.cs" />
-    <Compile Include="Generator\IConnection.cs" />
     <Compile Include="Generator\Index.cs" />
-    <Compile Include="Generator\SQLType.cs" />
+    <Compile Include="Generator\IndexGroup.cs" />
+    <Compile Include="Generator\DataType.cs" />
     <Compile Include="Generator\Table.cs" />
     <Compile Include="Generator\TSQLGenerator.cs" />
     <Compile Include="MySQLDatabase.cs" />
@@ -58,6 +58,10 @@
     <ProjectReference Include="..\ASCIISerializerManaged\ASCIISerializerManaged.csproj">
       <Project>{cf111332-3a81-4d4a-a04c-6634d8b6a8c6}</Project>
       <Name>ASCIISerializerManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonManaged\CommonManaged.csproj">
+      <Project>{26568521-9093-4208-9bac-10f5b123bffb}</Project>
+      <Name>CommonManaged</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

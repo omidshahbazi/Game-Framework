@@ -1,6 +1,4 @@
 ﻿// Copyright 2019. All Rights Reserved.
-
-
 namespace GameFramework.DatabaseManaged.Generator
 {
     public class Column
@@ -11,7 +9,7 @@ namespace GameFramework.DatabaseManaged.Generator
             private set;
         }
 
-        public Constraints Flags
+        public Flags FlagMask
         {
             get;
             private set;
@@ -23,38 +21,31 @@ namespace GameFramework.DatabaseManaged.Generator
             private set;
         }
 
-        public SQLType Type
-        {
+        public DataType DataType
+		{
             get;
             private set;
         }
 
-        public int Length
+        public Column(string Name, DataType DataType)
         {
-            get;
-            set;
+            this.Name = Name;
+            this.DataType = DataType;
         }
 
-        public Column(string name, SQLType type)
+        public Column(string Name, DataType DataType, Flags FlagMask) : this(Name, DataType)
         {
-            this.Name = name;
-            this.Type = type;
-            this.Length = name.Length;
+            this.FlagMask = FlagMask;
         }
 
-        public Column(string name, SQLType type, Constraints flags) : this(name, type)
-        {
-            this.Flags = flags;
-        }
-
-        public Column(string name, SQLType type, Constraints flags, object defaultValue) : this(name, type, flags)
-        {
-            this.DefaultValue = defaultValue;
-        }
-
-		public Column(string name, SQLType type, object defaultValue) : this(name, type)
+		public Column(string name, DataType type, object DefaultValue) : this(name, type)
 		{
-			this.DefaultValue = defaultValue;
+			this.DefaultValue = DefaultValue;
 		}
+
+        public Column(string name, DataType type, Flags FlagMask, object DefaultValue) : this(name, type, FlagMask)
+        {
+            this.DefaultValue = DefaultValue;
+        }
 	}
 }

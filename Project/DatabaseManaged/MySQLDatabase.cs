@@ -23,6 +23,12 @@ namespace GameFramework.DatabaseManaged
 			}
 		}
 
+		public MySQLDatabase(string Host, string Username, string Password)
+		{
+			connection = new MySqlConnection(string.Format("server={0};uid={1};pwd={2}", Host, Username, Password));
+
+			CheckConnection();
+		}
 		public MySQLDatabase(string Host, string Username, string Password, string Name)
 		{
 			connection = new MySqlConnection(string.Format("server={0};uid={1};pwd={2};database={3}", Host, Username, Password, Name));
@@ -68,7 +74,7 @@ namespace GameFramework.DatabaseManaged
 			if (IsConnectionAlive())
 				return;
 
-			connection.Open();
+			Database.Open();
 
 			if (!IsConnectionAlive())
 				throw new Exception("Database connection is no alive");
@@ -76,7 +82,7 @@ namespace GameFramework.DatabaseManaged
 
 		private bool IsConnectionAlive()
 		{
-			return !(connection.State == ConnectionState.Closed || connection.State == ConnectionState.Broken);
+			return !(Database.State == ConnectionState.Closed || Database.State == ConnectionState.Broken);
 		}
 	}
 }
