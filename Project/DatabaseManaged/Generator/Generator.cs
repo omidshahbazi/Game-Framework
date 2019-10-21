@@ -81,7 +81,7 @@ namespace GameFramework.DatabaseManaged.Generator
 
 						Builder.Append("PRIMARY KEY(`");
 						Builder.Append(primaryKey);
-						Builder.Append("`),");
+						Builder.Append("`)");
 						Builder.AppendLine();
 					}
 
@@ -241,8 +241,7 @@ namespace GameFramework.DatabaseManaged.Generator
 
 				for (int i = 0; i < IndexGroup.Indecies.Length; i++)
 				{
-					if (i != 0)
-						Builder.Append(',');
+					Builder.Append(',');
 
 					Index index = IndexGroup.Indecies[i];
 
@@ -407,7 +406,10 @@ namespace GameFramework.DatabaseManaged.Generator
 
 				for (int i = 0; i < types.Count; ++i)
 				{
-					if (Type.ToUpper() == types[i].ToString().ToUpper())
+					StringBuilder builder = new StringBuilder();
+					GenerateDataType(types[i], builder);
+
+					if (Type.ToUpper() == builder.ToString().ToUpper())
 						return types[i];
 				}
 
@@ -421,11 +423,12 @@ namespace GameFramework.DatabaseManaged.Generator
 
 			private static void GenerateDeprecatedColumns(Table Table, SyncTypes SyncType, Column[] OldColumns, Index[] OldIndecies, StringBuilder Builder)
 			{
+				List<Index> toModifyIndecies = new List<Index>();
 				for (int i = 0; i < OldColumns.Length; ++i)
 				{
 					Column oldColumn = OldColumns[i];
 
-					if (oldColumn.Name.EndsWith(DEPRECATED_POST_FIX))
+					if (SyncType == SyncTypes.Keep && oldColumn.Name.EndsWith(DEPRECATED_POST_FIX))
 						continue;
 
 					bool contains = false;
@@ -443,7 +446,6 @@ namespace GameFramework.DatabaseManaged.Generator
 					if (contains)
 						continue;
 
-					List<Index> toModifyIndecies = new List<Index>();
 					for (int j = 0; j < OldIndecies.Length; ++j)
 					{
 						Index index = OldIndecies[j];
@@ -473,16 +475,39 @@ namespace GameFramework.DatabaseManaged.Generator
 							Builder.AppendLine();
 							break;
 					}
+				}
 
-					for (int j = 0; j < toModifyIndecies.Count; ++j)
+				if (Table.IndexGroup != null)
+				{
+					for (int i = 0; i < Table.IndexGroup.Indecies.Length; ++i)
 					{
-						Index index = toModifyIndecies[j];
+						Index index = Table.IndexGroup.Indecies[i];
 
-						if (index.Columns.Length == 0)
+						bool found = false;
+						for (int j = 0; j < OldIndecies.Length; ++j)
+						{
+							if (index.Name != OldIndecies[j].Name)
+								continue;
+
+							found = true;
+							break;
+						}
+
+						if (found)
 							continue;
 
-						GenerateCreateIndex(Table, index, Builder);
+						toModifyIndecies.Add(index);
 					}
+				}
+
+				for (int i = 0; i < toModifyIndecies.Count; ++i)
+				{
+					Index index = toModifyIndecies[i];
+
+					if (index.Columns.Length == 0)
+						continue;
+
+					GenerateCreateIndex(Table, index, Builder);
 				}
 			}
 

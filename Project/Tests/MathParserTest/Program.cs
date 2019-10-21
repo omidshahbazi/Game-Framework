@@ -12,9 +12,10 @@ namespace MathParserTest
 		{
 			Database db = new MySQLDatabase("127.0.0.1", "root", "!QAZ2wsx");
 
-			Table t1 = new Table("test1", Collates.UTF8, Engines.InnoDB, new IndexGroup(new Index("value1_index", "value1")), new Column("id", DataType.Int, Flags.PrimaryKey | Flags.AutoIncrement), new Column("value1", DataType.Int));
+			Table t1 = new Table("test1", Collates.UTF8, Engines.InnoDB, new IndexGroup(new Index("value1_index", "value2")), new Column("id", DataType.Int, Flags.PrimaryKey | Flags.AutoIncrement), new Column("value2", DataType.Int));
+			Table t2 = new Table("test2", Collates.UTF8, Engines.InnoDB, new Column("id", DataType.Int, Flags.PrimaryKey | Flags.AutoIncrement), new Column("value22", DataType.Int));
 
-			Catalog catalog = new Catalog("test_catalog", t1);
+			Catalog catalog = new Catalog("test_catalog", t1, t2);
 
 			StringBuilder builder = new StringBuilder();
 			TSQLGenerator.MySQL.GenerateCreateCatalog(db, catalog, SyncTypes.Keep, builder);
