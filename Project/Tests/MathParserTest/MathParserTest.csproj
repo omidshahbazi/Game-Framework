@@ -44,6 +44,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DatabaseManaged\DatabaseManaged.csproj">
+      <Project>{47000C4C-8A48-4B73-A411-5A89A6F4B518}</Project>
+      <Name>DatabaseManaged</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MathParserManaged\MathParserManaged.csproj">
       <Project>{A4111CB2-D06B-405A-8A4C-381C99FE161C}</Project>
       <Name>MathParserManaged</Name>

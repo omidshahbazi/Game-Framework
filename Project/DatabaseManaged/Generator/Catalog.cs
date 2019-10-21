@@ -24,6 +24,11 @@ namespace GameFramework.DatabaseManaged.Generator
 			tables = new List<Table>();
 		}
 
+		public Catalog(string Name, params Table[] Tables) : this(Name)
+		{
+			tables.AddRange(Tables);
+		}
+
 		public Catalog(string Name, List<Table> Tables) : this(Name)
 		{
 			tables = Tables;

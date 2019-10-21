@@ -31,7 +31,7 @@ namespace GameFramework.DatabaseManaged
 		}
 		public MySQLDatabase(string Host, string Username, string Password, string Name)
 		{
-			connection = new MySqlConnection(string.Format("server={0};uid={1};pwd={2};database={3}", Host, Username, Password, Name));
+			connection = new MySqlConnection(string.Format("persistsecurityinfo=True;server={0};uid={1};pwd={2};database={3}", Host, Username, Password, Name));
 
 			CheckConnection();
 		}

@@ -55,28 +55,35 @@ namespace GameFramework.DatabaseManaged.Generator
 			columns.AddRange(Columns);
 		}
 
-		public Table(string name, IndexGroup IndexGroup, params Column[] Columns) : this(name)
+		public Table(string Name, IndexGroup IndexGroup, params Column[] Columns) : this(Name)
 		{
 			columns.AddRange(Columns);
 
 			this.IndexGroup = IndexGroup;
 		}
 
-		public Table(string name, Engines Engine, IndexGroup IndexGroup, params Column[] Columns) : this(name, Engine)
+		public Table(string Name, Engines Engine, IndexGroup IndexGroup, params Column[] Columns) : this(Name, Engine)
 		{
 			columns.AddRange(Columns);
 
 			this.IndexGroup = IndexGroup;
 		}
 
-		public Table(string name, Collates Collate, params Column[] Columns) : this(name, Collate)
+		public Table(string Name, Collates Collate, params Column[] Columns) : this(Name, Collate)
 		{
 			columns.AddRange(Columns);
 		}
 
-		public Table(string name, Collates Collate, Engines Engine, params Column[] Columns) : this(name, Collate, Engine)
+		public Table(string Name, Collates Collate, Engines Engine, params Column[] Columns) : this(Name, Collate, Engine)
 		{
 			columns.AddRange(Columns);
+		}
+
+		public Table(string Name, Collates Collate, Engines Engine, IndexGroup IndexGroup, params Column[] Columns) : this(Name, Collate, Engine)
+		{
+			columns.AddRange(Columns);
+
+			this.IndexGroup = IndexGroup;
 		}
 
 		public void AddColumn(Column col)

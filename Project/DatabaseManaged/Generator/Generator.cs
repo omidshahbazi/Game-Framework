@@ -1,21 +1,27 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
 namespace GameFramework.DatabaseManaged.Generator
 {
-	public static class Generator
+	public static class TSQLGenerator
 	{
 		public static class MySQL
 		{
 			public static void GenerateCreateCatalog(Database Database, Catalog Catalog, SyncTypes SyncType, StringBuilder Builder)
 			{
-				Builder.Append("CREATE DATABASE ");
+				if (!IsCatalogExists(Database, Catalog))
+				{
+					Builder.Append("CREATE DATABASE ");
+					Builder.Append(Catalog.Name);
+					Builder.Append(';');
+					Builder.AppendLine();
+				}
+
+				Builder.Append("USE ");
 				Builder.Append(Catalog.Name);
 				Builder.Append(';');
-				Builder.AppendLine();
 
 				for (int i = 0; i < Catalog.Tables.Length; ++i)
 					GenerateCreateTable(Database, Catalog.Tables[i], SyncType, Builder);
@@ -272,6 +278,21 @@ namespace GameFramework.DatabaseManaged.Generator
 				}
 			}
 
+			public static bool IsCatalogExists(Database Database, Catalog Catalog)
+			{
+				try
+				{
+					Database.Execute("USE " + Catalog.Name + ";");
+
+					return true;
+				}
+				catch
+				{
+				}
+
+				return false;
+			}
+
 			public static bool IsTableExists(Database Database, Table Table)
 			{
 				try
@@ -338,7 +359,7 @@ namespace GameFramework.DatabaseManaged.Generator
 						break;
 					}
 
-					if (contains)
+					if (!contains)
 						continue;
 
 					switch (SyncType)
