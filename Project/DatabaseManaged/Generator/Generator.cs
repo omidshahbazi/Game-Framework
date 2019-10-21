@@ -49,7 +49,15 @@ namespace GameFramework.DatabaseManaged.Generator
 
 						Column column = Table.Columns[i];
 
-						GenerateCreateColumn(column, Builder);
+						Builder.Append("`");
+						Builder.Append(column.Name);
+						Builder.Append("` ");
+
+						GenerateDataType(column.DataType, Builder);
+
+						GeneratePreFlags(column.FlagMask, Builder);
+
+						GenerateDefaultValue(column, Builder);
 
 						if (MaskContainsFlag(column.FlagMask, Flags.PrimaryKey))
 							primaryKey = column.Name;
@@ -81,44 +89,76 @@ namespace GameFramework.DatabaseManaged.Generator
 					return;
 				}
 
-				Column[] columns = GetColumns(Database, Table.Name);
+				Column[] oldColumns = GetColumns(Database, Table.Name);
 
-				AddToDatabase(Database, table, cols, ref str);
-
-				SyncToTable(table, SyncType, cols, ref str);
-
-				if (string.IsNullOrEmpty(str))
-					return null;
-
-				return new TSQLItem(str);
+				GenerateNewColumnsAdd(Database, Table, oldColumns, Builder);
+				GenerateDeprecatedColumnsDrop(Table, SyncType, oldColumns, Builder);
 			}
 
-			public static void GenerateCreateColumn(Column Column, StringBuilder Builder)
+			public static void GenerateDropTable(string Name, StringBuilder Builder)
 			{
-				Builder.Append("`");
+				Builder.Append("DROP TABLE IF EXISTS ");
+				Builder.Append(Name);
+				Builder.Append(';');
+			}
+
+			public static void GenerateCreateColumn(Database Database, Table Table, Column Column, Column PrevColumn, StringBuilder Builder)
+			{
+				if (IsColumnExists(Database, Table, Column))
+					return;
+
+				Builder.Append("ALTER TABLE ");
+				Builder.Append(Table.Name);
+				Builder.Append(" ADD `");
 				Builder.Append(Column.Name);
 				Builder.Append("` ");
 
 				GenerateDataType(Column.DataType, Builder);
 
-				if (MaskContainsFlag(Column.FlagMask, Flags.NotNull))
-					Builder.Append(" NOT NULL ");
-				if (MaskContainsFlag(Column.FlagMask, Flags.AutoIncrement))
-					Builder.Append(" AUTO_INCREMENT ");
+				GeneratePreFlags(Column.FlagMask, Builder);
 
-				if (Column.DefaultValue != null)
+				GenerateDefaultValue(Column, Builder);
+
+				if (PrevColumn != null)
 				{
-					Builder.Append(" DEFAULT ");
-
-					if (Column.DataType.Name == DataType.Int.Name)
-						Builder.Append(Column.DefaultValue);
-					else
-					{
-						Builder.Append('\'');
-						Builder.Append(Column.DefaultValue);
-						Builder.Append('\'');
-					}
+					Builder.Append(" AFTER `");
+					Builder.Append(PrevColumn.Name);
+					Builder.Append('`');
 				}
+
+				Builder.Append(';');
+			}
+
+			public static void GenerateDeprecatedColumnName(Table Table, Column Column, StringBuilder Builder)
+			{
+				Builder.Append("ALTER TABLE ");
+				Builder.Append(Table.Name);
+				Builder.Append(" CHANGE `");
+				Builder.Append(Column.Name);
+				Builder.Append("` `");
+				Builder.Append(Column.Name);
+				Builder.Append("_deprecated` ");
+
+				GenerateDataType(Column.DataType, Builder);
+
+				Builder.Append(';');
+			}
+
+			public static void GenerateModifyColumn(Table Table, Column OldColumn, Column NewColumn, StringBuilder Builder)
+			{
+				Builder.Append("ALTER TABLE ");
+				Builder.Append(Table.Name);
+				Builder.Append(" MODIFY `");
+				Builder.Append(OldColumn.Name);
+				Builder.Append("` ");
+
+				GenerateDataType(NewColumn.DataType, Builder);
+
+				Builder.Append(' ');
+
+				GeneratePreFlags(NewColumn.FlagMask, Builder);
+
+				Builder.Append(';');
 			}
 
 			public static Column[] GetColumns(Database Database, string TableName)
@@ -174,6 +214,15 @@ namespace GameFramework.DatabaseManaged.Generator
 				Builder.Append(')');
 			}
 
+			public static void GeneratePreFlags(Flags FlagMask, StringBuilder Builder)
+			{
+				if (MaskContainsFlag(FlagMask, Flags.NotNull))
+					Builder.Append(" NOT NULL ");
+
+				if (MaskContainsFlag(FlagMask, Flags.AutoIncrement))
+					Builder.Append(" AUTO_INCREMENT ");
+			}
+
 			public static void GenerateDataType(DataType DataType, StringBuilder Builder)
 			{
 				Builder.Append(DataType.Name.ToUpper());
@@ -185,6 +234,23 @@ namespace GameFramework.DatabaseManaged.Generator
 					Builder.Append('(');
 					Builder.Append(DataType.Lenght);
 					Builder.Append(')');
+				}
+			}
+
+			public static void GenerateDefaultValue(Column Column, StringBuilder Builder)
+			{
+				if (Column.DefaultValue == null)
+					return;
+
+				Builder.Append(" DEFAULT ");
+
+				if (Column.DataType.Name == DataType.Int.Name)
+					Builder.Append(Column.DefaultValue);
+				else
+				{
+					Builder.Append('\'');
+					Builder.Append(Column.DefaultValue);
+					Builder.Append('\'');
 				}
 			}
 
@@ -221,6 +287,21 @@ namespace GameFramework.DatabaseManaged.Generator
 				return false;
 			}
 
+			public static bool IsColumnExists(Database Database, Table Table, Column Column)
+			{
+				try
+				{
+					Database.Execute("SELECT `" + Column.Name + "` FROM " + Table.Name + " LIMIT 1");
+
+					return true;
+				}
+				catch
+				{
+				}
+
+				return false;
+			}
+
 			public static DataType GetDataType(string Type)
 			{
 				List<DataType> types = DataType.Types;
@@ -239,139 +320,74 @@ namespace GameFramework.DatabaseManaged.Generator
 				return (FlagMask & Flag) == Flag;
 			}
 
-			private static void SyncToTable(Table Table, SyncTypes SyncType, Column[] Columns, ref string Transact)
+			private static void GenerateDeprecatedColumnsDrop(Table Table, SyncTypes SyncType, Column[] OldColumns, StringBuilder Builder)
 			{
-				for (int i = 0; i < Columns.Length; ++i)
+				for (int i = 0; i < OldColumns.Length; ++i)
 				{
-					Column serverCol = Columns[i];
+					Column oldColumn = OldColumns[i];
 
 					bool contains = false;
-
 					for (int j = 0; j < Table.Columns.Length; ++j)
 					{
-						Column offlineCol = Table.Columns[j];
-						if (offlineCol.Name == serverCol.Name)
-						{
-							contains = true;
-						}
+						Column newColumn = Table.Columns[j];
+
+						if (newColumn.Name != oldColumn.Name)
+							continue;
+
+						contains = true;
+						break;
 					}
 
-					if (!contains)
+					if (contains)
+						continue;
+
+					switch (SyncType)
 					{
-						switch (SyncType)
-						{
-							case SyncTypes.Delete:
-								Transact += DropColumn(Table, serverCol, serverCol.Type).Transact + ";\n";
-								break;
-							case SyncTypes.Keep:
-								break;
-							default:
-								break;
-						}
+						case SyncTypes.Delete:
+							GenerateDeprecatedColumnName(Table, oldColumn, Builder);
+							Builder.AppendLine();
+							break;
+
+						case SyncTypes.Keep:
+							break;
 					}
 				}
 			}
 
-			private static void AddToDatabase(Database Database, Table Table, Column[] Columns, ref string Transact)
+			private static void GenerateNewColumnsAdd(Database Database, Table Table, Column[] OldColumns, StringBuilder Builder)
 			{
 				for (int i = 0; i < Table.Columns.Length; ++i)
 				{
-					Column offlineCol = Table.Columns[i];
+					Column newColumn = Table.Columns[i];
 
 					bool contains = false;
-
-					for (int j = 0; j < Columns.Length; ++j)
+					for (int j = 0; j < OldColumns.Length; ++j)
 					{
-						Column serverCol = Columns[j];
+						Column oldColumn = OldColumns[j];
 
-						//TODO :: Check Type | Constrains 
-						if (serverCol.Name == offlineCol.Name)
+						if (oldColumn.Name != newColumn.Name)
+							continue;
+
+						contains = true;
+
+						if (oldColumn.DataType.Name != newColumn.DataType.Name)
 						{
-							contains = true;
-							if (serverCol.Type.Name != offlineCol.Type.Name)
-							{
-								Transact += ModifyColumn(Table, serverCol, offlineCol.Type, offlineCol.Flags).Transact + ";\n";
-							}
+							GenerateModifyColumn(Table, oldColumn, newColumn, Builder);
+
+							Builder.AppendLine();
 						}
+
+						break;
 					}
 
-					if (!contains)
-					{
-						Transact += AddColumn(Connection, Table, offlineCol).Transact + ";\n";
-					}
+					if (contains)
+						continue;
+
+					GenerateCreateColumn(Database, Table, newColumn, (i == 0 ? null : Table.Columns[i - 1]), Builder);
+
+					Builder.AppendLine();
 				}
 			}
-
-			private static bool Exists(Database Database, Table table, Column column)
-			{
-				TSQLItem sqlItem = new TSQLItem("SELECT `" + column.Name + "` FROM " + table.Name + " LIMIT 1 ");
-				try
-				{
-					sqlItem.Execute(Connection);
-
-					return true;
-				}
-				catch
-				{
-				}
-
-				return false;
-			}
-
-			public static TSQLItem DropTable(string name)
-			{
-				return new TSQLItem("DROP TABLE IF EXISTS " + name);
-			}
-
-			public static TSQLItem AddColumn(Database Database, Table table, Column column)
-			{
-				if (!Exists(Connection, table))
-					return null;
-
-				//if (!Exists(table, column))
-				return new TSQLItem("ALTER TABLE " + table.Name + " ADD `" + column.Name + "` " + column.Type.ToString() + GetDefaultValue(column));
-
-				//return new MySQLItem(ModifyColumn(table, column, column.Type).SqlString);
-			}
-
-			public static string FindToDropColumns(Database Database)
-			{
-				string str = string.Empty;
-				DataTable tables = Database.ExecuteWithReturn("SHOW tables ");
-				string colName = tables.Columns[0].ColumnName;
-				foreach (DataRow row in tables.Rows)
-				{
-					DataTable tbl = Database.ExecuteWithReturn("describe " + row[colName].ToString());
-
-					for (int i = 0; i < tbl.Rows.Count; i++)
-					{
-						if (tbl.Rows[i]["Field"].ToString().Contains("_drop"))
-							str += "ALTER TABLE " + row[colName].ToString() + " DROP `" + tbl.Rows[i]["Field"].ToString() + "`;\n";
-					}
-				}
-				return str;
-			}
-
-			public static TSQLItem DropColumn(Table table, Column column, DataType type)
-			{
-				return new TSQLItem("ALTER TABLE " + table.Name + " CHANGE `" + column.Name + "`  `" + column.Name + "_drop` " + type.ToString());
-
-			}
-
-			public static TSQLItem ModifyColumn(Table table, Column column, DataType type, Constraints constriants)
-			{
-				return new TSQLItem("ALTER TABLE " + table.Name + " MODIFY `" + column.Name + "` " + type.ToString() + " " + GetFrontFlags(new Column("", DBType.Bit, constriants)));
-			}
-
-			public static TSQLItem UpdateCollate(Database Database, Table table)
-			{
-				if (!Exists(Connection, table))
-					return new TSQLItem(string.Empty);
-
-				return new TSQLItem("ALTER TABLE " + table.Name + " COLLATE " + table.Collate + ";");
-			}
-
-
 		}
 	}
 }

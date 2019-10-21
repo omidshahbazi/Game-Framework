@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GameFramework.DatabaseManaged</RootNamespace>
     <AssemblyName>DatabaseManaged</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,14 +44,15 @@
     <Compile Include="Database.cs" />
     <Compile Include="Generator\Collate.cs" />
     <Compile Include="Generator\Column.cs" />
-    <Compile Include="Generator\Database.cs" />
+    <Compile Include="Generator\Catalog.cs" />
+    <Compile Include="Generator\SyncType.cs" />
     <Compile Include="Generator\Engines.cs" />
     <Compile Include="Generator\Flags.cs" />
     <Compile Include="Generator\Index.cs" />
     <Compile Include="Generator\IndexGroup.cs" />
     <Compile Include="Generator\DataType.cs" />
     <Compile Include="Generator\Table.cs" />
-    <Compile Include="Generator\TSQLGenerator.cs" />
+    <Compile Include="Generator\Generator.cs" />
     <Compile Include="MySQLDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

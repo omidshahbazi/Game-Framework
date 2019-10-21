@@ -74,7 +74,7 @@ namespace GameFramework.DatabaseManaged
 			if (IsConnectionAlive())
 				return;
 
-			Database.Open();
+			connection.Open();
 
 			if (!IsConnectionAlive())
 				throw new Exception("Database connection is no alive");
@@ -82,7 +82,7 @@ namespace GameFramework.DatabaseManaged
 
 		private bool IsConnectionAlive()
 		{
-			return !(Database.State == ConnectionState.Closed || Database.State == ConnectionState.Broken);
+			return !(connection.State == ConnectionState.Closed || connection.State == ConnectionState.Broken);
 		}
 	}
 }
