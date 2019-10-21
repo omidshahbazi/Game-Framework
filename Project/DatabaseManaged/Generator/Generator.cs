@@ -1,4 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
@@ -7,6 +8,8 @@ namespace GameFramework.DatabaseManaged.Generator
 {
 	public static class TSQLGenerator
 	{
+		private const string DEPRECATED_POST_FIX = "_deprecated";
+
 		public static class MySQL
 		{
 			public static void GenerateCreateCatalog(Database Database, Catalog Catalog, SyncTypes SyncType, StringBuilder Builder)
@@ -22,6 +25,7 @@ namespace GameFramework.DatabaseManaged.Generator
 				Builder.Append("USE ");
 				Builder.Append(Catalog.Name);
 				Builder.Append(';');
+				Builder.AppendLine();
 
 				for (int i = 0; i < Catalog.Tables.Length; ++i)
 					GenerateCreateTable(Database, Catalog.Tables[i], SyncType, Builder);
@@ -31,17 +35,18 @@ namespace GameFramework.DatabaseManaged.Generator
 			{
 				Builder.Append("DROP DATABASE ");
 				Builder.Append(Catalog.Name);
-				Builder.Append(';');
+				Builder.AppendLine();
 			}
 
 			public static void GenerateCreateTable(Database Database, Table Table, SyncTypes SyncType, StringBuilder Builder)
 			{
 				if (!IsTableExists(Database, Table))
 				{
-					Builder.Append("CREATE TABLE ");
+					Builder.Append("CREATE TABLE `");
 					Builder.Append(Table.Name);
+					Builder.Append('`');
 					Builder.AppendLine();
-					Builder.Append('(');
+					Builder.Append("(");
 
 					string primaryKey = "";
 
@@ -74,9 +79,9 @@ namespace GameFramework.DatabaseManaged.Generator
 						Builder.Append(',');
 						Builder.AppendLine();
 
-						Builder.Append("PRIMARY KEY(");
+						Builder.Append("PRIMARY KEY(`");
 						Builder.Append(primaryKey);
-						Builder.Append(')');
+						Builder.Append("`),");
 						Builder.AppendLine();
 					}
 
@@ -91,14 +96,16 @@ namespace GameFramework.DatabaseManaged.Generator
 					GenerateCollate(Table.Collate, Builder);
 
 					Builder.Append(';');
+					Builder.AppendLine();
 
 					return;
 				}
 
 				Column[] oldColumns = GetColumns(Database, Table.Name);
+				Index[] oldIndecies = GetIndecies(Database, Table.Name);
 
 				GenerateNewColumnsAdd(Database, Table, oldColumns, Builder);
-				GenerateDeprecatedColumnsDrop(Table, SyncType, oldColumns, Builder);
+				GenerateDeprecatedColumns(Table, SyncType, oldColumns, oldIndecies, Builder);
 			}
 
 			public static void GenerateDropTable(string Name, StringBuilder Builder)
@@ -113,9 +120,9 @@ namespace GameFramework.DatabaseManaged.Generator
 				if (IsColumnExists(Database, Table, Column))
 					return;
 
-				Builder.Append("ALTER TABLE ");
+				Builder.Append("ALTER TABLE `");
 				Builder.Append(Table.Name);
-				Builder.Append(" ADD `");
+				Builder.Append("` ADD `");
 				Builder.Append(Column.Name);
 				Builder.Append("` ");
 
@@ -135,26 +142,39 @@ namespace GameFramework.DatabaseManaged.Generator
 				Builder.Append(';');
 			}
 
-			public static void GenerateDeprecatedColumnName(Table Table, Column Column, StringBuilder Builder)
+			public static void GenerateDropColumn(Table Table, Column Column, StringBuilder Builder)
 			{
-				Builder.Append("ALTER TABLE ");
+				Builder.Append("ALTER TABLE `");
 				Builder.Append(Table.Name);
-				Builder.Append(" CHANGE `");
+				Builder.Append("` DROP COLUMN `");
 				Builder.Append(Column.Name);
-				Builder.Append("` `");
-				Builder.Append(Column.Name);
-				Builder.Append("_deprecated` ");
-
-				GenerateDataType(Column.DataType, Builder);
+				Builder.Append("`;");
+				Builder.AppendLine();
 
 				Builder.Append(';');
 			}
 
+			public static void GenerateDeprecatedColumn(Table Table, Column Column, StringBuilder Builder)
+			{
+				Builder.Append("ALTER TABLE `");
+				Builder.Append(Table.Name);
+				Builder.Append("` CHANGE `");
+				Builder.Append(Column.Name);
+				Builder.Append("` `");
+				Builder.Append(GetDeprecatedColumnName(Column.Name));
+				Builder.Append("` ");
+
+				GenerateDataType(Column.DataType, Builder);
+
+				Builder.Append(';');
+				Builder.AppendLine();
+			}
+
 			public static void GenerateModifyColumn(Table Table, Column OldColumn, Column NewColumn, StringBuilder Builder)
 			{
-				Builder.Append("ALTER TABLE ");
+				Builder.Append("ALTER TABLE `");
 				Builder.Append(Table.Name);
-				Builder.Append(" MODIFY `");
+				Builder.Append("` MODIFY `");
 				Builder.Append(OldColumn.Name);
 				Builder.Append("` ");
 
@@ -165,11 +185,12 @@ namespace GameFramework.DatabaseManaged.Generator
 				GeneratePreFlags(NewColumn.FlagMask, Builder);
 
 				Builder.Append(';');
+				Builder.AppendLine();
 			}
 
 			public static Column[] GetColumns(Database Database, string TableName)
 			{
-				DataTable table = Database.ExecuteWithReturnDataTable("describe " + TableName);
+				DataTable table = Database.ExecuteWithReturnDataTable("DESCRIBE `" + TableName + "`");
 
 				List<Column> columns = new List<Column>();
 
@@ -181,6 +202,36 @@ namespace GameFramework.DatabaseManaged.Generator
 				}
 
 				return columns.ToArray();
+			}
+
+			public static Index[] GetIndecies(Database Database, string TableName)
+			{
+				DataTable table = Database.ExecuteWithReturnDataTable("SHOW INDEX FROM `" + TableName + "`");
+
+				DataTable nameTable = table.DefaultView.ToTable(true, "Key_name");
+
+				List<Index> indecies = new List<Index>();
+
+				for (int i = 0; i < nameTable.Rows.Count; i++)
+				{
+					DataRow row = nameTable.Rows[i];
+
+					string name = row["Key_name"].ToString();
+
+					Index index = new Index(name);
+
+					table.DefaultView.RowFilter = "Key_name='" + name + "'";
+					for (int j = 0; j < table.DefaultView.Count; ++j)
+					{
+						DataRowView columnRow = table.DefaultView[j];
+
+						index.AddColumn(columnRow["Column_name"].ToString());
+					}
+
+					indecies.Add(index);
+				}
+
+				return indecies.ToArray();
 			}
 
 			private static void GenerateCreateIndexGroup(IndexGroup IndexGroup, StringBuilder Builder)
@@ -195,29 +246,56 @@ namespace GameFramework.DatabaseManaged.Generator
 
 					Index index = IndexGroup.Indecies[i];
 
-					GenerateCreateIndex(index, Builder);
+					Builder.Append("KEY ");
+					Builder.Append(index.Name);
+					Builder.Append(" (");
+
+					for (int j = 0; j < index.Columns.Length; j++)
+					{
+						if (j != 0)
+							Builder.Append(',');
+
+						Builder.Append('`');
+						Builder.Append(index.Columns[j]);
+						Builder.Append('`');
+					}
+
+					Builder.Append(')');
 
 					Builder.AppendLine();
 				}
 			}
 
-			private static void GenerateCreateIndex(Index Index, StringBuilder Builder)
+			private static void GenerateCreateIndex(Table Table, Index Index, StringBuilder Builder)
 			{
-				Builder.Append("KEY ");
+				Builder.Append("ALTER TABLE `");
+				Builder.Append(Table.Name);
+				Builder.Append("` ADD INDEX `");
 				Builder.Append(Index.Name);
-				Builder.Append(" (");
+				Builder.Append("` (");
 
-				for (int i = 0; i < Index.Columns.Length; i++)
+				for (int j = 0; j < Index.Columns.Length; j++)
 				{
-					if (i != 0)
+					if (j != 0)
 						Builder.Append(',');
 
 					Builder.Append('`');
-					Builder.Append(Index.Columns[i]);
+					Builder.Append(Index.Columns[j]);
 					Builder.Append('`');
 				}
 
-				Builder.Append(')');
+				Builder.Append(");");
+				Builder.AppendLine();
+			}
+
+			private static void GenerateDropInex(Table Table, Index Index, StringBuilder Builder)
+			{
+				Builder.Append("ALTER TABLE `");
+				Builder.Append(Table.Name);
+				Builder.Append("` DROP INDEX `");
+				Builder.Append(Index.Name);
+				Builder.Append("`;");
+				Builder.AppendLine();
 			}
 
 			public static void GeneratePreFlags(Flags FlagMask, StringBuilder Builder)
@@ -297,7 +375,7 @@ namespace GameFramework.DatabaseManaged.Generator
 			{
 				try
 				{
-					Database.Execute("SELECT 1 FROM " + Table.Name + " LIMIT 1;");
+					Database.Execute("SELECT 1 FROM `" + Table.Name + "` LIMIT 1;");
 
 					return true;
 				}
@@ -312,7 +390,7 @@ namespace GameFramework.DatabaseManaged.Generator
 			{
 				try
 				{
-					Database.Execute("SELECT `" + Column.Name + "` FROM " + Table.Name + " LIMIT 1");
+					Database.Execute("SELECT `" + Column.Name + "` FROM `" + Table.Name + "` LIMIT 1");
 
 					return true;
 				}
@@ -341,11 +419,14 @@ namespace GameFramework.DatabaseManaged.Generator
 				return (FlagMask & Flag) == Flag;
 			}
 
-			private static void GenerateDeprecatedColumnsDrop(Table Table, SyncTypes SyncType, Column[] OldColumns, StringBuilder Builder)
+			private static void GenerateDeprecatedColumns(Table Table, SyncTypes SyncType, Column[] OldColumns, Index[] OldIndecies, StringBuilder Builder)
 			{
 				for (int i = 0; i < OldColumns.Length; ++i)
 				{
 					Column oldColumn = OldColumns[i];
+
+					if (oldColumn.Name.EndsWith(DEPRECATED_POST_FIX))
+						continue;
 
 					bool contains = false;
 					for (int j = 0; j < Table.Columns.Length; ++j)
@@ -359,18 +440,48 @@ namespace GameFramework.DatabaseManaged.Generator
 						break;
 					}
 
-					if (!contains)
+					if (contains)
 						continue;
+
+					List<Index> toModifyIndecies = new List<Index>();
+					for (int j = 0; j < OldIndecies.Length; ++j)
+					{
+						Index index = OldIndecies[j];
+
+						if (Array.IndexOf(index.Columns, oldColumn.Name) == -1)
+							continue;
+
+						index.RemmoveColumn(oldColumn.Name);
+
+						if (SyncType == SyncTypes.Keep)
+							index.AddColumn(GetDeprecatedColumnName(oldColumn.Name));
+
+						toModifyIndecies.Add(index);
+
+						GenerateDropInex(Table, index, Builder);
+					}
 
 					switch (SyncType)
 					{
 						case SyncTypes.Delete:
-							GenerateDeprecatedColumnName(Table, oldColumn, Builder);
+							GenerateDropColumn(Table, oldColumn, Builder);
 							Builder.AppendLine();
 							break;
 
 						case SyncTypes.Keep:
+							GenerateDeprecatedColumn(Table, oldColumn, Builder);
+							Builder.AppendLine();
 							break;
+					}
+
+					for (int j = 0; j < toModifyIndecies.Count; ++j)
+					{
+						Index index = toModifyIndecies[j];
+
+						if (index.Columns.Length == 0)
+							continue;
+
+						GenerateCreateIndex(Table, index, Builder);
 					}
 				}
 			}
@@ -408,6 +519,11 @@ namespace GameFramework.DatabaseManaged.Generator
 
 					Builder.AppendLine();
 				}
+			}
+
+			private static string GetDeprecatedColumnName(string ColumnName)
+			{
+				return ColumnName + DEPRECATED_POST_FIX;
 			}
 		}
 	}

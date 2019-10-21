@@ -12,7 +12,7 @@ namespace MathParserTest
 		{
 			Database db = new MySQLDatabase("127.0.0.1", "root", "!QAZ2wsx");
 
-			Table t1 = new Table("test1", Collates.UTF8, Engines.InnoDB, new IndexGroup(new Index("value1_index", "value1")), new Column("id", DataType.Int, Flags.PrimaryKey | Flags.AutoIncrement), new Column("value12", DataType.DateTime));
+			Table t1 = new Table("test1", Collates.UTF8, Engines.InnoDB, new IndexGroup(new Index("value1_index", "value1")), new Column("id", DataType.Int, Flags.PrimaryKey | Flags.AutoIncrement), new Column("value1", DataType.Int));
 
 			Catalog catalog = new Catalog("test_catalog", t1);
 
@@ -21,12 +21,15 @@ namespace MathParserTest
 
 			db.Execute(builder.ToString());
 
+			string query = builder.ToString();
 
-//			string str = @"Trophy+
-//if(B1=-1,0,if(B1=0,-30,if(B1=1,-20,if(B1=2,0,20))))+
-//if(B2=-1,0,if(B2=0,-30,if(B2=1,-20,if(B2=2,0,20))))+
-//if(B3=-1,0,if(B3=0,-30,if(B3=1,-20,if(B3=2,0,20))))+
-//if(B4=-1,0,if(B4=0,-30,if(B4=1,-20,if(B4=2,0,20))))+
+
+			Console.ReadLine();
+			//			string str = @"Trophy+
+			//if(B1=-1,0,if(B1=0,-30,if(B1=1,-20,if(B1=2,0,20))))+
+			//if(B2=-1,0,if(B2=0,-30,if(B2=1,-20,if(B2=2,0,20))))+
+			//if(B3=-1,0,if(B3=0,-30,if(B3=1,-20,if(B3=2,0,20))))+
+			//if(B4=-1,0,if(B4=0,-30,if(B4=1,-20,if(B4=2,0,20))))+
 
 			//if(B5=-1,0,if(B5=0,-30,if(B5=1,-20,if(B5=2,0,20))))";
 

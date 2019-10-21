@@ -22,5 +22,15 @@ namespace GameFramework.DatabaseManaged.Generator
 
 			columns.AddRange(Columns);
 		}
+
+		public void AddColumn(string ColumnName)
+		{
+			columns.Add(ColumnName);
+		}
+
+		public void RemmoveColumn(string ColumnName)
+		{
+			columns.Remove(ColumnName);
+		}
 	}
 }
