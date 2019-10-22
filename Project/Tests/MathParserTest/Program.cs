@@ -24,9 +24,10 @@ namespace MathParserTest
 			Database db = new MySQLDatabase("127.0.0.1", "root", "!QAZ2wsx", "analytics_test");
 
 
-			DatabaseGenerator.UpdateStructure(db);
 
 			Analytics analytics = new Analytics(db);
+			analytics.UpdateDatabaseStructure();
+
 			analytics.AddResourceEvent(100, rt.initial, ft.source, 1000, 10);
 
 			Console.ReadLine();
