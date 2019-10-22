@@ -150,8 +150,6 @@ namespace GameFramework.DatabaseManaged.Generator
 				Builder.Append(Column.Name);
 				Builder.Append("`;");
 				Builder.AppendLine();
-
-				Builder.Append(';');
 			}
 
 			public static void GenerateDeprecatedColumn(Table Table, Column Column, StringBuilder Builder, StringBuilder KeepSyncTypeBuilder)

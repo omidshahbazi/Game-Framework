@@ -13,7 +13,12 @@ namespace GameFramework.Analytics
 			database = Database;
 		}
 
-		public void AddResourceEvent<RT, FT>(int UserID, RT ResourceType, FT FlowType, int Amount, int Progress) where RT : struct, IConvertible
+		public void UpdateDatabaseStructure()
+		{
+			DatabaseGenerator.UpdateStructure(database);
+		}
+
+		public void AddResourceEvent<RT, FT>(int UserID, RT ResourceType, FT FlowType, int Amount, int Progress = 0) where RT : struct, IConvertible
 		{
 			if (!typeof(RT).IsEnum && typeof(RT) != typeof(int))
 				throw new ArgumentException("ResourceType must be int or enum");
