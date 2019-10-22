@@ -13,7 +13,7 @@ namespace GameFramework.DatabaseManaged.Generator
 		public static readonly DataType Int = new DataType("INT", 11);
 		public static readonly DataType BigInt = new DataType("BIGINT", 64);
 		public static readonly DataType DateTime = new DataType("DATETIME");
-		public static readonly DataType VarChar45 = new DataType("VARCHAR", 45);
+		public static readonly DataType VarChar = new DataType("VARCHAR", 45);
 		public static readonly DataType NVarChar = new DataType("NVARCHAR", 45);
 		public static readonly DataType Text = new DataType("TEXT");
 		public static readonly DataType LongText = new DataType("LONTTEXT");
@@ -33,7 +33,7 @@ namespace GameFramework.DatabaseManaged.Generator
 			this.Lenght = Lenght;
 		}
 
-		public static List<DataType> Types
+		public static DataType[] Types
 		{
 			get { return ReflectionExtensions.GetFields<DataType>(typeof(DataType)); }
 		}

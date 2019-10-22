@@ -12,7 +12,7 @@ namespace GameFramework.DatabaseManaged.Generator
 
 		public static class MySQL
 		{
-			public static void GenerateCreateCatalog(Database Database, Catalog Catalog, SyncTypes SyncType, StringBuilder Builder)
+			public static void GenerateCreateCatalog(Database Database, Catalog Catalog, SyncTypes SyncType, StringBuilder Builder, StringBuilder KeepSyncTypeBuilder = null)
 			{
 				if (!IsCatalogExists(Database, Catalog))
 				{
@@ -28,7 +28,7 @@ namespace GameFramework.DatabaseManaged.Generator
 				Builder.AppendLine();
 
 				for (int i = 0; i < Catalog.Tables.Length; ++i)
-					GenerateCreateTable(Database, Catalog.Tables[i], SyncType, Builder);
+					GenerateCreateTable(Database, Catalog.Tables[i], SyncType, Builder, KeepSyncTypeBuilder);
 			}
 
 			public static void GenerateDropCatalog(Catalog Catalog, StringBuilder Builder)
@@ -38,7 +38,7 @@ namespace GameFramework.DatabaseManaged.Generator
 				Builder.AppendLine();
 			}
 
-			public static void GenerateCreateTable(Database Database, Table Table, SyncTypes SyncType, StringBuilder Builder)
+			public static void GenerateCreateTable(Database Database, Table Table, SyncTypes SyncType, StringBuilder Builder, StringBuilder KeepSyncTypeBuilder = null)
 			{
 				if (!IsTableExists(Database, Table))
 				{
@@ -105,7 +105,7 @@ namespace GameFramework.DatabaseManaged.Generator
 				Index[] oldIndecies = GetIndecies(Database, Table.Name);
 
 				GenerateNewColumnsAdd(Database, Table, oldColumns, Builder);
-				GenerateDeprecatedColumns(Table, SyncType, oldColumns, oldIndecies, Builder);
+				GenerateDeprecatedColumns(Table, SyncType, oldColumns, oldIndecies, Builder, KeepSyncTypeBuilder);
 			}
 
 			public static void GenerateDropTable(string Name, StringBuilder Builder)
@@ -154,7 +154,7 @@ namespace GameFramework.DatabaseManaged.Generator
 				Builder.Append(';');
 			}
 
-			public static void GenerateDeprecatedColumn(Table Table, Column Column, StringBuilder Builder)
+			public static void GenerateDeprecatedColumn(Table Table, Column Column, StringBuilder Builder, StringBuilder KeepSyncTypeBuilder)
 			{
 				Builder.Append("ALTER TABLE `");
 				Builder.Append(Table.Name);
@@ -168,6 +168,8 @@ namespace GameFramework.DatabaseManaged.Generator
 
 				Builder.Append(';');
 				Builder.AppendLine();
+
+				GenerateDropColumn(Table, Column, KeepSyncTypeBuilder);
 			}
 
 			public static void GenerateModifyColumn(Table Table, Column OldColumn, Column NewColumn, StringBuilder Builder)
@@ -402,9 +404,9 @@ namespace GameFramework.DatabaseManaged.Generator
 
 			public static DataType GetDataType(string Type)
 			{
-				List<DataType> types = DataType.Types;
+				DataType[] types = DataType.Types;
 
-				for (int i = 0; i < types.Count; ++i)
+				for (int i = 0; i < types.Length; ++i)
 				{
 					StringBuilder builder = new StringBuilder();
 					GenerateDataType(types[i], builder);
@@ -421,7 +423,7 @@ namespace GameFramework.DatabaseManaged.Generator
 				return (FlagMask & Flag) == Flag;
 			}
 
-			private static void GenerateDeprecatedColumns(Table Table, SyncTypes SyncType, Column[] OldColumns, Index[] OldIndecies, StringBuilder Builder)
+			private static void GenerateDeprecatedColumns(Table Table, SyncTypes SyncType, Column[] OldColumns, Index[] OldIndecies, StringBuilder Builder, StringBuilder KeepSyncTypeBuilder = null)
 			{
 				List<Index> toModifyIndecies = new List<Index>();
 				for (int i = 0; i < OldColumns.Length; ++i)
@@ -471,7 +473,7 @@ namespace GameFramework.DatabaseManaged.Generator
 							break;
 
 						case SyncTypes.Keep:
-							GenerateDeprecatedColumn(Table, oldColumn, Builder);
+							GenerateDeprecatedColumn(Table, oldColumn, Builder, KeepSyncTypeBuilder);
 							Builder.AppendLine();
 							break;
 					}

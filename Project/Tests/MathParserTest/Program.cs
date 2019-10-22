@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using GameFramework.Analytics;
 using GameFramework.DatabaseManaged;
 using GameFramework.DatabaseManaged.Generator;
 using GameFramework.MathParser;
@@ -8,22 +9,25 @@ namespace MathParserTest
 {
 	class Program
 	{
+		enum rt
+		{
+			initial = 5
+		}
+
+		enum ft
+		{
+			source = 2
+		}
+
 		static void Main(string[] args)
 		{
-			Database db = new MySQLDatabase("127.0.0.1", "root", "!QAZ2wsx");
+			Database db = new MySQLDatabase("127.0.0.1", "root", "!QAZ2wsx", "analytics_test");
 
-			Table t1 = new Table("test1", Collates.UTF8, Engines.InnoDB, new IndexGroup(new Index("value1_index", "value2")), new Column("id", DataType.Int, Flags.PrimaryKey | Flags.AutoIncrement), new Column("value2", DataType.Int));
-			Table t2 = new Table("test2", Collates.UTF8, Engines.InnoDB, new Column("id", DataType.Int, Flags.PrimaryKey | Flags.AutoIncrement), new Column("value22", DataType.Int));
 
-			Catalog catalog = new Catalog("test_catalog", t1, t2);
+			DatabaseGenerator.UpdateStructure(db);
 
-			StringBuilder builder = new StringBuilder();
-			TSQLGenerator.MySQL.GenerateCreateCatalog(db, catalog, SyncTypes.Keep, builder);
-
-			db.Execute(builder.ToString());
-
-			string query = builder.ToString();
-
+			Analytics analytics = new Analytics(db);
+			analytics.AddResourceEvent(100, rt.initial, ft.source, 1000, 10);
 
 			Console.ReadLine();
 			//			string str = @"Trophy+

@@ -7,11 +7,14 @@ namespace GameFramework.Common.Utilities
 {
 	public static class ReflectionExtensions
 	{
-		public static List<MemberType> GetFields<MemberType>(this Type Type)
+		public const BindingFlags PrivateStaticFlags = BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+		public const BindingFlags PublicStaticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+
+		public static MemberType[] GetFields<MemberType>(this Type Type, BindingFlags Flags = PublicStaticFlags)
 		{
 			List<MemberType> members = new List<MemberType>();
 
-			FieldInfo[] fields = Type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+			FieldInfo[] fields = Type.GetFields(Flags);
 
 			for (int i = 0; i < fields.Length; ++i)
 			{
@@ -23,7 +26,7 @@ namespace GameFramework.Common.Utilities
 				members.Add((MemberType)field.GetValue(null));
 			}
 
-			return members;
+			return members.ToArray();
 		}
 	}
 }
