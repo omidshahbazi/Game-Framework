@@ -158,8 +158,8 @@ namespace GameFramework.Common.Compression
 
 		public static int Decompress(byte[] Input, uint InputIndex, uint InputLength, byte[] Output, uint OutputIndex, uint OutputLength)
 		{
-			uint iidx = 0;
-			uint oidx = 0;
+			uint iidx = InputIndex;
+			uint oidx = OutputIndex;
 
 			do
 			{

@@ -18,33 +18,38 @@ namespace GameFramework.BinarySerializer
 
 		public uint Size
 		{
-			//get { return (uint)stream.Position; }
-			get { return (uint)stream.Length; }
+			get;
+			private set;
 		}
 
 		public BufferStream(byte[] Buffer)
 		{
 			stream = new MemoryStream(Buffer, true);
+			Size = (uint)Buffer.Length;
 		}
 
 		public BufferStream(byte[] Buffer, uint Length)
 		{
 			stream = new MemoryStream(Buffer, 0, (int)Length, true);
+			Size = Length;
 		}
 
 		public BufferStream(byte[] Buffer, uint Index, uint Length)
 		{
 			stream = new MemoryStream(Buffer, (int)Index, (int)Length, true);
+			Size = Length;
 		}
 
 		public BufferStream(MemoryStream Stream)
 		{
 			stream = Stream;
+			Size = (uint)Stream.Position;
 		}
 
 		public void Reset()
 		{
 			stream.Seek(0, SeekOrigin.Begin);
+			Size = 0;
 		}
 
 		public bool ReadBool()
@@ -149,11 +154,13 @@ namespace GameFramework.BinarySerializer
 		public void WriteBytes(params byte[] Data)
 		{
 			stream.Write(Data, 0, Data.Length);
+			Size += (uint)Data.Length;
 		}
 
 		public void WriteBytes(byte[] Data, int Index, int Length)
 		{
 			stream.Write(Data, Index, Length);
+			Size += (uint)Data.Length;
 		}
 
 		public void BeginWriteArray(int Length)
