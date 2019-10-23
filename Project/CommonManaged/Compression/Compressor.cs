@@ -11,13 +11,13 @@ namespace GameFramework.Common.Compression
 
 		public static byte[] Compress(byte[] Input)
 		{
-			return Compress(Input, Input.Length);
+			return Compress(Input, 0, (uint)Input.Length);
 		}
 
-		public static byte[] Compress(byte[] Input, int Length)
+		public static byte[] Compress(byte[] Input, uint Index, uint Length)
 		{
 			byte[] processed = new byte[Length];
-			int length = Compress(Input, Length, processed, processed.Length);
+			int length = Compress(Input, Index, Length, processed, 0, (uint)processed.Length);
 
 			byte[] output = new byte[length];
 			System.Array.Copy(processed, 0, output, 0, length);
@@ -25,13 +25,13 @@ namespace GameFramework.Common.Compression
 			return output;
 		}
 
-		public static int Compress(byte[] Input, int InputLength, byte[] Output, int OutputLength)
+		public static int Compress(byte[] Input, uint InputIndex, uint InputLength, byte[] Output, uint OutputIndex, uint OutputLength)
 		{
 			long[] hashTable = new long[HSIZE];
 
 			long hslot;
-			uint iidx = 0;
-			uint oidx = 0;
+			uint iidx = InputIndex;
+			uint oidx = OutputIndex;
 			long reference;
 
 			uint hval = (uint)(((Input[iidx]) << 8) | Input[iidx + 1]); // FRST(in_data, iidx);
@@ -142,13 +142,13 @@ namespace GameFramework.Common.Compression
 
 		public static byte[] Decompress(byte[] Input)
 		{
-			return Decompress(Input, Input.Length);
+			return Decompress(Input, 0, (uint)Input.Length, 1000);
 		}
 
-		public static byte[] Decompress(byte[] Input, int Length)
+		public static byte[] Decompress(byte[] Input, uint Index, uint Length, uint SizeMultiplier)
 		{
-			byte[] processed = new byte[Length * 1000];
-			int length = Decompress(Input, Length, processed, processed.Length);
+			byte[] processed = new byte[Length * SizeMultiplier];
+			int length = Decompress(Input, Index, Length, processed, 0, (uint)processed.Length);
 
 			byte[] output = new byte[length];
 			System.Array.Copy(processed, 0, output, 0, length);
@@ -156,7 +156,7 @@ namespace GameFramework.Common.Compression
 			return output;
 		}
 
-		public static int Decompress(byte[] Input, int InputLength, byte[] Output, int OutputLength)
+		public static int Decompress(byte[] Input, uint InputIndex, uint InputLength, byte[] Output, uint OutputIndex, uint OutputLength)
 		{
 			uint iidx = 0;
 			uint oidx = 0;

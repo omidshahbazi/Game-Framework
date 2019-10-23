@@ -16,9 +16,10 @@ namespace GameFramework.BinarySerializer
 			get { return stream.ToArray(); }
 		}
 
-		public int Size
+		public uint Size
 		{
-			get { return (int)stream.Position; }
+			//get { return (uint)stream.Position; }
+			get { return (uint)stream.Length; }
 		}
 
 		public BufferStream(byte[] Buffer)
@@ -26,14 +27,14 @@ namespace GameFramework.BinarySerializer
 			stream = new MemoryStream(Buffer, true);
 		}
 
-		public BufferStream(byte[] Buffer, int Length)
+		public BufferStream(byte[] Buffer, uint Length)
 		{
-			stream = new MemoryStream(Buffer, 0, Length, true);
+			stream = new MemoryStream(Buffer, 0, (int)Length, true);
 		}
 
-		public BufferStream(byte[] Buffer, int Index, int Length)
+		public BufferStream(byte[] Buffer, uint Index, uint Length)
 		{
-			stream = new MemoryStream(Buffer, Index, Length, true);
+			stream = new MemoryStream(Buffer, (int)Index, (int)Length, true);
 		}
 
 		public BufferStream(MemoryStream Stream)
