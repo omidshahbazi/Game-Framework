@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using GameFramework.Analytics;
+using GameFramework.Common.FileLayer;
 using GameFramework.DatabaseManaged;
 using GameFramework.DatabaseManaged.Generator;
 using GameFramework.MathParser;
@@ -21,6 +22,11 @@ namespace MathParserTest
 
 		static void Main(string[] args)
 		{
+			FileSystem.DataPath = "D:/";
+			if (!FileSystem.DirectoryExists("D"))
+				FileSystem.CreateDirectory("D");
+
+
 			Database db = new MySQLDatabase("127.0.0.1", "root", "!QAZ2wsx", "analytics_test");
 
 

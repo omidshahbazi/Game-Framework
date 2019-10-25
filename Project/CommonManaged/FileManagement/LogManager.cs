@@ -6,29 +6,24 @@ namespace GameFramework.Common.FileLayer
 {
 	public class LogManager
 	{
-		private string path;
-		private string fileName;
-		private string oldFileNamePattern;
 		private StreamWriter writer;
 
-		private LogManager(string Path, string FileName)
+		public LogManager(string Path, string FileName)
 		{
-			path = Path;
-			fileName = FileName;
-			oldFileNamePattern = fileName + " {0}";
+			string filePath = Path + (Path.EndsWith("\\") || Path.EndsWith("/") ? "" : "/") + FileName;
 
-			if (!FileSystem.DirectoryExists(path))
-				FileSystem.CreateDirectory(path);
+			if (!FileSystem.DirectoryExists(filePath))
+				FileSystem.CreateDirectory(filePath);
 
-			if (FileSystem.FileExists(fileName))
+			if (FileSystem.FileExists(filePath))
 				try
 				{
-					FileSystem.RenameFile(fileName, string.Format(oldFileNamePattern, DateTime.Now.ToString().Replace(':', '-')));
+					FileSystem.RenameFile(filePath, FileSystem.GetDirectoryName(filePath) + "\\" + FileSystem.GetFileNameWithoutExtension(filePath) + " " + DateTime.Now.ToString().Replace('/', '-').Replace(':', '-') + FileSystem.GetFileExtension(filePath));
 				}
 				catch
 				{ }
 
-			writer = FileSystem.CreateStreamWriter(fileName);
+			writer = FileSystem.CreateStreamWriter(filePath);
 			writer.AutoFlush = true;
 		}
 

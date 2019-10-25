@@ -48,6 +48,10 @@
       <Project>{7e1d73d2-07dc-428e-b951-0fff9144bc6b}</Project>
       <Name>AnalyticsManaged</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\CommonManaged\CommonManaged.csproj">
+      <Project>{26568521-9093-4208-9BAC-10F5B123BFFB}</Project>
+      <Name>CommonManaged</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DatabaseManaged\DatabaseManaged.csproj">
       <Project>{47000C4C-8A48-4B73-A411-5A89A6F4B518}</Project>
       <Name>DatabaseManaged</Name>

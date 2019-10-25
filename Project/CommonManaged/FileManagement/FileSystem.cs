@@ -48,6 +48,21 @@ namespace GameFramework.Common.FileLayer
 			return new StreamWriter(DataPath + Path);
 		}
 
+		public static string GetFileName(string Path)
+		{
+			return System.IO.Path.GetFileName(DataPath + Path);
+		}
+
+		public static string GetFileNameWithoutExtension(string Path)
+		{
+			return System.IO.Path.GetFileNameWithoutExtension(DataPath + Path);
+		}
+
+		public static string GetFileExtension(string Path)
+		{
+			return System.IO.Path.GetExtension(Path);
+		}
+
 		public static bool FileExists(string Path)
 		{
 			return File.Exists(DataPath + Path);
@@ -56,6 +71,11 @@ namespace GameFramework.Common.FileLayer
 		public static void DeleteFile(string Path)
 		{
 			File.Delete(DataPath + Path);
+		}
+
+		public static string GetDirectoryName(string Path)
+		{
+			return System.IO.Path.GetDirectoryName(Path);
 		}
 
 		public static bool DirectoryExists(string Path)
