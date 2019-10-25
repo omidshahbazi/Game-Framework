@@ -159,6 +159,9 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 
 			object obj = map[Name];
 
+			if (obj == null)
+				return DefaultValue;
+
 			if (obj is T)
 				return (T)obj;
 
