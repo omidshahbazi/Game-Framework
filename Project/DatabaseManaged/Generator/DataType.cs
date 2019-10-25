@@ -8,7 +8,6 @@ namespace GameFramework.DatabaseManaged.Generator
 	{
 		public static readonly DataType Bit = new DataType("BIT");
 		public static readonly DataType Binary = new DataType("BINARY");
-		public static readonly DataType VarBinaryMax = new DataType("VARBINARY", -1);
 		public static readonly DataType Float = new DataType("FLOAT");
 		public static readonly DataType Int = new DataType("INT", 11);
 		public static readonly DataType BigInt = new DataType("BIGINT", 64);
@@ -17,6 +16,8 @@ namespace GameFramework.DatabaseManaged.Generator
 		public static readonly DataType NVarChar = new DataType("NVARCHAR", 45);
 		public static readonly DataType Text = new DataType("TEXT");
 		public static readonly DataType LongText = new DataType("LONTTEXT");
+		public static readonly DataType Blob = new DataType("BLOB");
+		public static readonly DataType LongBlob = new DataType("LONGBLOB");
 
 		public string Name { get; set; }
 		public int Lenght { get; set; }
