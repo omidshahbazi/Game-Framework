@@ -23,15 +23,33 @@ namespace GameFramework.DatabaseManaged
 			}
 		}
 
-		public MySQLDatabase(string Host, string Username, string Password)
+		public MySQLDatabase(string Host, string Username, string Password, bool UsePool = false) :
+			this(Host, Username, Password, "", UsePool)
 		{
-			connection = new MySqlConnection(string.Format("server={0};uid={1};pwd={2}", Host, Username, Password));
-
-			CheckConnection();
 		}
-		public MySQLDatabase(string Host, string Username, string Password, string Name)
+
+		public MySQLDatabase(string Host, string Username, string Password, string Name, bool UsePool = false)
 		{
-			connection = new MySqlConnection(string.Format("persistsecurityinfo=True;server={0};uid={1};pwd={2};database={3}", Host, Username, Password, Name));
+			MySqlConnectionStringBuilder conStr = new MySqlConnectionStringBuilder();
+
+			conStr.Server = Host;
+			conStr.UserID = Username;
+			conStr.Password = Password;
+
+			conStr.Database = Name;
+
+			if (UsePool)
+			{
+				conStr.Pooling = true;
+				conStr.MinimumPoolSize = 20;
+				conStr.MaximumPoolSize = 100;
+			}
+
+			conStr.PersistSecurityInfo = true;
+
+			conStr.CharacterSet = "utf8";
+
+			connection = new MySqlConnection(conStr.GetConnectionString(true));
 
 			CheckConnection();
 		}
