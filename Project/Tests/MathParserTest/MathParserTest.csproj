@@ -48,6 +48,10 @@
       <Project>{7e1d73d2-07dc-428e-b951-0fff9144bc6b}</Project>
       <Name>AnalyticsManaged</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ASCIISerializerManaged\ASCIISerializerManaged.csproj">
+      <Project>{CF111332-3A81-4D4A-A04C-6634D8B6A8C6}</Project>
+      <Name>ASCIISerializerManaged</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\CommonManaged\CommonManaged.csproj">
       <Project>{26568521-9093-4208-9BAC-10F5B123BFFB}</Project>
       <Name>CommonManaged</Name>

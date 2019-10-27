@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using GameFramework.Analytics;
+using GameFramework.ASCIISerializer;
 using GameFramework.Common.FileLayer;
 using GameFramework.DatabaseManaged;
 using GameFramework.DatabaseManaged.Generator;
@@ -10,33 +11,15 @@ namespace MathParserTest
 {
 	class Program
 	{
-		enum rt
-		{
-			initial = 5
-		}
-
-		enum ft
-		{
-			source = 2
-		}
-
 		static void Main(string[] args)
 		{
 			FileSystem.DataPath = "D:/";
-			if (!FileSystem.DirectoryExists("D"))
-				FileSystem.CreateDirectory("D");
+			ISerializeObject objBase = Creator.Create<ISerializeObject>(FileSystem.Read("base.json"));
+			ISerializeObject sec = Creator.Create<ISerializeObject>(FileSystem.Read("sec.json"));
+
+			Creator.Override(sec, objBase);
 
 
-			Database db = new MySQLDatabase("127.0.0.1", "root", "!QAZ2wsx", "analytics_test");
-
-
-
-			Analytics analytics = new Analytics(db);
-			analytics.UpdateDatabaseStructure();
-
-			analytics.AddResourceEvent(100, rt.initial, ft.source, 1000, 10);
-
-			Console.ReadLine();
 			//			string str = @"Trophy+
 			//if(B1=-1,0,if(B1=0,-30,if(B1=1,-20,if(B1=2,0,20))))+
 			//if(B2=-1,0,if(B2=0,-30,if(B2=1,-20,if(B2=2,0,20))))+

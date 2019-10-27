@@ -191,6 +191,16 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 			items.RemoveAt((int)Index);
 		}
 
+		bool ISerializeArray.Contains(object Value)
+		{
+			return items.Contains(Value);
+		}
+
+		IEnumerator<object> ISerializeArray.GetEnumerator()
+		{
+			return items.GetEnumerator();
+		}
+
 		ISerializeArray ISerializeArray.Clone()
 		{
 			return Creator.Create<ISerializeArray>(((ISerializeData)this).Content);

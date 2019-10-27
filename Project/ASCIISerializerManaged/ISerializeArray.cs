@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
+using System.Collections.Generic;
 
 namespace GameFramework.ASCIISerializer
 {
@@ -32,6 +33,10 @@ namespace GameFramework.ASCIISerializer
 		T[] GetRange<T>(uint Index, uint Count);
 
 		void Remove(uint Index);
+
+		bool Contains(object Value);
+
+		IEnumerator<object> GetEnumerator();
 
 		ISerializeArray Clone();
 	}
