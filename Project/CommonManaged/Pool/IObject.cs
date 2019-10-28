@@ -3,8 +3,8 @@ namespace GameFramework.Common.Pool
 {
 	public interface IObject
 	{
-		//void GoOutOfPool(); ?
+		void GoOutOfPool();
 
-		//void GoInPool();
+		void GoInPool();
 	}
 }

@@ -50,8 +50,8 @@ namespace GameFramework.Common.Pool
 			}
 			else
 			{
-				//obj.GoOutOfPool();
-				//Factory.BeforeGetFromPool(obj, UserData);
+				obj.GoOutOfPool();
+				Factory.BeforeGetFromPool(obj, UserData);
 			}
 
 			return obj;
@@ -60,8 +60,8 @@ namespace GameFramework.Common.Pool
 		public void Push(T Object)
 		{
 			ObjectHolder.Push(Object);
-			//Object.GoInPool();
-			//Factory.AfterSendToPool(Object);
+			Object.GoInPool();
+			Factory.AfterSendToPool(Object);
 		}
 
 		public void Reserve(uint Count, object UserData = null)

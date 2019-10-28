@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using GameFramework.Analytics;
 using GameFramework.ASCIISerializer;
 using GameFramework.Common.FileLayer;
@@ -13,12 +14,19 @@ namespace MathParserTest
 	{
 		static void Main(string[] args)
 		{
-			FileSystem.DataPath = "D:/";
-			ISerializeObject objBase = Creator.Create<ISerializeObject>(FileSystem.Read("base.json"));
-			ISerializeObject sec = Creator.Create<ISerializeObject>(FileSystem.Read("sec.json"));
 
-			Creator.Override(sec, objBase);
+			MySQLDatabase db = new MySQLDatabase("localhost", "root", "!QAZ2wsx", "power_tank");
 
+			for (int i = 0; i < 100; ++i)
+			{
+				int index = i;
+				new Thread(() =>
+				{
+					System.Data.DataTable table = db.ExecuteWithReturnDataTable("SELECT * FROM logintable1");
+
+					Console.WriteLine(index + ". " + table.Rows.Count);
+				}).Start();
+			}
 
 			//			string str = @"Trophy+
 			//if(B1=-1,0,if(B1=0,-30,if(B1=1,-20,if(B1=2,0,20))))+
