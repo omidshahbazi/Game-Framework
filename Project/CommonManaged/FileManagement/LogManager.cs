@@ -32,22 +32,28 @@ namespace GameFramework.Common.FileLayer
 			writer.Close();
 		}
 
-		public void Log(string Message)
+		public void Log(string Message, params object[] Arguments)
 		{
 			writer.Write("[Log] ");
-			writer.WriteLine(Message);
+			writer.WriteLine(string.Format(Message, Arguments));
 		}
 
-		public void LogError(string Message)
-		{
-			writer.Write("[Error] ");
-			writer.WriteLine(Message);
-		}
-
-		public void LogWarning(string Message)
+		public void LogWarning(string Message, params object[] Arguments)
 		{
 			writer.Write("[Warning] ");
-			writer.WriteLine(Message);
+			writer.WriteLine(string.Format(Message, Arguments));
+		}
+
+		public void LogError(string Message, params object[] Arguments)
+		{
+			writer.Write("[Error] ");
+			writer.WriteLine(string.Format(Message, Arguments));
+		}
+
+		public void LogException(string Message, params object[] Arguments)
+		{
+			writer.Write("[Exception] ");
+			writer.WriteLine(string.Format(Message, Arguments));
 		}
 	}
 }
