@@ -1,4 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
+//#define USING_POOL
 using GameFramework.Common.Pool;
 using MySql.Data.MySqlClient;
 using System;
@@ -9,6 +10,7 @@ namespace GameFramework.DatabaseManaged
 {
 	public class MySQLDatabase : Database
 	{
+#if USING_POOL
 		private class ConnectionHolder : IObject
 		{
 			public MySqlConnection Connection
@@ -50,10 +52,6 @@ namespace GameFramework.DatabaseManaged
 			}
 		}
 
-		private class Pool : ObjectPool<ConnectionHolder>
-		{
-		}
-
 		private class PoolFactory : IObjectFactory<ConnectionHolder>
 		{
 			private string connectionString;
@@ -85,18 +83,14 @@ namespace GameFramework.DatabaseManaged
 			}
 		}
 
-		public override int LastInsertID
+		private class Pool : ObjectPool<ConnectionHolder>
 		{
-			get
-			{
-				DataTable table = ExecuteWithReturnDataTable("SELECT LAST_INSERT_ID() id");
-
-				if (table == null || table.Rows.Count == 0)
-					return 0;
-
-				return Convert.ToInt32(table.Rows[0]["id"]);
-			}
 		}
+
+		private Pool pool = null;
+#else
+		private MySqlConnection connection = null;
+#endif
 
 		public MySQLDatabase(string Host, string Username, string Password, uint PoolCount = 1) :
 			this(Host, Username, Password, "", PoolCount)
@@ -117,22 +111,32 @@ namespace GameFramework.DatabaseManaged
 
 			conStr.CharacterSet = "utf8";
 
-			Pool.Instance.Factory = new PoolFactory(conStr.GetConnectionString(true), PoolCount);
+			string connectionString = conStr.GetConnectionString(true);
+
+#if USING_POOL
+			pool = new Pool();
+			pool.Factory = new PoolFactory(connectionString, PoolCount);
+#else
+			connection = new MySqlConnection(connectionString);
+
+			CheckConnection();
+#endif
 		}
 
 		public override void Execute(string Query, params object[] Parameters)
 		{
+#if USING_POOL
 			while (true)
 			{
 				try
 				{
-					ConnectionHolder con = Pool.Instance.Pull();
+					ConnectionHolder con = pool.Pull();
 
-					MySqlCommand command = CreateCommand(con, Query, Parameters);
+					MySqlCommand command = CreateCommand(con.Connection, Query, Parameters);
 					command.ExecuteNonQuery();
 					command.Dispose();
 
-					Pool.Instance.Push(con);
+					pool.Push(con);
 
 					break;
 				}
@@ -140,27 +144,61 @@ namespace GameFramework.DatabaseManaged
 				{
 				}
 			}
+#else
+			CheckConnection();
+
+			MySqlCommand command = CreateCommand(connection, Query, Parameters);
+			command.ExecuteNonQuery();
+			command.Dispose();
+#endif
 		}
 
-		public override DataTable ExecuteWithReturnDataTable(string Query, params object[] Parameters)
+		public override int ExecuteInsert(string Query, params object[] Parameters)
 		{
+#if USING_POOL
 			while (true)
 			{
 				try
 				{
-					ConnectionHolder con = Pool.Instance.Pull();
+					ConnectionHolder con = pool.Pull();
 
-					MySqlCommand command = CreateCommand(con, Query, Parameters);
-					MySqlDataAdapter adapter = new MySqlDataAdapter(command);
-
-					DataTable table = new DataTable();
-					adapter.Fill(table);
-
-					adapter.Dispose();
+					MySqlCommand command = CreateCommand(con.Connection, Query, Parameters);
+					command.ExecuteNonQuery();
 					command.Dispose();
-					command.Cancel();
 
-					Pool.Instance.Push(con);
+					int id = GetLastInsertID(con.Connection);
+
+					pool.Push(con);
+
+					return id;
+				}
+				catch
+				{
+				}
+			}
+#else
+			CheckConnection();
+
+			MySqlCommand command = CreateCommand(connection, Query, Parameters);
+			command.ExecuteNonQuery();
+			command.Dispose();
+
+			return GetLastInsertID(connection);
+#endif
+		}
+
+		public override DataTable ExecuteWithReturnDataTable(string Query, params object[] Parameters)
+		{
+#if USING_POOL
+			while (true)
+			{
+				try
+				{
+					ConnectionHolder con = pool.Pull();
+
+					DataTable table = ExecuteWithReturnDataTable(con.Connection, Query, Parameters);
+
+					pool.Push(con);
 
 					return table;
 				}
@@ -168,13 +206,43 @@ namespace GameFramework.DatabaseManaged
 				{
 				}
 			}
+#else
+			CheckConnection();
+
+			return ExecuteWithReturnDataTable(connection, Query, Parameters);
+#endif
 		}
 
-		private MySqlCommand CreateCommand(ConnectionHolder Connection, string Query, object[] Parameters)
+		private DataTable ExecuteWithReturnDataTable(MySqlConnection Connection, string Query, params object[] Parameters)
+		{
+			MySqlCommand command = CreateCommand(Connection, Query, Parameters);
+			MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+
+			DataTable table = new DataTable();
+			adapter.Fill(table);
+
+			adapter.Dispose();
+			command.Dispose();
+			command.Cancel();
+
+			return table;
+		}
+
+		private int GetLastInsertID(MySqlConnection Connection)
+		{
+			DataTable table = ExecuteWithReturnDataTable(Connection, "SELECT LAST_INSERT_ID() id");
+
+			if (table == null || table.Rows.Count == 0)
+				return 0;
+
+			return Convert.ToInt32(table.Rows[0]["id"]);
+		}
+
+		private MySqlCommand CreateCommand(MySqlConnection Connection, string Query, object[] Parameters)
 		{
 			Debug.Assert(Parameters == null || Parameters.Length % 2 == 0, "Parameters count must be even");
 
-			MySqlCommand command = new MySqlCommand(Query, Connection.Connection);
+			MySqlCommand command = new MySqlCommand(Query, Connection);
 			command.CommandType = CommandType.Text;
 
 			if (Parameters != null)
@@ -183,5 +251,23 @@ namespace GameFramework.DatabaseManaged
 
 			return command;
 		}
+
+#if !USING_POOL
+		public bool IsConnectionAlive
+		{
+			get { return !(connection.State == ConnectionState.Closed || connection.State == ConnectionState.Broken); }
+		}
+
+		public void CheckConnection()
+		{
+			if (IsConnectionAlive)
+				return;
+
+			connection.Open();
+
+			if (!IsConnectionAlive)
+				throw new Exception("Database connection is no alive");
+		}
+#endif
 	}
 }

@@ -31,7 +31,7 @@ namespace GameFramework.Common.Extensions
 		public static void Resize<T>(this List<T> a, int NewSize)
 			where T : class, IObject
 		{
-			a.Resize(NewSize, ObjectPool<T>.Instance);
+			a.Resize(NewSize, ObjectPoolSingleton<T>.Instance);
 		}
 	}
 }

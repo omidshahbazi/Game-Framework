@@ -1,10 +1,22 @@
 // Copyright 2019. All Rights Reserved.
 using System;
+using System.IO;
+using System.Reflection;
 
 namespace GameFramework.Common.Utilities
 {
 	public static class ConsoleHelper
 	{
+		public static string ExecutingPath
+		{
+			get { return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\"; }
+		}
+
+		public static string ExecutableFileName
+		{
+			get { return Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location); }
+		}
+
 		public static void ReadConnectionInfo(out string ServerAddress, out string DatabaseName, out string Username, out string Password)
 		{
 			ReadString("Enter server address :", out ServerAddress);

@@ -5,19 +5,7 @@ namespace GameFramework.Common.Pool
 		where T : class, IObject
 		where U : ObjectPool<T>, new()
 	{
-		private static U instance = null;
 		private IObjectHolder<T> objectHolder = null;
-
-		public static U Instance
-		{
-			get
-			{
-				if (instance == null)
-					instance = new U();
-
-				return instance;
-			}
-		}
 
 		public IObjectHolder<T> ObjectHolder
 		{
@@ -76,6 +64,27 @@ namespace GameFramework.Common.Pool
 		}
 	}
 
+	public class ObjectPoolSingleton<T, U> : ObjectPool<T, U>
+		where T : class, IObject
+		where U : ObjectPool<T>, new()
+	{
+		private static U instance = null;
+
+		public static U Instance
+		{
+			get
+			{
+				if (instance == null)
+					instance = new U();
+
+				return instance;
+			}
+		}
+	}
+
 	public class ObjectPool<T> : ObjectPool<T, ObjectPool<T>> where T : class, IObject
+	{ }
+
+	public class ObjectPoolSingleton<T> : ObjectPoolSingleton<T, ObjectPool<T>> where T : class, IObject
 	{ }
 }

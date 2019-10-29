@@ -7,12 +7,9 @@ namespace GameFramework.DatabaseManaged
 {
 	public abstract class Database
 	{
-		public abstract int LastInsertID
-		{
-			get;
-		}
-
 		public abstract void Execute(string Query, params object[] Parameters);
+
+		public abstract int ExecuteInsert(string Query, params object[] Parameters);
 
 		public abstract DataTable ExecuteWithReturnDataTable(string Query, params object[] Parameters);
 
