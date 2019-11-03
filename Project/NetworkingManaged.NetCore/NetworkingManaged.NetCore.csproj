@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>GameFramework.NetworkingManaged</RootNamespace>
+    <AssemblyName>NetworkingManaged.NetCore</AssemblyName>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath></OutputPath>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetPath) $(SolutionDir)Binaries\NetworkingManaged.NetCore.dll" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Include="..\NetworkingManaged\ClientSocket.cs" Link="ClientSocket.cs" />
+    <Compile Include="..\NetworkingManaged\Enums.cs" Link="Enums.cs" />
+    <Compile Include="..\NetworkingManaged\ServerSocket.cs" Link="ServerSocket.cs" />
+    <Compile Include="..\NetworkingManaged\SocketUtilities.cs" Link="SocketUtilities.cs" />
+  </ItemGroup>
+
+</Project>
