@@ -12,9 +12,9 @@ namespace GameFramework.NetworkingManaged
 		public static Socket CreateSocket(Protocols Protocol)
 		{
 			ProtocolType protocol = (Protocol == Protocols.TCP ? ProtocolType.Tcp : ProtocolType.Udp);
-			SocketType type = (Protocol == Protocols.TCP ? SocketType.Raw : SocketType.Dgram);
+			SocketType type = (Protocol == Protocols.TCP ? SocketType.Stream : SocketType.Dgram);
 
-			return new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+			return new Socket(AddressFamily.InterNetworkV6, type, protocol);
 		}
 
 		public static void SetIPv6Only(Socket Socket, bool Value)

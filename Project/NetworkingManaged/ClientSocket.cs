@@ -1,15 +1,31 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using System.Net;
 using System.Net.Sockets;
 
 namespace GameFramework.NetworkingManaged
 {
-	public class ClientSocket
+	public abstract class ClientSocket : BaseSocket
 	{
-		private Socket socket = null;
-
-		public ClientSocket(Protocols Type)
+		public ClientSocket(Protocols Type) : base(Type)
 		{
-			socket = SocketUtilities.CreateSocket(Type);
+		}
+
+		public void Connect(string Host, ushort Port)
+		{
+			Connect(SocketUtilities.ResolveDomain(Host), Port);
+		}
+
+		public void Connect(IPAddress IP, ushort Port)
+		{
+			Connect(new IPEndPoint(IP, Port));
+		}
+
+		public void Connect(IPEndPoint EndPoint)
+		{
+			if (EndPoint.AddressFamily == AddressFamily.InterNetwork)
+				EndPoint.Address = SocketUtilities.MapIPv4ToIPv6(EndPoint.Address);
+
+			Socket.Connect(EndPoint);
 		}
 	}
 }

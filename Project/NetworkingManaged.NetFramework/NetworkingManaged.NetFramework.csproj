@@ -39,6 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\NetworkingManaged\BaseSocket.cs">
+      <Link>BaseSocket.cs</Link>
+    </Compile>
     <Compile Include="..\NetworkingManaged\ClientSocket.cs">
       <Link>ClientSocket.cs</Link>
     </Compile>
@@ -50,6 +53,18 @@
     </Compile>
     <Compile Include="..\NetworkingManaged\SocketUtilities.cs">
       <Link>SocketUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\NetworkingManaged\TCPClientSocket.cs">
+      <Link>TCPClientSocket.cs</Link>
+    </Compile>
+    <Compile Include="..\NetworkingManaged\TCPServerSocket.cs">
+      <Link>TCPServerSocket.cs</Link>
+    </Compile>
+    <Compile Include="..\NetworkingManaged\UDPClientSocket.cs">
+      <Link>UDPClientSocket.cs</Link>
+    </Compile>
+    <Compile Include="..\NetworkingManaged\UDPServerSocket.cs">
+      <Link>UDPServerSocket.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

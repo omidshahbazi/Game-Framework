@@ -4,26 +4,37 @@ using System.Net.Sockets;
 
 namespace GameFramework.NetworkingManaged
 {
-	public class ServerSocket
+	public abstract class ServerSocket : BaseSocket
 	{
-		private Socket socket = null;
-
-		public ServerSocket(Protocols Type)
+		public uint MaxConnection
 		{
-			socket = SocketUtilities.CreateSocket(Type);
+			get;
+			set;
+		}
 
-			SocketUtilities.SetIPv6Only(socket, false);
+		public ServerSocket(Protocols Type, uint MaxConnection) : base(Type)
+		{
+			this.MaxConnection = MaxConnection;
 		}
 
 		public void Bind(string Host, ushort Port)
 		{
-			IPAddress ip = SocketUtilities.ResolveDomain(Host);
+			Bind(SocketUtilities.ResolveDomain(Host), Port);
+		}
 
-			if (ip.AddressFamily == AddressFamily.InterNetwork)
-				ip = SocketUtilities.MapIPv4ToIPv6(ip);
+		public void Bind(IPAddress IP, ushort Port)
+		{
+			Bind(new IPEndPoint(IP, Port));
+		}
 
+		public void Bind(IPEndPoint EndPoint)
+		{
+			if (EndPoint.AddressFamily == AddressFamily.InterNetwork)
+				EndPoint.Address = SocketUtilities.MapIPv4ToIPv6(EndPoint.Address);
 
-			socket.Bind(new IPEndPoint(ip, Port));
+			Socket.Bind(EndPoint);
+
+			Socket.Listen((int)MaxConnection);
 		}
 	}
 }

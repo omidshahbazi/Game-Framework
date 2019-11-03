@@ -7,13 +7,12 @@ namespace NetworkingTest
 	{
 		static void Main(string[] args)
 		{
-			ServerSocket server = new ServerSocket(Protocols.TCP);
-			server.Bind("127.0.0.1", 433);
+			TCPServerSocket server = new TCPServerSocket(24);
+			server.Bind("::1", 433);
 
 
-			ClientSocket client = new ClientSocket(Protocols.TCP);
-
-			Console.WriteLine("Hello World!");
+			TCPClientSocket client = new TCPClientSocket();
+			client.Connect("::1", 433);
 		}
 	}
 }
