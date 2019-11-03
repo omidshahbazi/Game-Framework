@@ -6,7 +6,6 @@ namespace GameFramework.NetworkingManaged
 	{
 		public UDPServerSocket(uint MaxConnection = 32) : base(Protocols.UDP, MaxConnection)
 		{
-			this.MaxConnection = MaxConnection;
 		}
 	}
 }

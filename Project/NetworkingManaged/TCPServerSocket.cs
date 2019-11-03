@@ -6,7 +6,6 @@ namespace GameFramework.NetworkingManaged
 	{
 		public TCPServerSocket(uint MaxConnection = 32) : base(Protocols.TCP, MaxConnection)
 		{
-			this.MaxConnection = MaxConnection;
 		}
 	}
 }
