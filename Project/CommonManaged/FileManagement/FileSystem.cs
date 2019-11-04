@@ -80,12 +80,22 @@ namespace GameFramework.Common.FileLayer
 
 		public static bool DirectoryExists(string Path)
 		{
-			return Directory.Exists(System.IO.Path.GetDirectoryName(DataPath + Path));
+			string fullPath = DataPath + Path;
+
+			if (System.IO.Path.HasExtension(fullPath))
+				return Directory.Exists(System.IO.Path.GetDirectoryName(fullPath));
+
+			return Directory.Exists(fullPath);
 		}
 
 		public static void CreateDirectory(string Path)
 		{
-			Directory.CreateDirectory(System.IO.Path.GetDirectoryName(DataPath + Path));
+			string fullPath = DataPath + Path;
+
+			if (System.IO.Path.HasExtension(fullPath))
+				Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fullPath));
+
+			Directory.CreateDirectory(fullPath);
 		}
 
 		public static string[] GetFiles(string Path)

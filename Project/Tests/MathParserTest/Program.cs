@@ -14,20 +14,14 @@ namespace MathParserTest
 	{
 		static void Main(string[] args)
 		{
+			FileSystem.DataPath = "D:\\";
+			if (!FileSystem.DirectoryExists("omid"))
+				FileSystem.CreateDirectory("omid");
 
-			MySQLDatabase db = new MySQLDatabase("localhost", "root", "!QAZ2wsx", "power_tank");
 
-			for (int i = 0; i < 100; ++i)
-			{
-				int index = i;
-				new Thread(() =>
-				{
-					System.Data.DataTable table = db.ExecuteWithReturnDataTable("SELECT * FROM logintable1");
+			MySQLDatabase db = new MySQLDatabase("localhost", "root", "!QAZ2wsx", "backgammon");
 
-					Console.WriteLine(index + ". " + table.Rows.Count);
-				}).Start();
-			}
-
+			int i = db.ExecuteInsert("INSERT INTO users_game(type, bet, white_user_id, black_user_id, bot_user_info, winner_user_id, finish_reason, start_time, end_time, version, replay_data) VALUES(1, 1, 1, 1, NULL, 1, NULL, NOW(), NULL, 1, NULL)");
 			//			string str = @"Trophy+
 			//if(B1=-1,0,if(B1=0,-30,if(B1=1,-20,if(B1=2,0,20))))+
 			//if(B2=-1,0,if(B2=0,-30,if(B2=1,-20,if(B2=2,0,20))))+

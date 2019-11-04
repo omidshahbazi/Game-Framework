@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="..\NetworkingManaged\BaseSocket.cs" Link="BaseSocket.cs" />
+    <Compile Include="..\NetworkingManaged\Client.cs" Link="Client.cs" />
     <Compile Include="..\NetworkingManaged\ClientSocket.cs" Link="ClientSocket.cs" />
     <Compile Include="..\NetworkingManaged\Enums.cs" Link="Enums.cs" />
     <Compile Include="..\NetworkingManaged\ServerSocket.cs" Link="ServerSocket.cs" />
@@ -27,6 +28,10 @@
     <Compile Include="..\NetworkingManaged\TCPServerSocket.cs" Link="TCPServerSocket.cs" />
     <Compile Include="..\NetworkingManaged\UDPClientSocket.cs" Link="UDPClientSocket.cs" />
     <Compile Include="..\NetworkingManaged\UDPServerSocket.cs" Link="UDPServerSocket.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BinarySerializerManaged\BinarySerializerManaged.csproj" />
   </ItemGroup>
 
 </Project>

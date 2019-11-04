@@ -42,6 +42,9 @@
     <Compile Include="..\NetworkingManaged\BaseSocket.cs">
       <Link>BaseSocket.cs</Link>
     </Compile>
+    <Compile Include="..\NetworkingManaged\Client.cs">
+      <Link>Client.cs</Link>
+    </Compile>
     <Compile Include="..\NetworkingManaged\ClientSocket.cs">
       <Link>ClientSocket.cs</Link>
     </Compile>
@@ -67,6 +70,12 @@
       <Link>UDPServerSocket.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BinarySerializerManaged\BinarySerializerManaged.csproj">
+      <Project>{c4f68da6-6645-46a1-8481-dfe4f1dc9075}</Project>
+      <Name>BinarySerializerManaged</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

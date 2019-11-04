@@ -8,10 +8,14 @@ namespace NetworkingTest
 		{
 			TCPServerSocket server = new TCPServerSocket(24);
 			server.Bind("::1", 433);
+			server.Listen();
 
+			while (true)
+			{
+				System.Threading.Thread.Sleep(100);
 
-			TCPClientSocket client = new TCPClientSocket();
-			client.Connect("::1", 433);
+				server.Service();
+			}
 		}
 	}
 }

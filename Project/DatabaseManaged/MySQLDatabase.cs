@@ -1,6 +1,4 @@
 ﻿// Copyright 2019. All Rights Reserved.
-//#define USING_POOL
-using GameFramework.Common.Pool;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
@@ -10,94 +8,14 @@ namespace GameFramework.DatabaseManaged
 {
 	public class MySQLDatabase : Database
 	{
-#if USING_POOL
-		private class ConnectionHolder : IObject
-		{
-			public MySqlConnection Connection
-			{
-				get;
-				private set;
-			}
+		private string connectionString;
 
-			public bool IsConnectionAlive
-			{
-				get { return !(Connection.State == ConnectionState.Closed || Connection.State == ConnectionState.Broken); }
-			}
-
-			public ConnectionHolder(string ConnectionString)
-			{
-				Connection = new MySqlConnection(ConnectionString);
-
-				CheckConnection();
-			}
-
-			public void CheckConnection()
-			{
-				if (IsConnectionAlive)
-					return;
-
-				Connection.Open();
-
-				if (!IsConnectionAlive)
-					throw new Exception("Database connection is no alive");
-			}
-
-			void IObject.GoOutOfPool()
-			{
-				CheckConnection();
-			}
-
-			void IObject.GoInPool()
-			{
-			}
-		}
-
-		private class PoolFactory : IObjectFactory<ConnectionHolder>
-		{
-			private string connectionString;
-
-			public PoolFactory(string ConnectionString, uint PoolCount)
-			{
-				connectionString = ConnectionString;
-
-				for (uint i = 0; i < PoolCount; ++i)
-					((IObjectFactory<ConnectionHolder>)this).Instantiate(null);
-			}
-
-			void IObjectFactory<ConnectionHolder>.AfterSendToPool(ConnectionHolder Object)
-			{
-			}
-
-			void IObjectFactory<ConnectionHolder>.BeforeGetFromPool(ConnectionHolder Object, object UserData)
-			{
-			}
-
-			void IObjectFactory<ConnectionHolder>.Destroy(ConnectionHolder Object)
-			{
-				Object.Connection.Dispose();
-			}
-
-			ConnectionHolder IObjectFactory<ConnectionHolder>.Instantiate(object UserData = null)
-			{
-				return new ConnectionHolder((string)connectionString);
-			}
-		}
-
-		private class Pool : ObjectPool<ConnectionHolder>
+		public MySQLDatabase(string Host, string Username, string Password) :
+			this(Host, Username, Password, "")
 		{
 		}
 
-		private Pool pool = null;
-#else
-		private MySqlConnection connection = null;
-#endif
-
-		public MySQLDatabase(string Host, string Username, string Password, uint PoolCount = 1) :
-			this(Host, Username, Password, "", PoolCount)
-		{
-		}
-
-		public MySQLDatabase(string Host, string Username, string Password, string Name, uint PoolCount = 1)
+		public MySQLDatabase(string Host, string Username, string Password, string Name)
 		{
 			MySqlConnectionStringBuilder conStr = new MySqlConnectionStringBuilder();
 
@@ -111,106 +29,28 @@ namespace GameFramework.DatabaseManaged
 
 			conStr.CharacterSet = "utf8";
 
-			string connectionString = conStr.GetConnectionString(true);
-
-#if USING_POOL
-			pool = new Pool();
-			pool.Factory = new PoolFactory(connectionString, PoolCount);
-#else
-			connection = new MySqlConnection(connectionString);
-
-			CheckConnection();
-#endif
+			connectionString = conStr.GetConnectionString(true);
 		}
 
 		public override void Execute(string Query, params object[] Parameters)
 		{
-#if USING_POOL
-			while (true)
-			{
-				try
-				{
-					ConnectionHolder con = pool.Pull();
-
-					MySqlCommand command = CreateCommand(con.Connection, Query, Parameters);
-					command.ExecuteNonQuery();
-					command.Dispose();
-
-					pool.Push(con);
-
-					break;
-				}
-				catch
-				{
-				}
-			}
-#else
-			CheckConnection();
-
-			MySqlCommand command = CreateCommand(connection, Query, Parameters);
+			MySqlCommand command = CreateCommand(CreateConnection(), Query, Parameters);
 			command.ExecuteNonQuery();
 			command.Dispose();
-#endif
 		}
 
 		public override int ExecuteInsert(string Query, params object[] Parameters)
 		{
-#if USING_POOL
-			while (true)
-			{
-				try
-				{
-					ConnectionHolder con = pool.Pull();
-
-					MySqlCommand command = CreateCommand(con.Connection, Query, Parameters);
-					command.ExecuteNonQuery();
-					command.Dispose();
-
-					int id = GetLastInsertID(con.Connection);
-
-					pool.Push(con);
-
-					return id;
-				}
-				catch
-				{
-				}
-			}
-#else
-			CheckConnection();
-
-			MySqlCommand command = CreateCommand(connection, Query, Parameters);
+			MySqlCommand command = CreateCommand(CreateConnection(), Query, Parameters);
 			command.ExecuteNonQuery();
 			command.Dispose();
 
-			return GetLastInsertID(connection);
-#endif
+			return GetLastInsertID(command.Connection);
 		}
 
 		public override DataTable ExecuteWithReturnDataTable(string Query, params object[] Parameters)
 		{
-#if USING_POOL
-			while (true)
-			{
-				try
-				{
-					ConnectionHolder con = pool.Pull();
-
-					DataTable table = ExecuteWithReturnDataTable(con.Connection, Query, Parameters);
-
-					pool.Push(con);
-
-					return table;
-				}
-				catch
-				{
-				}
-			}
-#else
-			CheckConnection();
-
-			return ExecuteWithReturnDataTable(connection, Query, Parameters);
-#endif
+			return ExecuteWithReturnDataTable(CreateConnection(), Query, Parameters);
 		}
 
 		private DataTable ExecuteWithReturnDataTable(MySqlConnection Connection, string Query, params object[] Parameters)
@@ -238,6 +78,22 @@ namespace GameFramework.DatabaseManaged
 			return Convert.ToInt32(table.Rows[0]["id"]);
 		}
 
+		private MySqlConnection CreateConnection()
+		{
+			MySqlConnection connection = new MySqlConnection(connectionString);
+
+			connection.Open();
+
+			return connection;
+		}
+
+		private MySqlCommand CreateCommand(string Query, object[] Parameters)
+		{
+			MySqlConnection connection = CreateConnection();
+
+			return CreateCommand(connection, Query, Parameters);
+		}
+
 		private MySqlCommand CreateCommand(MySqlConnection Connection, string Query, object[] Parameters)
 		{
 			Debug.Assert(Parameters == null || Parameters.Length % 2 == 0, "Parameters count must be even");
@@ -251,23 +107,5 @@ namespace GameFramework.DatabaseManaged
 
 			return command;
 		}
-
-#if !USING_POOL
-		public bool IsConnectionAlive
-		{
-			get { return !(connection.State == ConnectionState.Closed || connection.State == ConnectionState.Broken); }
-		}
-
-		public void CheckConnection()
-		{
-			if (IsConnectionAlive)
-				return;
-
-			connection.Open();
-
-			if (!IsConnectionAlive)
-				throw new Exception("Database connection is no alive");
-		}
-#endif
 	}
 }
