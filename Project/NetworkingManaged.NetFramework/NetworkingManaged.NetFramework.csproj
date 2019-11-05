@@ -42,6 +42,9 @@
     <Compile Include="..\NetworkingManaged\BaseSocket.cs">
       <Link>BaseSocket.cs</Link>
     </Compile>
+    <Compile Include="..\NetworkingManaged\CallbackUtilities.cs">
+      <Link>CallbackUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\NetworkingManaged\Client.cs">
       <Link>Client.cs</Link>
     </Compile>

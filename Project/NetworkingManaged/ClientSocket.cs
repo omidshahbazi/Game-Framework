@@ -7,6 +7,22 @@ namespace GameFramework.NetworkingManaged
 {
 	public abstract class ClientSocket : BaseSocket
 	{
+		private abstract class ClientEventBase : EventBase
+		{
+		}
+
+		private class ConnectedEvent : ClientEventBase
+		{
+		}
+
+		private class ConnectionFailedEvent : ClientEventBase
+		{
+		}
+
+		private class DisconnectedEvent : ClientEventBase
+		{
+		}
+
 		public delegate void ConnectionEventHandler();
 
 		public event ConnectionEventHandler OnConnected = null;
@@ -43,6 +59,22 @@ namespace GameFramework.NetworkingManaged
 		{
 		}
 
+		protected override void ProcessEvent(EventBase Event)
+		{
+			ClientEventBase ev = (ClientEventBase)Event;
+
+			if (ev is ConnectedEvent)
+			{
+				if (OnConnected != null)
+					CallbackUtilities.InvokeCallback(OnConnected.Invoke);
+			}
+			else if (ev is ConnectionFailedEvent)
+			{
+				if (OnConnectionFailed != null)
+					CallbackUtilities.InvokeCallback(OnConnectionFailed.Invoke);
+			}
+		}
+
 		private void OnConnectedCallback(IAsyncResult Result)
 		{
 			if (Socket.Connected)
@@ -52,11 +84,11 @@ namespace GameFramework.NetworkingManaged
 				if (MultithreadedCallbacks)
 				{
 					if (OnConnected != null)
-						OnConnected();
+						CallbackUtilities.InvokeCallback(OnConnected.Invoke);
 				}
 				else
 				{
-					// call OnConnected on main thread
+					AddEvent(new ConnectedEvent());
 				}
 			}
 			else
@@ -64,11 +96,11 @@ namespace GameFramework.NetworkingManaged
 				if (MultithreadedCallbacks)
 				{
 					if (OnConnectionFailed != null)
-						OnConnectionFailed();
+						CallbackUtilities.InvokeCallback(OnConnectionFailed.Invoke);
 				}
 				else
 				{
-					// call OnConnectionFailed on main thread
+					AddEvent(new ConnectionFailedEvent());
 				}
 			}
 		}

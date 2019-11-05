@@ -1,4 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -7,6 +8,32 @@ namespace GameFramework.NetworkingManaged
 {
 	public abstract class ServerSocket : BaseSocket
 	{
+		private abstract class ServerEventBase : EventBase
+		{
+			public Client Client
+			{
+				get;
+				private set;
+			}
+
+			public ServerEventBase(Client Client)
+			{
+				this.Client = Client;
+			}
+		}
+
+		private class ClientConnectedEvent : ServerEventBase
+		{
+			public ClientConnectedEvent(Client Client) : base(Client)
+			{ }
+		}
+
+		private class ClientDisconnectedEvent : ServerEventBase
+		{
+			public ClientDisconnectedEvent(Client Client) : base(Client)
+			{ }
+		}
+
 		public delegate void ConnectionEventHandler(Client Client);
 
 		private Thread receiveThread = null;
@@ -26,6 +53,9 @@ namespace GameFramework.NetworkingManaged
 					return clients.ToArray();
 			}
 		}
+
+		public event ConnectionEventHandler OnClientConnected = null;
+		public event ConnectionEventHandler OnClientDisconnected = null;
 
 		public ServerSocket(Protocols Type, uint MaxConnection) : base(Type)
 		{
@@ -52,9 +82,6 @@ namespace GameFramework.NetworkingManaged
 			Socket.Bind(EndPoint);
 		}
 
-		public event ConnectionEventHandler OnClientConnected = null;
-		public event ConnectionEventHandler OnClientDisconnected = null;
-
 		public void Listen()
 		{
 			Socket.Listen((int)MaxConnection);
@@ -80,11 +107,11 @@ namespace GameFramework.NetworkingManaged
 				if (MultithreadedCallbacks)
 				{
 					if (OnClientConnected != null)
-						OnClientConnected(client);
+						CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
 				}
 				else
 				{
-					// call OnClientConnected on main thread
+					AddEvent(new ClientConnectedEvent(client));
 				}
 			}
 			catch (SocketException e)
@@ -95,6 +122,8 @@ namespace GameFramework.NetworkingManaged
 
 			lock (clients)
 			{
+				ClientList disconnectedClients = new ClientList();
+
 				for (int i = 0; i < clients.Count; ++i)
 				{
 					Client client = clients[i];
@@ -109,14 +138,16 @@ namespace GameFramework.NetworkingManaged
 							continue;
 						else if (e.SocketErrorCode == SocketError.ConnectionReset)
 						{
+							disconnectedClients.Add(client);
+
 							if (MultithreadedCallbacks)
 							{
 								if (OnClientDisconnected != null)
-									OnClientDisconnected(client);
+									CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, client);
 							}
 							else
 							{
-								// call OnClientDisconnected on main thread
+								AddEvent(new ClientDisconnectedEvent(client));
 							}
 
 							continue;
@@ -125,6 +156,25 @@ namespace GameFramework.NetworkingManaged
 							throw e;
 					}
 				}
+
+				for (int i = 0; i < disconnectedClients.Count; ++i)
+					clients.Remove(disconnectedClients[i]);
+			}
+		}
+
+		protected override void ProcessEvent(EventBase Event)
+		{
+			ServerEventBase ev = (ServerEventBase)Event;
+
+			if (ev is ClientConnectedEvent)
+			{
+				if (OnClientConnected != null)
+					CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, ev.Client);
+			}
+			else if (ev is ClientDisconnectedEvent)
+			{
+				if (OnClientDisconnected != null)
+					CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, ev.Client);
 			}
 		}
 

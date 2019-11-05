@@ -1,4 +1,5 @@
 ﻿using GameFramework.NetworkingManaged;
+using System;
 
 namespace NetworkingTest
 {
@@ -7,6 +8,9 @@ namespace NetworkingTest
 		static void Main(string[] args)
 		{
 			TCPServerSocket server = new TCPServerSocket(24);
+			server.MultithreadedCallbacks = false;
+			server.OnClientConnected += Server_OnClientConnected;
+			server.OnClientDisconnected += Server_OnClientDisconnected;
 			server.Bind("::1", 433);
 			server.Listen();
 
@@ -16,6 +20,16 @@ namespace NetworkingTest
 
 				server.Service();
 			}
+		}
+
+		private static void Server_OnClientConnected(Client Client)
+		{
+			Console.WriteLine("Server_OnClientConnected " + Client.Socket.RemoteEndPoint);
+		}
+
+		private static void Server_OnClientDisconnected(Client Client)
+		{
+			Console.WriteLine("Server_OnClientDisconnected " + Client.Socket.RemoteEndPoint);
 		}
 	}
 }

@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="..\NetworkingManaged\BaseSocket.cs" Link="BaseSocket.cs" />
+    <Compile Include="..\NetworkingManaged\CallbackUtilities.cs" Link="CallbackUtilities.cs" />
     <Compile Include="..\NetworkingManaged\Client.cs" Link="Client.cs" />
     <Compile Include="..\NetworkingManaged\ClientSocket.cs" Link="ClientSocket.cs" />
     <Compile Include="..\NetworkingManaged\Enums.cs" Link="Enums.cs" />
