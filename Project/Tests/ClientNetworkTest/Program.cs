@@ -1,8 +1,6 @@
-﻿using GameFramework.NetworkingManaged;
+﻿using GameFramework.BinarySerializer;
+using GameFramework.NetworkingManaged;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ClientNetworkTest
 {
@@ -16,6 +14,8 @@ namespace ClientNetworkTest
 
 			client.OnConnected += Client_OnConnected;
 			client.OnConnectionFailed += Client_OnConnectionFailed;
+			client.OnDisconnected += Client_OnDisconnected;
+			client.OnBufferReceived += Client_OnBufferReceived;
 
 			client.Connect("::1", 433);
 
@@ -37,6 +37,16 @@ namespace ClientNetworkTest
 		private static void Client_OnConnectionFailed()
 		{
 			Console.WriteLine("Client_OnConnectionFailed");
+		}
+
+		private static void Client_OnDisconnected()
+		{
+			Console.WriteLine("Client_OnDisconnected");
+		}
+
+		private static void Client_OnBufferReceived(BufferStream Buffer)
+		{
+			Console.WriteLine("Client_OnBufferReceived " + Buffer.Size);
 		}
 	}
 }

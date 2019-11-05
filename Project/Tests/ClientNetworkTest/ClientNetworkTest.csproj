@@ -44,6 +44,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\BinarySerializerManaged\BinarySerializerManaged.csproj">
+      <Project>{C4F68DA6-6645-46A1-8481-DFE4F1DC9075}</Project>
+      <Name>BinarySerializerManaged</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\NetworkingManaged.NetFramework\NetworkingManaged.NetFramework.csproj">
       <Project>{94BEEFAB-AF92-4151-A38B-AB77DD353D43}</Project>
       <Name>NetworkingManaged.NetFramework</Name>

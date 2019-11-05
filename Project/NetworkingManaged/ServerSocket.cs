@@ -1,8 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using System.Collections.Generic;
+using GameFramework.BinarySerializer;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace GameFramework.NetworkingManaged
 {
@@ -34,9 +33,23 @@ namespace GameFramework.NetworkingManaged
 			{ }
 		}
 
-		public delegate void ConnectionEventHandler(Client Client);
+		private class BufferReceivedvent : ServerEventBase
+		{
+			public BufferStream Buffer
+			{
+				get;
+				private set;
+			}
 
-		private Thread receiveThread = null;
+			public BufferReceivedvent(Client Client, BufferStream Buffer) : base(Client)
+			{
+				this.Buffer = Buffer;
+			}
+		}
+
+		public delegate void ConnectionEventHandler(Client Client);
+		public delegate void BufferReceivedEventHandler(Client Sender, BufferStream Buffer);
+
 		private ClientList clients = null;
 
 		public uint MaxConnection
@@ -56,6 +69,7 @@ namespace GameFramework.NetworkingManaged
 
 		public event ConnectionEventHandler OnClientConnected = null;
 		public event ConnectionEventHandler OnClientDisconnected = null;
+		public event BufferReceivedEventHandler OnBufferReceived = null;
 
 		public ServerSocket(Protocols Type, uint MaxConnection) : base(Type)
 		{
@@ -82,19 +96,39 @@ namespace GameFramework.NetworkingManaged
 			Socket.Bind(EndPoint);
 		}
 
+		public void UnBind()
+		{
+			clients.Clear();
+
+			Shutdown();
+		}
+
+		public void DisconnectClient(Client Client)
+		{
+			lock (clients)
+				clients.Remove(Client);
+
+			if (Client.Socket.Connected)
+			{
+				// TODO: Send disconnect packet
+			}
+
+			DisconnectClientInternal(Client);
+		}
+
 		public void Listen()
 		{
 			Socket.Listen((int)MaxConnection);
 
 			if (MultithreadedReceive)
-			{
-				receiveThread = new Thread(ListenWorker);
-				receiveThread.Start();
-			}
+				RunReceiveThread();
 		}
 
 		protected override void Receive()
 		{
+			if (!Socket.IsBound)
+				return;
+
 			try
 			{
 				Socket clientSocket = Socket.Accept();
@@ -130,7 +164,11 @@ namespace GameFramework.NetworkingManaged
 
 					try
 					{
-						int len = client.Socket.Receive(ReceiveBuffer);
+						int size = client.Socket.Receive(ReceiveBuffer);
+
+						BandwidthIn += (uint)size;
+
+						OnBufferReceived(client, new BufferStream(ReceiveBuffer, (uint)size));
 					}
 					catch (SocketException e)
 					{
@@ -140,20 +178,12 @@ namespace GameFramework.NetworkingManaged
 						{
 							disconnectedClients.Add(client);
 
-							if (MultithreadedCallbacks)
-							{
-								if (OnClientDisconnected != null)
-									CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, client);
-							}
-							else
-							{
-								AddEvent(new ClientDisconnectedEvent(client));
-							}
+							DisconnectClientInternal(client);
 
 							continue;
 						}
-						else
-							throw e;
+
+						throw e;
 					}
 				}
 
@@ -175,16 +205,43 @@ namespace GameFramework.NetworkingManaged
 			{
 				if (OnClientDisconnected != null)
 					CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, ev.Client);
+
+				SocketUtilities.CloseSocket(ev.Client.Socket);
+			}
+			else if (ev is BufferReceivedvent)
+			{
+				if (OnBufferReceived != null)
+					CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, ev.Client, ((BufferReceivedvent)ev).Buffer);
 			}
 		}
 
-		private void ListenWorker()
-		{
-			while (Socket.IsBound)
-			{
-				Thread.Sleep(1);
+		protected abstract void ProcessReceivedBuffer(Client Sender, BufferStream Buffer);
 
-				Receive();
+		protected void HandleReceivedBuffer(Client Sender, BufferStream Buffer)
+		{
+			if (MultithreadedCallbacks)
+			{
+				if (OnBufferReceived != null)
+					CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Sender, Buffer);
+			}
+			else
+			{
+				AddEvent(new BufferReceivedvent(Sender, Buffer));
+			}
+		}
+
+		private void DisconnectClientInternal(Client Client)
+		{
+			if (MultithreadedCallbacks)
+			{
+				if (OnClientDisconnected != null)
+					CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, Client);
+
+				SocketUtilities.CloseSocket(Client.Socket);
+			}
+			else
+			{
+				AddEvent(new ClientDisconnectedEvent(Client));
 			}
 		}
 	}

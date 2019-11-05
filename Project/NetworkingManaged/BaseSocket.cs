@@ -1,6 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace GameFramework.NetworkingManaged
 {
@@ -18,6 +19,12 @@ namespace GameFramework.NetworkingManaged
 
 		private EventBaseList events = null;
 
+		protected Thread ReceiveThread
+		{
+			get;
+			private set;
+		}
+
 		protected Socket Socket
 		{
 			get;
@@ -28,6 +35,18 @@ namespace GameFramework.NetworkingManaged
 		{
 			get;
 			private set;
+		}
+
+		public ulong BandwidthIn
+		{
+			get;
+			protected set;
+		}
+
+		public ulong BandwidthOut
+		{
+			get;
+			protected set;
 		}
 
 		public bool MultithreadedCallbacks
@@ -48,18 +67,35 @@ namespace GameFramework.NetworkingManaged
 			set;
 		}
 
+		public float PacketLossSimulation // TODO: use this
+		{
+			get;
+			set;
+		}
+
+		public int LatencySimulation // TODO: use this
+		{
+			get;
+			set;
+		}
+
+		public const uint RECEIVE_BUFFER_SIZE = 1024;
+		public const uint SEND_BUFFER_SIZE = 1024;
+
 		public BaseSocket(Protocols Type)
 		{
 			events = new EventBaseList();
 
 			Socket = SocketUtilities.CreateSocket(Type);
 			Socket.Blocking = false;
+			Socket.ReceiveBufferSize = (int)RECEIVE_BUFFER_SIZE;
+			Socket.SendBufferSize = (int)SEND_BUFFER_SIZE;
 
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);
 			SocketUtilities.SetDelayEnabled(Socket, false);
 
-			ReceiveBuffer = new byte[1024];
+			ReceiveBuffer = new byte[RECEIVE_BUFFER_SIZE];
 
 			MultithreadedCallbacks = true;
 			MultithreadedReceive = true;
@@ -83,6 +119,20 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
+		protected void Shutdown()
+		{
+			SocketUtilities.CloseSocket(Socket);
+
+			if (MultithreadedReceive)
+				ReceiveThread.Abort();
+		}
+
+		protected void RunReceiveThread()
+		{
+			ReceiveThread = new Thread(ReceiverWorker);
+			ReceiveThread.Start();
+		}
+
 		protected abstract void Receive();
 
 		protected abstract void ProcessEvent(EventBase Event);
@@ -91,6 +141,16 @@ namespace GameFramework.NetworkingManaged
 		{
 			lock (events)
 				events.Add(Event);
+		}
+
+		private void ReceiverWorker()
+		{
+			while (true)
+			{
+				Thread.Sleep(1);
+
+				Receive();
+			}
 		}
 	}
 }

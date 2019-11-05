@@ -17,6 +17,12 @@ namespace GameFramework.NetworkingManaged
 			return new Socket(AddressFamily.InterNetworkV6, type, protocol);
 		}
 
+		public static void CloseSocket(Socket Socket)
+		{
+			Socket.Shutdown(SocketShutdown.Both);
+			Socket.Close();
+		}
+
 		public static void SetIPv6OnlyEnabled(Socket Socket, bool Value)
 		{
 			Socket.SetSocketOption(SocketOptionLevel.IPv6, IPV6_ONLY_OPTION, Value);

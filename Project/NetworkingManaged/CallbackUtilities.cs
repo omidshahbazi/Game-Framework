@@ -17,11 +17,23 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
-		public static void InvokeCallback<T>(Action<T> Callback, T Param1)
+		public static void InvokeCallback<P1>(Action<P1> Callback, P1 Param1)
 		{
 			try
 			{
 				Callback(Param1);
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+		}
+
+		public static void InvokeCallback<P1, P2>(Action<P1, P2> Callback, P1 Param1, P2 Param2)
+		{
+			try
+			{
+				Callback(Param1, Param2);
 			}
 			catch (Exception e)
 			{
