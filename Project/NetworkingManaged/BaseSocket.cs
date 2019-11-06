@@ -1,4 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using GameFramework.BinarySerializer;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -17,13 +18,28 @@ namespace GameFramework.NetworkingManaged
 		private class EventBaseList : List<EventBase>
 		{ }
 
-		private EventBaseList events = null;
-
-		protected Thread ReceiveThread
+		protected class SendCommand
 		{
-			get;
-			private set;
+			public BufferStream Buffer
+			{
+				get;
+				private set;
+			}
+
+			public SendCommand(BufferStream Buffer)
+			{
+				this.Buffer = Buffer;
+			}
 		}
+
+		private class SendCommandList : List<SendCommand>
+		{ }
+
+		private Thread receiveThread = null;
+		private Thread sendThread = null;
+
+		private EventBaseList events = null;
+		private SendCommandList sendCommands = null;
 
 		protected Socket Socket
 		{
@@ -85,6 +101,7 @@ namespace GameFramework.NetworkingManaged
 		public BaseSocket(Protocols Type)
 		{
 			events = new EventBaseList();
+			sendCommands = new SendCommandList();
 
 			Socket = SocketUtilities.CreateSocket(Type);
 			Socket.Blocking = false;
@@ -107,6 +124,9 @@ namespace GameFramework.NetworkingManaged
 			if (!MultithreadedReceive)
 				Receive();
 
+			if (!MultithreadedSend)
+				HandleSendCommands();
+
 			if (!MultithreadedCallbacks)
 			{
 				lock (events)
@@ -124,16 +144,38 @@ namespace GameFramework.NetworkingManaged
 			SocketUtilities.CloseSocket(Socket);
 
 			if (MultithreadedReceive)
-				ReceiveThread.Abort();
+				receiveThread.Abort();
+
+			if (MultithreadedSend)
+				sendThread.Abort();
 		}
 
 		protected void RunReceiveThread()
 		{
-			ReceiveThread = new Thread(ReceiverWorker);
-			ReceiveThread.Start();
+			if (!MultithreadedReceive)
+				return;
+
+			receiveThread = new Thread(ReceiverWorker);
+			receiveThread.Start();
+		}
+
+		protected void RunSenndThread()
+		{
+			if (!MultithreadedSend)
+				return;
+
+			sendThread = new Thread(SendWorker);
+			sendThread.Start();
 		}
 
 		protected abstract void Receive();
+
+		protected virtual void HandleSendCommand(SendCommand Command)
+		{
+			BandwidthOut += Command.Buffer.Size;
+
+			Socket.Send(Command.Buffer.Buffer);
+		}
 
 		protected abstract void ProcessEvent(EventBase Event);
 
@@ -143,6 +185,12 @@ namespace GameFramework.NetworkingManaged
 				events.Add(Event);
 		}
 
+		protected void AddSendCommand(SendCommand Command)
+		{
+			lock (sendCommands)
+				sendCommands.Add(Command);
+		}
+
 		private void ReceiverWorker()
 		{
 			while (true)
@@ -150,6 +198,27 @@ namespace GameFramework.NetworkingManaged
 				Thread.Sleep(1);
 
 				Receive();
+			}
+		}
+
+		private void SendWorker()
+		{
+			while (true)
+			{
+				Thread.Sleep(1);
+
+				HandleSendCommands();
+			}
+		}
+
+		private void HandleSendCommands()
+		{
+			lock (sendCommands)
+			{
+				for (int i = 0; i < sendCommands.Count; ++i)
+					HandleSendCommand(sendCommands[i]);
+
+				sendCommands.Clear();
 			}
 		}
 	}

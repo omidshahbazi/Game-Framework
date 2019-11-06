@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
+using System;
 using System.Net;
 using System.Net.Sockets;
 
@@ -44,6 +45,20 @@ namespace GameFramework.NetworkingManaged
 			public BufferReceivedvent(Client Client, BufferStream Buffer) : base(Client)
 			{
 				this.Buffer = Buffer;
+			}
+		}
+
+		protected class ServerSendCommand : SendCommand
+		{
+			public Socket Socket
+			{
+				get;
+				private set;
+			}
+
+			public ServerSendCommand(Socket Socket, BufferStream Buffer) : base(Buffer)
+			{
+				this.Socket = Socket;
 			}
 		}
 
@@ -108,7 +123,7 @@ namespace GameFramework.NetworkingManaged
 			lock (clients)
 				clients.Remove(Client);
 
-			if (Client.Socket.Connected)
+			if (Client.IsConnected)
 			{
 				// TODO: Send disconnect packet
 			}
@@ -120,8 +135,13 @@ namespace GameFramework.NetworkingManaged
 		{
 			Socket.Listen((int)MaxConnection);
 
-			if (MultithreadedReceive)
-				RunReceiveThread();
+			RunReceiveThread();
+			RunSenndThread();
+		}
+
+		public virtual void Send(Client Target, BufferStream Buffer)
+		{
+			AddSendCommand(new ServerSendCommand(Target.Socket, Buffer));
 		}
 
 		protected override void Receive()
@@ -168,7 +188,17 @@ namespace GameFramework.NetworkingManaged
 
 						BandwidthIn += (uint)size;
 
-						OnBufferReceived(client, new BufferStream(ReceiveBuffer, (uint)size));
+						BufferStream buffer = new BufferStream(ReceiveBuffer, (uint)size);
+
+						if (MultithreadedCallbacks)
+						{
+							if (OnBufferReceived != null)
+								CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, client, buffer);
+						}
+						else
+						{
+							AddEvent(new BufferReceivedvent(client, buffer));
+						}
 					}
 					catch (SocketException e)
 					{
@@ -185,10 +215,40 @@ namespace GameFramework.NetworkingManaged
 
 						throw e;
 					}
+					catch (Exception e)
+					{
+						throw e;
+					}
 				}
 
 				for (int i = 0; i < disconnectedClients.Count; ++i)
 					clients.Remove(disconnectedClients[i]);
+			}
+		}
+
+		protected override void HandleSendCommand(SendCommand Command)
+		{
+			ServerSendCommand sendCommand = (ServerSendCommand)Command;
+
+			try
+			{
+				if (!sendCommand.Socket.Connected)
+					return;
+
+				sendCommand.Socket.Send(Command.Buffer.Buffer);
+
+				BandwidthOut += Command.Buffer.Size;
+			}
+			catch (SocketException e)
+			{
+				if (e.SocketErrorCode == SocketError.ConnectionReset)
+					return;
+
+				throw e;
+			}
+			catch (Exception e)
+			{
+				throw e;
 			}
 		}
 

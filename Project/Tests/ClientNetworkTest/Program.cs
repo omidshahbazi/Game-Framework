@@ -31,7 +31,7 @@ namespace ClientNetworkTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			client.Send();
+			client.Send(new BufferStream(new byte[] { 10, 22 }));
 		}
 
 		private static void Client_OnConnectionFailed()
@@ -47,6 +47,8 @@ namespace ClientNetworkTest
 		private static void Client_OnBufferReceived(BufferStream Buffer)
 		{
 			Console.WriteLine("Client_OnBufferReceived " + Buffer.Size);
+
+			client.Send(Buffer);
 		}
 	}
 }

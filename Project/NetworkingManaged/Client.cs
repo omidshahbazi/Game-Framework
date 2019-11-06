@@ -6,7 +6,18 @@ namespace GameFramework.NetworkingManaged
 {
 	public class Client
 	{
+		public bool IsConnected
+		{
+			get { return Socket.Connected; }
+		}
+
 		public Socket Socket
+		{
+			get;
+			private set;
+		}
+
+		public uint RoundTripTime
 		{
 			get;
 			private set;

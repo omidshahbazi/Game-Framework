@@ -73,9 +73,11 @@ namespace GameFramework.NetworkingManaged
 			Shutdown();
 		}
 
-		public void Send()
+		public virtual void Send(BufferStream Buffer)
 		{
-			Socket.Send(new byte[] { 2, 3, 4 });
+			BandwidthOut += Buffer.Size;
+
+			Socket.Send(Buffer.Buffer);
 		}
 
 		protected override void Receive()
@@ -88,6 +90,18 @@ namespace GameFramework.NetworkingManaged
 				int size = Socket.Receive(ReceiveBuffer);
 
 				BandwidthIn += (uint)size;
+
+				BufferStream buffer = new BufferStream(ReceiveBuffer, (uint)size);
+
+				if (MultithreadedCallbacks)
+				{
+					if (OnBufferReceived != null)
+						CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, buffer);
+				}
+				else
+				{
+					AddEvent(new BufferReceivedvent(buffer));
+				}
 			}
 			catch (SocketException e)
 			{
@@ -152,8 +166,8 @@ namespace GameFramework.NetworkingManaged
 			{
 				Socket.EndConnect(Result);
 
-				if (MultithreadedReceive)
-					RunReceiveThread();
+				RunReceiveThread();
+				RunSenndThread();
 
 				if (MultithreadedCallbacks)
 				{

@@ -6,10 +6,13 @@ namespace NetworkingTest
 {
 	class Program
 	{
+		private static TCPServerSocket server = null;
 		static void Main(string[] args)
 		{
-			TCPServerSocket server = new TCPServerSocket(24);
-			//server.MultithreadedCallbacks = false;
+			server = new TCPServerSocket(24);
+			server.MultithreadedCallbacks = false;
+			//server.MultithreadedReceive = false;
+			//server.MultithreadedSend = false;
 			server.OnClientConnected += Server_OnClientConnected;
 			server.OnClientDisconnected += Server_OnClientDisconnected;
 			server.OnBufferReceived += Server_OnBufferReceived;
@@ -37,6 +40,8 @@ namespace NetworkingTest
 		private static void Server_OnBufferReceived(Client Sender, BufferStream Buffer)
 		{
 			Console.WriteLine("Server_OnBufferReceived " + Sender.Socket.RemoteEndPoint + " " + Buffer.Size);
+
+			server.Send(Sender, Buffer);
 		}
 	}
 }
