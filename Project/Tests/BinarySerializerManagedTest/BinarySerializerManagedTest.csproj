@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AF475368-B0A5-4517-8033-6C0937293786}</ProjectGuid>
+    <ProjectGuid>{6891E266-7C0D-41F2-8691-2E7A64512801}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MathParserTest</RootNamespace>
-    <AssemblyName>MathParserTest</AssemblyName>
+    <RootNamespace>BinarySerializerManagedTest</RootNamespace>
+    <AssemblyName>BinarySerializerManagedTest</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -44,25 +44,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\AnalyticsManaged\AnalyticsManaged.csproj">
-      <Project>{7e1d73d2-07dc-428e-b951-0fff9144bc6b}</Project>
-      <Name>AnalyticsManaged</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ASCIISerializerManaged\ASCIISerializerManaged.csproj">
-      <Project>{CF111332-3A81-4D4A-A04C-6634D8B6A8C6}</Project>
-      <Name>ASCIISerializerManaged</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CommonManaged\CommonManaged.csproj">
-      <Project>{26568521-9093-4208-9bac-10f5b123bffb}</Project>
-      <Name>CommonManaged</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\DatabaseManaged\DatabaseManaged.csproj">
-      <Project>{47000C4C-8A48-4B73-A411-5A89A6F4B518}</Project>
-      <Name>DatabaseManaged</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MathParserManaged\MathParserManaged.csproj">
-      <Project>{A4111CB2-D06B-405A-8A4C-381C99FE161C}</Project>
-      <Name>MathParserManaged</Name>
+    <ProjectReference Include="..\..\BinarySerializerManaged\BinarySerializerManaged.csproj">
+      <Project>{c4f68da6-6645-46a1-8481-dfe4f1dc9075}</Project>
+      <Name>BinarySerializerManaged</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

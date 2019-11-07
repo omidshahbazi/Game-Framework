@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6891E266-7C0D-41F2-8691-2E7A64512801}</ProjectGuid>
+    <ProjectGuid>{D7A517D3-BBB1-4166-8EBD-42671BCBF42A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BinarySerializerTest</RootNamespace>
-    <AssemblyName>BinarySerializerTest</AssemblyName>
+    <RootNamespace>ClientNetworkingManagedTest</RootNamespace>
+    <AssemblyName>ClientNetworkingManagedTest</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -45,16 +45,13 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\BinarySerializerManaged\BinarySerializerManaged.csproj">
-      <Project>{c4f68da6-6645-46a1-8481-dfe4f1dc9075}</Project>
+      <Project>{C4F68DA6-6645-46A1-8481-DFE4F1DC9075}</Project>
       <Name>BinarySerializerManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\NetworkingManaged.NetFramework\NetworkingManaged.NetFramework.csproj">
+      <Project>{94BEEFAB-AF92-4151-A38B-AB77DD353D43}</Project>
+      <Name>NetworkingManaged.NetFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

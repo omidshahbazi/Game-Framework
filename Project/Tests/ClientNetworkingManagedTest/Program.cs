@@ -2,7 +2,7 @@
 using GameFramework.NetworkingManaged;
 using System;
 
-namespace ClientNetworkTest
+namespace ClientNetworkingManagedTest
 {
 	class Program
 	{
@@ -11,6 +11,38 @@ namespace ClientNetworkTest
 		static void Main(string[] args)
 		{
 			client = new TCPClientSocket();
+
+			client.MultithreadedCallbacks = false;
+			client.MultithreadedReceive = false;
+			client.MultithreadedSend = false;
+
+			//client.MultithreadedCallbacks = true;
+			//client.MultithreadedReceive = false;
+			//client.MultithreadedSend = false;
+
+			//client.MultithreadedCallbacks = false;
+			//client.MultithreadedReceive = true;
+			//client.MultithreadedSend = false;
+
+			//client.MultithreadedCallbacks = false;
+			//client.MultithreadedReceive = false;
+			//client.MultithreadedSend = true;
+
+			//client.MultithreadedCallbacks = true;
+			//client.MultithreadedReceive = true;
+			//client.MultithreadedSend = false;
+
+			//client.MultithreadedCallbacks = true;
+			//client.MultithreadedReceive = false;
+			//client.MultithreadedSend = true;
+
+			//client.MultithreadedCallbacks = false;
+			//client.MultithreadedReceive = true;
+			//client.MultithreadedSend = true;
+
+			//client.MultithreadedCallbacks = true;
+			//client.MultithreadedReceive = true;
+			//client.MultithreadedSend = true;
 
 			client.OnConnected += Client_OnConnected;
 			client.OnConnectionFailed += Client_OnConnectionFailed;

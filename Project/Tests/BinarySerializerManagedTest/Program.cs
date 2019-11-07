@@ -1,6 +1,6 @@
 ﻿using GameFramework.BinarySerializer;
 
-namespace EntitySystemTest
+namespace BinarySerializerManagedTest
 {
 	class Program
 	{

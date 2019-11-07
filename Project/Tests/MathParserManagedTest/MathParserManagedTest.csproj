@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D7A517D3-BBB1-4166-8EBD-42671BCBF42A}</ProjectGuid>
+    <ProjectGuid>{AF475368-B0A5-4517-8033-6C0937293786}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ClientNetworkTest</RootNamespace>
-    <AssemblyName>ClientNetworkTest</AssemblyName>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MathParserManagedTest</RootNamespace>
+    <AssemblyName>MathParserManagedTest</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -44,14 +44,33 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\BinarySerializerManaged\BinarySerializerManaged.csproj">
-      <Project>{C4F68DA6-6645-46A1-8481-DFE4F1DC9075}</Project>
-      <Name>BinarySerializerManaged</Name>
+    <ProjectReference Include="..\..\AnalyticsManaged\AnalyticsManaged.csproj">
+      <Project>{7e1d73d2-07dc-428e-b951-0fff9144bc6b}</Project>
+      <Name>AnalyticsManaged</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\NetworkingManaged.NetFramework\NetworkingManaged.NetFramework.csproj">
-      <Project>{94BEEFAB-AF92-4151-A38B-AB77DD353D43}</Project>
-      <Name>NetworkingManaged.NetFramework</Name>
+    <ProjectReference Include="..\..\ASCIISerializerManaged\ASCIISerializerManaged.csproj">
+      <Project>{CF111332-3A81-4D4A-A04C-6634D8B6A8C6}</Project>
+      <Name>ASCIISerializerManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CommonManaged\CommonManaged.csproj">
+      <Project>{26568521-9093-4208-9bac-10f5b123bffb}</Project>
+      <Name>CommonManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DatabaseManaged\DatabaseManaged.csproj">
+      <Project>{47000C4C-8A48-4B73-A411-5A89A6F4B518}</Project>
+      <Name>DatabaseManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MathParserManaged\MathParserManaged.csproj">
+      <Project>{A4111CB2-D06B-405A-8A4C-381C99FE161C}</Project>
+      <Name>MathParserManaged</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>
