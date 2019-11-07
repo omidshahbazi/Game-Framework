@@ -123,12 +123,7 @@ namespace GameFramework.NetworkingManaged
 			lock (clients)
 				clients.Remove(Client);
 
-			if (Client.IsConnected)
-			{
-				// TODO: Send disconnect packet
-			}
-
-			DisconnectClientInternal(Client);
+			HandleClientDisconnection(Client);
 		}
 
 		public void Listen()
@@ -184,6 +179,9 @@ namespace GameFramework.NetworkingManaged
 
 					try
 					{
+						if (client.Socket.Available == 0)
+							continue;
+
 						int size = client.Socket.Receive(ReceiveBuffer);
 
 						BandwidthIn += (uint)size;
@@ -208,7 +206,7 @@ namespace GameFramework.NetworkingManaged
 						{
 							disconnectedClients.Add(client);
 
-							DisconnectClientInternal(client);
+							HandleClientDisconnection(client);
 
 							continue;
 						}
@@ -271,7 +269,7 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
-		private void DisconnectClientInternal(Client Client)
+		private void HandleClientDisconnection(Client Client)
 		{
 			if (MultithreadedCallbacks)
 			{

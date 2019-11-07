@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
+using GameFramework.Common.Timing;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -41,6 +42,11 @@ namespace GameFramework.NetworkingManaged
 		public delegate void ConnectionEventHandler();
 		public delegate void BufferReceivedEventHandler(BufferStream Buffer);
 
+		public const float PING_TIME = 5;
+
+		private double nextPingTime;
+		private BufferStream pingBuffer;
+
 		public event ConnectionEventHandler OnConnected = null;
 		public event ConnectionEventHandler OnConnectionFailed = null;
 		public event ConnectionEventHandler OnDisconnected = null;
@@ -48,6 +54,21 @@ namespace GameFramework.NetworkingManaged
 
 		public ClientSocket(Protocols Type) : base(Type)
 		{
+			pingBuffer = new BufferStream(new byte[10]);
+		}
+
+		public override void Service()
+		{
+			if (Time.CurrentEpochTime >= nextPingTime)
+			{
+				nextPingTime = Time.CurrentEpochTime + PING_TIME;
+
+				UpdatePingBuffer();
+
+				Send(Socket, pingBuffer);
+			}
+
+			base.Service();
 		}
 
 		public void Connect(string Host, ushort Port)
@@ -85,6 +106,9 @@ namespace GameFramework.NetworkingManaged
 
 			try
 			{
+				if (Socket.Available == 0)
+					return;
+
 				int size = Socket.Receive(ReceiveBuffer);
 
 				BandwidthIn += (uint)size;
@@ -105,15 +129,7 @@ namespace GameFramework.NetworkingManaged
 			{
 				if (e.SocketErrorCode == SocketError.ConnectionReset)
 				{
-					if (MultithreadedCallbacks)
-					{
-						if (OnDisconnected != null)
-							CallbackUtilities.InvokeCallback(OnDisconnected.Invoke);
-					}
-					else
-					{
-						AddEvent(new DisconnectedEvent());
-					}
+					HandleDisconnection();
 
 					return;
 				}
@@ -146,6 +162,13 @@ namespace GameFramework.NetworkingManaged
 				if (OnConnectionFailed != null)
 					CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, ((BufferReceivedvent)ev).Buffer);
 			}
+		}
+
+		protected override void HandleDisconnection(Socket Socket)
+		{
+			base.HandleDisconnection(Socket);
+
+			HandleDisconnection();
 		}
 
 		protected abstract void ProcessReceivedBuffer(BufferStream Buffer);
@@ -194,6 +217,25 @@ namespace GameFramework.NetworkingManaged
 					AddEvent(new ConnectionFailedEvent());
 				}
 			}
+		}
+
+		private void HandleDisconnection()
+		{
+			if (MultithreadedCallbacks)
+			{
+				if (OnDisconnected != null)
+					CallbackUtilities.InvokeCallback(OnDisconnected.Invoke);
+			}
+			else
+			{
+				AddEvent(new DisconnectedEvent());
+			}
+		}
+
+		private void UpdatePingBuffer()
+		{
+			pingBuffer.Reset();
+			pingBuffer.WriteFloat64(Time.CurrentEpochTime);
 		}
 	}
 }

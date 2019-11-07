@@ -79,6 +79,10 @@
       <Project>{c4f68da6-6645-46a1-8481-dfe4f1dc9075}</Project>
       <Name>BinarySerializerManaged</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CommonManaged\CommonManaged.csproj">
+      <Project>{26568521-9093-4208-9bac-10f5b123bffb}</Project>
+      <Name>CommonManaged</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

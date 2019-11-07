@@ -11,10 +11,11 @@ namespace ClientNetworkingManagedTest
 		static void Main(string[] args)
 		{
 			client = new TCPClientSocket();
+			Console.WriteLine("TCPClientSocket created");
 
-			client.MultithreadedCallbacks = false;
-			client.MultithreadedReceive = false;
-			client.MultithreadedSend = false;
+			//client.MultithreadedCallbacks = false;
+			//client.MultithreadedReceive = false;
+			//client.MultithreadedSend = false;
 
 			//client.MultithreadedCallbacks = true;
 			//client.MultithreadedReceive = false;
@@ -40,9 +41,9 @@ namespace ClientNetworkingManagedTest
 			//client.MultithreadedReceive = true;
 			//client.MultithreadedSend = true;
 
-			//client.MultithreadedCallbacks = true;
-			//client.MultithreadedReceive = true;
-			//client.MultithreadedSend = true;
+			client.MultithreadedCallbacks = true;
+			client.MultithreadedReceive = true;
+			client.MultithreadedSend = true;
 
 			client.OnConnected += Client_OnConnected;
 			client.OnConnectionFailed += Client_OnConnectionFailed;
@@ -50,6 +51,7 @@ namespace ClientNetworkingManagedTest
 			client.OnBufferReceived += Client_OnBufferReceived;
 
 			client.Connect("::1", 433);
+			Console.WriteLine("TCPServerSocket started connecting");
 
 			while (true)
 			{

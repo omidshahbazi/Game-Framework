@@ -36,6 +36,10 @@ namespace GameFramework.NetworkingManaged
 		private class SendCommandList : List<SendCommand>
 		{ }
 
+		public const uint RECEIVE_TIMEOUT = 1;
+		public const uint RECEIVE_BUFFER_SIZE = 1024;
+		public const uint SEND_BUFFER_SIZE = 1024;
+
 		private Thread receiveThread = null;
 		private Thread sendThread = null;
 
@@ -96,9 +100,6 @@ namespace GameFramework.NetworkingManaged
 			set;
 		}
 
-		public const uint RECEIVE_BUFFER_SIZE = 1024;
-		public const uint SEND_BUFFER_SIZE = 1024;
-
 		public BaseSocket(Protocols Type)
 		{
 			events = new EventBaseList();
@@ -120,7 +121,7 @@ namespace GameFramework.NetworkingManaged
 			MultithreadedSend = true;
 		}
 
-		public void Service()
+		public virtual void Service()
 		{
 			if (!MultithreadedReceive)
 				Receive();
@@ -185,7 +186,11 @@ namespace GameFramework.NetworkingManaged
 			catch (SocketException e)
 			{
 				if (e.SocketErrorCode == SocketError.ConnectionReset)
+				{
+					HandleDisconnection(Target);
+
 					return;
+				}
 
 				throw e;
 			}
@@ -209,6 +214,10 @@ namespace GameFramework.NetworkingManaged
 		{
 			lock (sendCommands)
 				sendCommands.Add(Command);
+		}
+
+		protected virtual void HandleDisconnection(Socket Socket)
+		{
 		}
 
 		private void ReceiverWorker()
