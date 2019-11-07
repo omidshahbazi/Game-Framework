@@ -75,9 +75,7 @@ namespace GameFramework.NetworkingManaged
 
 		public virtual void Send(BufferStream Buffer)
 		{
-			BandwidthOut += Buffer.Size;
-
-			Socket.Send(Buffer.Buffer);
+			AddSendCommand(new SendCommand(Buffer));
 		}
 
 		protected override void Receive()
@@ -122,6 +120,11 @@ namespace GameFramework.NetworkingManaged
 
 				throw e;
 			}
+		}
+
+		protected override void HandleSendCommand(SendCommand Command)
+		{
+			Send(Socket, Command.Buffer);
 		}
 
 		protected override void ProcessEvent(EventBase Event)

@@ -230,26 +230,7 @@ namespace GameFramework.NetworkingManaged
 		{
 			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 
-			try
-			{
-				if (!sendCommand.Socket.Connected)
-					return;
-
-				sendCommand.Socket.Send(Command.Buffer.Buffer);
-
-				BandwidthOut += Command.Buffer.Size;
-			}
-			catch (SocketException e)
-			{
-				if (e.SocketErrorCode == SocketError.ConnectionReset)
-					return;
-
-				throw e;
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
+			Send(sendCommand.Socket, Command.Buffer);
 		}
 
 		protected override void ProcessEvent(EventBase Event)

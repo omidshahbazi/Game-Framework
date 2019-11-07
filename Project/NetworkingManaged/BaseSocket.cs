@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -170,12 +171,31 @@ namespace GameFramework.NetworkingManaged
 
 		protected abstract void Receive();
 
-		protected virtual void HandleSendCommand(SendCommand Command)
+		protected virtual void Send(Socket Target, BufferStream Buffer)
 		{
-			BandwidthOut += Command.Buffer.Size;
+			try
+			{
+				if (!Target.Connected)
+					return;
 
-			Socket.Send(Command.Buffer.Buffer);
+				Target.Send(Buffer.Buffer);
+
+				BandwidthOut += Buffer.Size;
+			}
+			catch (SocketException e)
+			{
+				if (e.SocketErrorCode == SocketError.ConnectionReset)
+					return;
+
+				throw e;
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
 		}
+
+		protected abstract void HandleSendCommand(SendCommand Command);
 
 		protected abstract void ProcessEvent(EventBase Event);
 
