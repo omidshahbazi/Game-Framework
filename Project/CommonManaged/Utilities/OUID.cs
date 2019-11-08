@@ -42,7 +42,7 @@ namespace GameFramework.Common.Utilities
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return (int)CRC32.CalculateHash(System.Text.Encoding.ASCII.GetBytes(Value));
 		}
 
 		public override string ToString()

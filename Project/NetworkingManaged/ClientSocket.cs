@@ -94,7 +94,27 @@ namespace GameFramework.NetworkingManaged
 			Shutdown();
 		}
 
-		public virtual void Send(BufferStream Buffer)
+		public virtual void Send(byte[] Buffer)
+		{
+			Send(Buffer, 0, Buffer.Length);
+		}
+
+		public virtual void Send(byte[] Buffer, int Length)
+		{
+			Send(Buffer, 0, Length);
+		}
+
+		public virtual void Send(byte[] Buffer, int Index, int Length)
+		{
+			BufferStream buffer = new BufferStream(new byte[Constants.Packet.HEADER_SIZE + Length]);
+			buffer.Reset();
+			buffer.WriteBytes(Constants.Control.BUFFER);
+			buffer.WriteBytes(Buffer, Index, Length);
+
+			Send(buffer);
+		}
+
+		protected virtual void Send(BufferStream Buffer)
 		{
 			AddSendCommand(new SendCommand(Buffer));
 		}
@@ -113,17 +133,7 @@ namespace GameFramework.NetworkingManaged
 
 				BandwidthIn += (uint)size;
 
-				BufferStream buffer = new BufferStream(ReceiveBuffer, (uint)size);
-
-				if (MultithreadedCallbacks)
-				{
-					if (OnBufferReceived != null)
-						CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, buffer);
-				}
-				else
-				{
-					AddEvent(new BufferReceivedvent(buffer));
-				}
+				HandleIncommingBuffer(new BufferStream(ReceiveBuffer, (uint)size));
 			}
 			catch (SocketException e)
 			{
@@ -135,6 +145,30 @@ namespace GameFramework.NetworkingManaged
 				}
 
 				throw e;
+			}
+		}
+
+		protected virtual void HandleIncommingBuffer(BufferStream Buffer)
+		{
+			byte control = Buffer.ReadByte();
+
+			if (control == Constants.Control.BUFFER)
+			{
+				BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.Packet.HEADER_SIZE, Buffer.Size - Constants.Packet.HEADER_SIZE);
+
+				if (MultithreadedCallbacks)
+				{
+					if (OnBufferReceived != null)
+						CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, buffer);
+				}
+				else
+				{
+					AddEvent(new BufferReceivedvent(buffer));
+				}
+			}
+			else if (control == Constants.Control.PING)
+			{
+
 			}
 		}
 
@@ -234,7 +268,12 @@ namespace GameFramework.NetworkingManaged
 
 		private void UpdatePingBuffer()
 		{
+			//Add IOControl byte
+			//buffer
+			//ping
+			//fill rtt
 			pingBuffer.Reset();
+			pingBuffer.WriteBytes(Constants.Control.PING);
 			pingBuffer.WriteFloat64(Time.CurrentEpochTime);
 		}
 	}

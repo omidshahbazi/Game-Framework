@@ -51,6 +51,9 @@
     <Compile Include="..\NetworkingManaged\ClientSocket.cs">
       <Link>ClientSocket.cs</Link>
     </Compile>
+    <Compile Include="..\NetworkingManaged\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
     <Compile Include="..\NetworkingManaged\Enums.cs">
       <Link>Enums.cs</Link>
     </Compile>

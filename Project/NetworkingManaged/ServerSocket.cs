@@ -134,7 +134,27 @@ namespace GameFramework.NetworkingManaged
 			RunSenndThread();
 		}
 
-		public virtual void Send(Client Target, BufferStream Buffer)
+		public virtual void Send(Client Target, byte[] Buffer)
+		{
+			Send(Target, Buffer, 0, Buffer.Length);
+		}
+
+		public virtual void Send(Client Target, byte[] Buffer, int Length)
+		{
+			Send(Target, Buffer, 0, Length);
+		}
+
+		public virtual void Send(Client Target, byte[] Buffer, int Index, int Length)
+		{
+			BufferStream buffer = new BufferStream(new byte[Constants.Packet.HEADER_SIZE + Length]);
+			buffer.Reset();
+			buffer.WriteBytes(Constants.Control.BUFFER);
+			buffer.WriteBytes(Buffer, Index, Length);
+
+			Send(Target, buffer);
+		}
+
+		protected virtual void Send(Client Target, BufferStream Buffer)
 		{
 			AddSendCommand(new ServerSendCommand(Target.Socket, Buffer));
 		}
@@ -186,17 +206,7 @@ namespace GameFramework.NetworkingManaged
 
 						BandwidthIn += (uint)size;
 
-						BufferStream buffer = new BufferStream(ReceiveBuffer, (uint)size);
-
-						if (MultithreadedCallbacks)
-						{
-							if (OnBufferReceived != null)
-								CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, client, buffer);
-						}
-						else
-						{
-							AddEvent(new BufferReceivedvent(client, buffer));
-						}
+						HandleIncommingBuffer(client, new BufferStream(ReceiveBuffer, (uint)size));
 					}
 					catch (SocketException e)
 					{
@@ -221,6 +231,29 @@ namespace GameFramework.NetworkingManaged
 
 				for (int i = 0; i < disconnectedClients.Count; ++i)
 					clients.Remove(disconnectedClients[i]);
+			}
+		}
+
+		protected virtual void HandleIncommingBuffer(Client Client, BufferStream Buffer)
+		{
+			byte control = Buffer.ReadByte();
+
+			if (control == Constants.Control.BUFFER)
+			{
+				BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.Packet.HEADER_SIZE, Buffer.Size - Constants.Packet.HEADER_SIZE);
+
+				if (MultithreadedCallbacks)
+				{
+					if (OnBufferReceived != null)
+						CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Client, buffer);
+				}
+				else
+				{
+					AddEvent(new BufferReceivedvent(Client, buffer));
+				}
+			}
+			else if (control == Constants.Control.PING)
+			{
 			}
 		}
 

@@ -13,9 +13,9 @@ namespace ServerNetworkingManagedTest
 			server = new TCPServerSocket(24);
 			Console.WriteLine("TCPServerSocket created");
 
-			//server.MultithreadedCallbacks = false;
-			//server.MultithreadedReceive = false;
-			//server.MultithreadedSend = false;
+			server.MultithreadedCallbacks = false;
+			server.MultithreadedReceive = false;
+			server.MultithreadedSend = false;
 
 			//server.MultithreadedCallbacks = true;
 			//server.MultithreadedReceive = false;
@@ -41,9 +41,9 @@ namespace ServerNetworkingManagedTest
 			//server.MultithreadedReceive = true;
 			//server.MultithreadedSend = true;
 
-			server.MultithreadedCallbacks = true;
-			server.MultithreadedReceive = true;
-			server.MultithreadedSend = true;
+			//server.MultithreadedCallbacks = true;
+			//server.MultithreadedReceive = true;
+			//server.MultithreadedSend = true;
 
 			server.OnClientConnected += Server_OnClientConnected;
 			server.OnClientDisconnected += Server_OnClientDisconnected;
@@ -77,7 +77,7 @@ namespace ServerNetworkingManagedTest
 		{
 			Console.WriteLine("Server_OnBufferReceived " + Sender.Socket.RemoteEndPoint + " " + Buffer.Size);
 
-			server.Send(Sender, Buffer);
+			server.Send(Sender, Buffer.Buffer);
 		}
 	}
 }

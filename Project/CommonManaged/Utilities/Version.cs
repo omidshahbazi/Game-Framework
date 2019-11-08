@@ -117,7 +117,7 @@ namespace GameFramework.Common.Utilities
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return (int)CRC32.CalculateHash(System.BitConverter.GetBytes(value));
 		}
 
 		public override string ToString()
