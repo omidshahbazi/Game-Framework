@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
+using GameFramework.Common.Timing;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -254,6 +255,10 @@ namespace GameFramework.NetworkingManaged
 			}
 			else if (control == Constants.Control.PING)
 			{
+				double sendTime = Buffer.ReadFloat64();
+
+				Client.UpdateLatency((uint)((Time.CurrentEpochTime - sendTime) * 1000));
+
 			}
 		}
 

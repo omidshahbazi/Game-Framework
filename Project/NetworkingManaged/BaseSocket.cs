@@ -179,7 +179,7 @@ namespace GameFramework.NetworkingManaged
 				if (!Target.Connected)
 					return;
 
-				Target.Send(Buffer.Buffer);
+				Target.Send(Buffer.Buffer, 0, (int)Buffer.Size, SocketFlags.None);
 
 				BandwidthOut += Buffer.Size;
 			}

@@ -17,7 +17,7 @@ namespace GameFramework.NetworkingManaged
 			private set;
 		}
 
-		public uint RoundTripTime
+		public uint Latency
 		{
 			get;
 			private set;
@@ -26,6 +26,11 @@ namespace GameFramework.NetworkingManaged
 		public Client(Socket Socket)
 		{
 			this.Socket = Socket;
+		}
+
+		public void UpdateLatency(uint Latency)
+		{
+			this.Latency = Latency;
 		}
 	}
 
