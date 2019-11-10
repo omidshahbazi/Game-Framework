@@ -42,9 +42,14 @@ namespace GameFramework.NetworkingManaged
 		public delegate void ConnectionEventHandler();
 		public delegate void BufferReceivedEventHandler(BufferStream Buffer);
 
-		public const float PING_TIME = 5;
-
 		private BufferStream pingBuffer;
+		private double lastPingTime = 0;
+		private double timeOffset = 0;
+
+		public double ServerTime
+		{
+			get { return Time.CurrentEpochTime + timeOffset; }
+		}
 
 		public double LastTouchTime
 		{
@@ -70,7 +75,7 @@ namespace GameFramework.NetworkingManaged
 
 		public override void Service()
 		{
-			if (LastTouchTime + PING_TIME <= Time.CurrentEpochTime)
+			if (LastTouchTime + Constants.PING_TIME <= Time.CurrentEpochTime)
 			{
 				LastTouchTime = Time.CurrentEpochTime;
 
@@ -105,19 +110,18 @@ namespace GameFramework.NetworkingManaged
 
 		public virtual void Send(byte[] Buffer)
 		{
-			Send(Buffer, 0, Buffer.Length);
+			Send(Buffer, 0, (uint)Buffer.Length);
 		}
 
-		public virtual void Send(byte[] Buffer, int Length)
+		public virtual void Send(byte[] Buffer, uint Length)
 		{
 			Send(Buffer, 0, Length);
 		}
 
-		public virtual void Send(byte[] Buffer, int Index, int Length)
+		public virtual void Send(byte[] Buffer, uint Index, uint Length)
 		{
-			BufferStream buffer = new BufferStream(new byte[Constants.Packet.HEADER_SIZE + Length]);
-			buffer.Reset();
-			buffer.WriteBytes(Constants.Control.BUFFER);
+			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+
 			buffer.WriteBytes(Buffer, Index, Length);
 
 			Send(buffer);
@@ -148,7 +152,7 @@ namespace GameFramework.NetworkingManaged
 			{
 				if (e.SocketErrorCode == SocketError.ConnectionReset)
 				{
-					HandleDisconnection();
+					HandleDisconnection(Socket);
 
 					return;
 				}
@@ -167,7 +171,7 @@ namespace GameFramework.NetworkingManaged
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.Packet.HEADER_SIZE, Buffer.Size - Constants.Packet.HEADER_SIZE);
+				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
 				if (MultithreadedCallbacks)
 				{
@@ -184,6 +188,13 @@ namespace GameFramework.NetworkingManaged
 				double sendTime = Buffer.ReadFloat64();
 
 				Latency = (uint)((time - sendTime) * 1000);
+
+				double t0 = lastPingTime;
+				double t1 = sendTime;
+				double t2 = sendTime;
+				double t3 = time;
+
+				timeOffset = ((t1 - t0) + (t2 - t3)) / 2;
 			}
 		}
 
@@ -217,7 +228,15 @@ namespace GameFramework.NetworkingManaged
 		{
 			base.HandleDisconnection(Socket);
 
-			HandleDisconnection();
+			if (MultithreadedCallbacks)
+			{
+				if (OnDisconnected != null)
+					CallbackUtilities.InvokeCallback(OnDisconnected.Invoke);
+			}
+			else
+			{
+				AddEvent(new DisconnectedEvent());
+			}
 		}
 
 		protected abstract void ProcessReceivedBuffer(BufferStream Buffer);
@@ -268,26 +287,11 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
-		private void HandleDisconnection()
-		{
-			if (MultithreadedCallbacks)
-			{
-				if (OnDisconnected != null)
-					CallbackUtilities.InvokeCallback(OnDisconnected.Invoke);
-			}
-			else
-			{
-				AddEvent(new DisconnectedEvent());
-			}
-		}
-
 		private void SendPing()
 		{
-			//Add IOControl byte
-			//buffer
-			//ping
-			//fill rtt
 			Constants.Packet.UpdatePingBufferStream(pingBuffer);
+
+			lastPingTime = Time.CurrentEpochTime;
 
 			Send(Socket, pingBuffer);
 		}

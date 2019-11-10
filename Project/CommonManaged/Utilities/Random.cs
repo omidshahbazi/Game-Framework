@@ -44,10 +44,9 @@ namespace GameFramework.Common.Utilities
 			return randomGenerator.random(Min, Max - 1);
 		}
 
-		public float Next(float Min, float Max)
+		public double NextDouble()
 		{
-			float precision = 1000.0F;
-			return Next((int)(Min * precision), (int)(Max * precision)) / precision;
+			return Next(0, 100) / 100.0D;
 		}
 	}
 

@@ -55,9 +55,9 @@ namespace ClientNetworkingManagedTest
 
 			while (true)
 			{
-				System.Threading.Thread.Sleep(100);
-
 				client.Service();
+
+				System.Threading.Thread.Sleep(100);
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			//client.Send(new byte[] { 10, 22 });
+			client.Send(new byte[] { 10, 22 });
 		}
 
 		private static void Client_OnConnectionFailed()

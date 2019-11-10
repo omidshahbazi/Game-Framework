@@ -36,10 +36,6 @@ namespace GameFramework.NetworkingManaged
 		private class SendCommandList : List<SendCommand>
 		{ }
 
-		public const uint RECEIVE_TIMEOUT = 1;
-		public const uint RECEIVE_BUFFER_SIZE = 1024;
-		public const uint SEND_BUFFER_SIZE = 1024;
-
 		private Thread receiveThread = null;
 		private Thread sendThread = null;
 
@@ -56,6 +52,11 @@ namespace GameFramework.NetworkingManaged
 		{
 			get;
 			private set;
+		}
+
+		public bool IsConnected
+		{
+			get { return Socket.Connected; }
 		}
 
 		public ulong BandwidthIn
@@ -88,7 +89,7 @@ namespace GameFramework.NetworkingManaged
 			set;
 		}
 
-		public float PacketLossSimulation // TODO: use this
+		public float PacketLossSimulation
 		{
 			get;
 			set;
@@ -107,14 +108,14 @@ namespace GameFramework.NetworkingManaged
 
 			Socket = SocketUtilities.CreateSocket(Type);
 			Socket.Blocking = false;
-			Socket.ReceiveBufferSize = (int)RECEIVE_BUFFER_SIZE;
-			Socket.SendBufferSize = (int)SEND_BUFFER_SIZE;
+			Socket.ReceiveBufferSize = (int)Constants.RECEIVE_BUFFER_SIZE;
+			Socket.SendBufferSize = (int)Constants.SEND_BUFFER_SIZE;
 
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);
 			SocketUtilities.SetDelayEnabled(Socket, false);
 
-			ReceiveBuffer = new byte[RECEIVE_BUFFER_SIZE];
+			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 
 			MultithreadedCallbacks = true;
 			MultithreadedReceive = true;
@@ -179,7 +180,8 @@ namespace GameFramework.NetworkingManaged
 				if (!Target.Connected)
 					return;
 
-				Target.Send(Buffer.Buffer, 0, (int)Buffer.Size, SocketFlags.None);
+				if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
+					Target.Send(Buffer.Buffer, 0, (int)Buffer.Size, SocketFlags.None);
 
 				BandwidthOut += Buffer.Size;
 			}
@@ -218,6 +220,7 @@ namespace GameFramework.NetworkingManaged
 
 		protected virtual void HandleDisconnection(Socket Socket)
 		{
+			//Internationally Left Blank
 		}
 
 		private void ReceiverWorker()
@@ -242,6 +245,9 @@ namespace GameFramework.NetworkingManaged
 
 		private void HandleSendCommands()
 		{
+			if (!IsConnected)
+				return;
+
 			lock (sendCommands)
 			{
 				for (int i = 0; i < sendCommands.Count; ++i)

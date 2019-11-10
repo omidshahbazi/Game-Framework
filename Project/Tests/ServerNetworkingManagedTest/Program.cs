@@ -60,6 +60,7 @@ namespace ServerNetworkingManagedTest
 				System.Threading.Thread.Sleep(100);
 
 				server.Service();
+
 			}
 		}
 

@@ -137,19 +137,18 @@ namespace GameFramework.NetworkingManaged
 
 		public virtual void Send(Client Target, byte[] Buffer)
 		{
-			Send(Target, Buffer, 0, Buffer.Length);
+			Send(Target, Buffer, 0, (uint)Buffer.Length);
 		}
 
-		public virtual void Send(Client Target, byte[] Buffer, int Length)
+		public virtual void Send(Client Target, byte[] Buffer, uint Length)
 		{
 			Send(Target, Buffer, 0, Length);
 		}
 
-		public virtual void Send(Client Target, byte[] Buffer, int Index, int Length)
+		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length)
 		{
-			BufferStream buffer = new BufferStream(new byte[Constants.Packet.HEADER_SIZE + Length]);
-			buffer.Reset();
-			buffer.WriteBytes(Constants.Control.BUFFER);
+			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+
 			buffer.WriteBytes(Buffer, Index, Length);
 
 			Send(Target, buffer);
@@ -201,7 +200,16 @@ namespace GameFramework.NetworkingManaged
 					try
 					{
 						if (client.Socket.Available == 0)
+						{
+							if (!client.IsConnected)
+							{
+								disconnectedClients.Add(client);
+
+								HandleClientDisconnection(client);
+							}
+
 							continue;
+						}
 
 						int size = client.Socket.Receive(ReceiveBuffer);
 
@@ -245,7 +253,7 @@ namespace GameFramework.NetworkingManaged
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.Packet.HEADER_SIZE, Buffer.Size - Constants.Packet.HEADER_SIZE);
+				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
 				if (MultithreadedCallbacks)
 				{
