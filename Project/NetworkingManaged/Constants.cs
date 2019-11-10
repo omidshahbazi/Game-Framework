@@ -35,14 +35,16 @@ namespace GameFramework.NetworkingManaged
 
 			public static BufferStream CreatePingBufferStream()
 			{
-				return new BufferStream(new byte[HEADER_SIZE + sizeof(double)]);
-			}
+				//BufferStream buffer = new BufferStream(new byte[HEADER_SIZE + sizeof(double)]);
+				BufferStream buffer = new BufferStream(new byte[HEADER_SIZE + (sizeof(double) * 4)]);
+				buffer.Reset();
+				buffer.WriteBytes(Control.PING);
+				buffer.WriteFloat64(Time.CurrentEpochTime);
+				buffer.WriteFloat64(Time.CurrentEpochTime);
+				buffer.WriteFloat64(Time.CurrentEpochTime);
+				buffer.WriteFloat64(Time.CurrentEpochTime);
 
-			public static void UpdatePingBufferStream(BufferStream Buffer)
-			{
-				Buffer.Reset();
-				Buffer.WriteBytes(Control.PING);
-				Buffer.WriteFloat64(Time.CurrentEpochTime);
+				return buffer;
 			}
 		}
 

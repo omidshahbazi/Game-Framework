@@ -166,9 +166,6 @@ namespace GameFramework.NetworkingManaged
 
 		protected override void Receive()
 		{
-			if (!IsReady)
-				return;
-
 			try
 			{
 				Socket clientSocket = Socket.Accept();
@@ -204,19 +201,24 @@ namespace GameFramework.NetworkingManaged
 
 					try
 					{
-						if (client.Socket.Available == 0)
-						{
-							if (!client.IsConnected)
-							{
-								disconnectedClients.Add(client);
+						int size = 0;
 
-								HandleClientDisconnection(client);
+						lock (Socket)
+						{
+							if (client.Socket.Available == 0)
+							{
+								if (!client.IsConnected)
+								{
+									disconnectedClients.Add(client);
+
+									HandleClientDisconnection(client);
+								}
+
+								continue;
 							}
 
-							continue;
+							size = client.Socket.Receive(ReceiveBuffer);
 						}
-
-						int size = client.Socket.Receive(ReceiveBuffer);
 
 						BandwidthIn += (uint)size;
 
@@ -276,9 +278,9 @@ namespace GameFramework.NetworkingManaged
 
 				Client.UpdateLatency((uint)((time - sendTime) * 1000));
 
-				Constants.Packet.UpdatePingBufferStream(Buffer);
+				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
 
-				Send(Client.Socket, Buffer);
+				Send(Client.Socket, pingBuffer);
 			}
 		}
 

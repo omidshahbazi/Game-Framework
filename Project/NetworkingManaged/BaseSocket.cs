@@ -124,10 +124,10 @@ namespace GameFramework.NetworkingManaged
 
 		public virtual void Service()
 		{
-			if (!MultithreadedReceive)
+			if (!MultithreadedReceive && IsReady)
 				Receive();
 
-			if (!MultithreadedSend)
+			if (!MultithreadedSend && IsReady)
 				HandleSendCommands();
 
 			if (!MultithreadedCallbacks)
@@ -177,13 +177,16 @@ namespace GameFramework.NetworkingManaged
 		{
 			try
 			{
-				if (!Target.Connected)
-					return;
+				lock (Target)
+				{
+					if (!Target.Connected)
+						return;
 
-				if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
-					Target.Send(Buffer.Buffer, 0, (int)Buffer.Size, SocketFlags.None);
+					if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
+						Target.Send(Buffer.Buffer, 0, (int)Buffer.Size, SocketFlags.None);
 
-				BandwidthOut += Buffer.Size;
+					BandwidthOut += Buffer.Size;
+				}
 			}
 			catch (SocketException e)
 			{
@@ -245,9 +248,6 @@ namespace GameFramework.NetworkingManaged
 
 		private void HandleSendCommands()
 		{
-			if (!IsReady)
-				return;
-
 			lock (sendCommands)
 			{
 				for (int i = 0; i < sendCommands.Count; ++i)

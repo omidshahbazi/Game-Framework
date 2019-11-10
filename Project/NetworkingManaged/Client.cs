@@ -1,6 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.Common.Timing;
-using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 
@@ -10,7 +9,7 @@ namespace GameFramework.NetworkingManaged
 	{
 		public bool IsConnected
 		{
-			get { return Socket.Connected; }
+			get { return Socket.Connected ; }//&& (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2)
 		}
 
 		public Socket Socket

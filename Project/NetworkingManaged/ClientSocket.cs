@@ -42,7 +42,6 @@ namespace GameFramework.NetworkingManaged
 		public delegate void ConnectionEventHandler();
 		public delegate void BufferReceivedEventHandler(BufferStream Buffer);
 
-		private BufferStream pingBuffer;
 		private double lastPingTime = 0;
 		private double timeOffset = 0;
 
@@ -75,7 +74,6 @@ namespace GameFramework.NetworkingManaged
 
 		public ClientSocket(Protocols Type) : base(Type)
 		{
-			pingBuffer = Constants.Packet.CreatePingBufferStream();
 		}
 
 		public override void Service()
@@ -139,15 +137,18 @@ namespace GameFramework.NetworkingManaged
 
 		protected override void Receive()
 		{
-			if (!IsReady)
-				return;
 
 			try
 			{
-				if (Socket.Available == 0)
-					return;
+				int size = 0;
 
-				int size = Socket.Receive(ReceiveBuffer);
+				lock (Socket)
+				{
+					if (Socket.Available == 0)
+						return;
+
+					size = Socket.Receive(ReceiveBuffer);
+				}
 
 				BandwidthIn += (uint)size;
 
@@ -263,7 +264,10 @@ namespace GameFramework.NetworkingManaged
 		{
 			if (IsReady)
 			{
-				Socket.EndConnect(Result);
+				lock (Socket)
+				{
+					Socket.EndConnect(Result);
+				}
 
 				RunReceiveThread();
 				RunSenndThread();
@@ -294,11 +298,11 @@ namespace GameFramework.NetworkingManaged
 
 		private void SendPing()
 		{
-			Constants.Packet.UpdatePingBufferStream(pingBuffer);
+			BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
 
 			lastPingTime = Time.CurrentEpochTime;
 
-			Send(Socket, pingBuffer);
+			Send(pingBuffer);
 		}
 	}
 }
