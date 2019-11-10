@@ -239,6 +239,10 @@ namespace GameFramework.NetworkingManaged
 		{
 			byte control = Buffer.ReadByte();
 
+			double time = Time.CurrentEpochTime;
+
+			Client.UpdateLastTouchTime(time);
+
 			if (control == Constants.Control.BUFFER)
 			{
 				BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.Packet.HEADER_SIZE, Buffer.Size - Constants.Packet.HEADER_SIZE);
@@ -257,8 +261,11 @@ namespace GameFramework.NetworkingManaged
 			{
 				double sendTime = Buffer.ReadFloat64();
 
-				Client.UpdateLatency((uint)((Time.CurrentEpochTime - sendTime) * 1000));
+				Client.UpdateLatency((uint)((time - sendTime) * 1000));
 
+				Constants.Packet.UpdatePingBufferStream(Buffer);
+
+				Send(Client.Socket, Buffer);
 			}
 		}
 

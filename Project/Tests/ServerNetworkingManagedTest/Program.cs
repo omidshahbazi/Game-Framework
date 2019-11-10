@@ -41,9 +41,9 @@ namespace ServerNetworkingManagedTest
 			//server.MultithreadedReceive = true;
 			//server.MultithreadedSend = true;
 
-			//server.MultithreadedCallbacks = true;
-			//server.MultithreadedReceive = true;
-			//server.MultithreadedSend = true;
+			server.MultithreadedCallbacks = true;
+			server.MultithreadedReceive = true;
+			server.MultithreadedSend = true;
 
 			server.OnClientConnected += Server_OnClientConnected;
 			server.OnClientDisconnected += Server_OnClientDisconnected;

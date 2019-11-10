@@ -91,7 +91,7 @@ namespace GameFramework.BinarySerializer
 		{
 			byte[] data = new byte[sizeof(double)];
 			ReadBytes(data, 0, sizeof(double));
-			return BitConverter.ToInt64(data, 0);
+			return BitConverter.ToDouble(data, 0);
 		}
 
 		public string ReadString()

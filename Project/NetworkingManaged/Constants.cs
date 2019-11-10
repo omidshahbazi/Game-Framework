@@ -1,4 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using GameFramework.BinarySerializer;
+using GameFramework.Common.Timing;
+
 namespace GameFramework.NetworkingManaged
 {
 	static class Constants
@@ -14,6 +17,18 @@ namespace GameFramework.NetworkingManaged
 		public static class Packet
 		{
 			public const int HEADER_SIZE = Control.SIZE;
+
+			public static BufferStream CreatePingBufferStream()
+			{
+				return new BufferStream(new byte[Constants.Packet.HEADER_SIZE + sizeof(double)]);
+			}
+
+			public static void UpdatePingBufferStream(BufferStream Buffer)
+			{
+				Buffer.Reset();
+				Buffer.WriteBytes(Control.PING);
+				Buffer.WriteFloat64(Time.CurrentEpochTime);
+			}
 		}
 	}
 }

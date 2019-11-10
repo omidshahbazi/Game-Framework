@@ -41,9 +41,9 @@ namespace ClientNetworkingManagedTest
 			//client.MultithreadedReceive = true;
 			//client.MultithreadedSend = true;
 
-			//client.MultithreadedCallbacks = true;
-			//client.MultithreadedReceive = true;
-			//client.MultithreadedSend = true;
+			client.MultithreadedCallbacks = true;
+			client.MultithreadedReceive = true;
+			client.MultithreadedSend = true;
 
 			client.OnConnected += Client_OnConnected;
 			client.OnConnectionFailed += Client_OnConnectionFailed;
@@ -65,7 +65,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			client.Send(new byte[] { 10, 22 });
+			//client.Send(new byte[] { 10, 22 });
 		}
 
 		private static void Client_OnConnectionFailed()

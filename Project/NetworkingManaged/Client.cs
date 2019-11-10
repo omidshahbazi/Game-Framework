@@ -1,4 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using GameFramework.Common.Timing;
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 
@@ -17,6 +19,12 @@ namespace GameFramework.NetworkingManaged
 			private set;
 		}
 
+		public double LastTouchTime
+		{
+			get;
+			private set;
+		}
+
 		public uint Latency
 		{
 			get;
@@ -26,6 +34,13 @@ namespace GameFramework.NetworkingManaged
 		public Client(Socket Socket)
 		{
 			this.Socket = Socket;
+
+			LastTouchTime = Time.CurrentEpochTime;
+		}
+
+		public void UpdateLastTouchTime(double Time)
+		{
+			LastTouchTime = Time;
 		}
 
 		public void UpdateLatency(uint Latency)

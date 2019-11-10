@@ -44,8 +44,19 @@ namespace GameFramework.NetworkingManaged
 
 		public const float PING_TIME = 5;
 
-		private double nextPingTime;
 		private BufferStream pingBuffer;
+
+		public double LastTouchTime
+		{
+			get;
+			private set;
+		}
+
+		public uint Latency
+		{
+			get;
+			private set;
+		}
 
 		public event ConnectionEventHandler OnConnected = null;
 		public event ConnectionEventHandler OnConnectionFailed = null;
@@ -54,18 +65,16 @@ namespace GameFramework.NetworkingManaged
 
 		public ClientSocket(Protocols Type) : base(Type)
 		{
-			pingBuffer = new BufferStream(new byte[10]);
+			pingBuffer = Constants.Packet.CreatePingBufferStream();
 		}
 
 		public override void Service()
 		{
-			if (Time.CurrentEpochTime >= nextPingTime)
+			if (LastTouchTime + PING_TIME <= Time.CurrentEpochTime)
 			{
-				nextPingTime = Time.CurrentEpochTime + PING_TIME;
+				LastTouchTime = Time.CurrentEpochTime;
 
-				UpdatePingBuffer();
-
-				Send(Socket, pingBuffer);
+				SendPing();
 			}
 
 			base.Service();
@@ -150,6 +159,10 @@ namespace GameFramework.NetworkingManaged
 
 		protected virtual void HandleIncommingBuffer(BufferStream Buffer)
 		{
+			double time = Time.CurrentEpochTime;
+
+			LastTouchTime = time;
+
 			byte control = Buffer.ReadByte();
 
 			if (control == Constants.Control.BUFFER)
@@ -168,7 +181,9 @@ namespace GameFramework.NetworkingManaged
 			}
 			else if (control == Constants.Control.PING)
 			{
+				double sendTime = Buffer.ReadFloat64();
 
+				Latency = (uint)((time - sendTime) * 1000);
 			}
 		}
 
@@ -266,15 +281,15 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
-		private void UpdatePingBuffer()
+		private void SendPing()
 		{
 			//Add IOControl byte
 			//buffer
 			//ping
 			//fill rtt
-			pingBuffer.Reset();
-			pingBuffer.WriteBytes(Constants.Control.PING);
-			pingBuffer.WriteFloat64(Time.CurrentEpochTime);
+			Constants.Packet.UpdatePingBufferStream(pingBuffer);
+
+			Send(Socket, pingBuffer);
 		}
 	}
 }
