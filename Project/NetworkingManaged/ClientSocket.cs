@@ -46,6 +46,11 @@ namespace GameFramework.NetworkingManaged
 		private double lastPingTime = 0;
 		private double timeOffset = 0;
 
+		public override bool IsReady
+		{
+			get { return Socket.Connected; }
+		}
+
 		public double ServerTime
 		{
 			get { return Time.CurrentEpochTime + timeOffset; }
@@ -134,7 +139,7 @@ namespace GameFramework.NetworkingManaged
 
 		protected override void Receive()
 		{
-			if (!Socket.Connected)
+			if (!IsReady)
 				return;
 
 			try
@@ -256,7 +261,7 @@ namespace GameFramework.NetworkingManaged
 
 		private void OnConnectedCallback(IAsyncResult Result)
 		{
-			if (Socket.Connected)
+			if (IsReady)
 			{
 				Socket.EndConnect(Result);
 

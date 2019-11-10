@@ -57,10 +57,9 @@ namespace ServerNetworkingManagedTest
 
 			while (true)
 			{
-				System.Threading.Thread.Sleep(100);
-
 				server.Service();
 
+				System.Threading.Thread.Sleep(100);
 			}
 		}
 

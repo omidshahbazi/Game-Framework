@@ -54,9 +54,9 @@ namespace GameFramework.NetworkingManaged
 			private set;
 		}
 
-		public bool IsConnected
+		public abstract bool IsReady
 		{
-			get { return Socket.Connected; }
+			get;
 		}
 
 		public ulong BandwidthIn
@@ -245,7 +245,7 @@ namespace GameFramework.NetworkingManaged
 
 		private void HandleSendCommands()
 		{
-			if (!IsConnected)
+			if (!IsReady)
 				return;
 
 			lock (sendCommands)

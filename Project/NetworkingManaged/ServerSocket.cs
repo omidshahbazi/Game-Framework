@@ -68,6 +68,11 @@ namespace GameFramework.NetworkingManaged
 
 		private ClientList clients = null;
 
+		public override bool IsReady
+		{
+			get { return Socket.IsBound; }
+		}
+
 		public uint MaxConnection
 		{
 			get;
@@ -161,7 +166,7 @@ namespace GameFramework.NetworkingManaged
 
 		protected override void Receive()
 		{
-			if (!Socket.IsBound)
+			if (!IsReady)
 				return;
 
 			try
