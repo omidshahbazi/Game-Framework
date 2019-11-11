@@ -107,7 +107,6 @@ namespace GameFramework.NetworkingManaged
 			sendCommands = new SendCommandList();
 
 			Socket = SocketUtilities.CreateSocket(Type);
-			Socket.NoDelay = true;
 			Socket.Blocking = false;
 			Socket.ReceiveBufferSize = (int)Constants.RECEIVE_BUFFER_SIZE;
 			Socket.SendBufferSize = (int)Constants.SEND_BUFFER_SIZE;
@@ -117,7 +116,7 @@ namespace GameFramework.NetworkingManaged
 
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);
-			SocketUtilities.SetDelayEnabled(Socket, false);
+			SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);
 
 			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 

@@ -74,7 +74,7 @@ namespace GameFramework.NetworkingManaged
 
 		public ClientSocket(Protocols Type) : base(Type)
 		{
-			LastTouchTime = Time.CurrentEpochTime; //TODO: if remove this line, leads you to a problem that Socket not working any more
+			//LastTouchTime = Time.CurrentEpochTime; //TODO: if remove this line, leads you to a problem that Socket not working any more
 		}
 
 		public override void Service()
