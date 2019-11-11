@@ -107,9 +107,13 @@ namespace GameFramework.NetworkingManaged
 			sendCommands = new SendCommandList();
 
 			Socket = SocketUtilities.CreateSocket(Type);
+			Socket.NoDelay = true;
 			Socket.Blocking = false;
 			Socket.ReceiveBufferSize = (int)Constants.RECEIVE_BUFFER_SIZE;
 			Socket.SendBufferSize = (int)Constants.SEND_BUFFER_SIZE;
+			Socket.ReceiveTimeout = (int)Constants.RECEIVE_TIMEOUT;
+			Socket.SendTimeout = (int)Constants.SEND_TIMEOUT;
+			Socket.Ttl = Constants.TIME_TO_LIVE;
 
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);
