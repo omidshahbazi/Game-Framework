@@ -184,7 +184,7 @@ namespace GameFramework.NetworkingManaged
 				lock (Target)
 				{
 					if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
-						Target.Send(Buffer.Buffer, 0, (int)Buffer.Size, SocketFlags.None);
+						Target.Send(Buffer.Buffer);
 
 					BandwidthOut += Buffer.Size;
 				}
