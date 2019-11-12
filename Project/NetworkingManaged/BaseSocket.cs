@@ -250,6 +250,9 @@ namespace GameFramework.NetworkingManaged
 		{
 			lock (sendCommands)
 			{
+				if (!IsReady)
+					return;
+
 				for (int i = 0; i < sendCommands.Count; ++i)
 					HandleSendCommand(sendCommands[i]);
 

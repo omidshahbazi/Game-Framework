@@ -47,7 +47,8 @@ namespace GameFramework.NetworkingManaged
 
 		public override bool IsReady
 		{
-			get { return Socket.Connected; }
+			//get { return Socket.Connected; }
+			get { return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0); }
 		}
 
 		public double ServerTime
