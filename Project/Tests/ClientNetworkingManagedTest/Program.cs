@@ -33,9 +33,9 @@ namespace ClientNetworkingManagedTest
 			//client.MultithreadedReceive = true;
 			//client.MultithreadedSend = false;
 
-			client.MultithreadedCallbacks = true;
-			client.MultithreadedReceive = false;
-			client.MultithreadedSend = true;
+			//client.MultithreadedCallbacks = true;
+			//client.MultithreadedReceive = false;
+			//client.MultithreadedSend = true;
 
 			//client.MultithreadedCallbacks = false;
 			//client.MultithreadedReceive = true;
