@@ -51,7 +51,7 @@ namespace ClientNetworkingManagedTest
 			client.OnBufferReceived += Client_OnBufferReceived;
 
 			client.Connect("::1", 433);
-			Console.WriteLine("TCPServerSocket started connecting");
+			Console.WriteLine("TCPClientSocket started connecting");
 
 			while (true)
 			{

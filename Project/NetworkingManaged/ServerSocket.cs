@@ -293,8 +293,6 @@ namespace GameFramework.NetworkingManaged
 				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
 
 				Send(Client.Socket, pingBuffer);
-
-				Console.WriteLine("Ping");
 			}
 		}
 
