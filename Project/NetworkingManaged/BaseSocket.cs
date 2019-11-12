@@ -117,6 +117,7 @@ namespace GameFramework.NetworkingManaged
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);
 			SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);
+			SocketUtilities.SetBSDUrgentEnabled(Socket, true);
 
 			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 
@@ -182,9 +183,6 @@ namespace GameFramework.NetworkingManaged
 			{
 				lock (Target)
 				{
-					if (!Target.Connected)
-						return;
-
 					if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
 						Target.Send(Buffer.Buffer, 0, (int)Buffer.Size, SocketFlags.None);
 
@@ -208,7 +206,7 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
-		protected abstract void HandleSendCommand(SendCommand Command);
+		protected abstract bool HandleSendCommand(SendCommand Command);
 
 		protected abstract void ProcessEvent(EventBase Event);
 
@@ -253,9 +251,6 @@ namespace GameFramework.NetworkingManaged
 		{
 			lock (sendCommands)
 			{
-				if (!IsReady)
-					return;
-
 				for (int i = 0; i < sendCommands.Count; ++i)
 					HandleSendCommand(sendCommands[i]);
 

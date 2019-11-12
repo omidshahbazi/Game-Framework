@@ -209,7 +209,7 @@ namespace GameFramework.NetworkingManaged
 						{
 							if (client.Socket.Available == 0)
 							{
-								if (!client.IsConnected)
+								if (!client.IsReady)
 								{
 									disconnectedClients.Add(client);
 
@@ -224,7 +224,17 @@ namespace GameFramework.NetworkingManaged
 
 						BandwidthIn += (uint)size;
 
-						HandleIncommingBuffer(client, new BufferStream(ReceiveBuffer, (uint)size));
+						uint index = 0;
+						while (index != size)
+						{
+							uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
+
+							index += Constants.Packet.PACKET_SIZE_SIZE;
+
+							HandleIncommingBuffer(client, new BufferStream(ReceiveBuffer, index, packetSize));
+
+							index += packetSize;
+						}
 					}
 					catch (SocketException e)
 					{
@@ -288,11 +298,16 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
-		protected override void HandleSendCommand(SendCommand Command)
+		protected override bool HandleSendCommand(SendCommand Command)
 		{
 			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 
+			if (!SocketUtilities.IsSocketReady(sendCommand.Socket))
+				return false;
+
 			Send(sendCommand.Socket, Command.Buffer);
+
+			return true;
 		}
 
 		protected override void ProcessEvent(EventBase Event)

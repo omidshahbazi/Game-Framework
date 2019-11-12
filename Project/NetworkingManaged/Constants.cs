@@ -17,12 +17,16 @@ namespace GameFramework.NetworkingManaged
 
 		public static class Packet
 		{
+			public const int PACKET_SIZE_SIZE = sizeof(uint);
 			public const int HEADER_SIZE = Control.SIZE;
 
 			public static BufferStream CreateOutgoingBufferStream(uint Length)
 			{
-				BufferStream buffer = new BufferStream(new byte[HEADER_SIZE + Length]);
+				uint length = HEADER_SIZE + Length;
+
+				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
 				buffer.Reset();
+				buffer.WriteUInt32(length);
 				buffer.WriteBytes(Control.BUFFER);
 
 				return buffer;
@@ -35,8 +39,11 @@ namespace GameFramework.NetworkingManaged
 
 			public static BufferStream CreatePingBufferStream()
 			{
-				BufferStream buffer = new BufferStream(new byte[HEADER_SIZE + sizeof(double)]);
+				uint length = HEADER_SIZE + sizeof(double);
+
+				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
 				buffer.Reset();
+				buffer.WriteUInt32(length);
 				buffer.WriteBytes(Control.PING);
 				buffer.WriteFloat64(Time.CurrentEpochTime);
 
@@ -50,7 +57,7 @@ namespace GameFramework.NetworkingManaged
 		public const uint SEND_BUFFER_SIZE = 8 * 1024;
 
 		// https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.ttl?view=netframework-4.8#System_Net_Sockets_Socket_Ttl
-		public const short TIME_TO_LIVE = 64; 
+		public const short TIME_TO_LIVE = 64;
 		public const float PING_TIME = 5;
 
 		public static readonly Random Random = new Random();

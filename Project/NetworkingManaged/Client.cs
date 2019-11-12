@@ -7,9 +7,9 @@ namespace GameFramework.NetworkingManaged
 {
 	public class Client
 	{
-		public bool IsConnected
+		public bool IsReady
 		{
-			get { return Socket.Connected ; }//&& (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2)
+			get { return SocketUtilities.IsSocketReady(Socket); }//&& (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2)
 		}
 
 		public Socket Socket

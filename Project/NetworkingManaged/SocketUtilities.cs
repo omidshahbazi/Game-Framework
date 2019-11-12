@@ -33,9 +33,23 @@ namespace GameFramework.NetworkingManaged
 			Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoChecksum, (!Value ? 0 : 1));
 		}
 
+		public static void SetBSDUrgentEnabled(Socket Socket, bool Value)
+		{
+			Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.BsdUrgent, Value);
+		}
+
+		// After many researches abound NoDelay and the Nagle algorithm, I found out that using this algorithm on TCP
+		// will apply a bad effect on the send/receive protocol under TCP connection
+		// Altough, NoDelay and the function doesn't work properly as described in MSDN and I desired
+		// https://support.microsoft.com/en-us/help/214397/design-issues-sending-small-data-segments-over-tcp-with-winsock
 		public static void SetNagleAlgorithmEnabled(Socket Socket, bool Value)
 		{
 			Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, !Value);
+		}
+
+		public static bool IsSocketReady(Socket Socket)
+		{
+			return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0);
 		}
 
 		public static IPAddress ResolveDomain(string Domain)

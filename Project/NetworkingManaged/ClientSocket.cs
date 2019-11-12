@@ -47,8 +47,7 @@ namespace GameFramework.NetworkingManaged
 
 		public override bool IsReady
 		{
-			//get { return Socket.Connected; }
-			get { return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0); }
+			get { return SocketUtilities.IsSocketReady(Socket); }
 		}
 
 		public double ServerTime
@@ -154,7 +153,17 @@ namespace GameFramework.NetworkingManaged
 
 				BandwidthIn += (uint)size;
 
-				HandleIncommingBuffer(new BufferStream(ReceiveBuffer, (uint)size));
+				uint index = 0;
+				while (index != size)
+				{
+					uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
+
+					index += Constants.Packet.PACKET_SIZE_SIZE;
+
+					HandleIncommingBuffer(new BufferStream(ReceiveBuffer, index, packetSize));
+
+					index += packetSize;
+				}
 			}
 			catch (SocketException e)
 			{
@@ -206,9 +215,14 @@ namespace GameFramework.NetworkingManaged
 			}
 		}
 
-		protected override void HandleSendCommand(SendCommand Command)
+		protected override bool HandleSendCommand(SendCommand Command)
 		{
+			if (!SocketUtilities.IsSocketReady(Socket))
+				return false;
+
 			Send(Socket, Command.Buffer);
+
+			return true;
 		}
 
 		protected override void ProcessEvent(EventBase Event)
@@ -264,7 +278,7 @@ namespace GameFramework.NetworkingManaged
 
 		private void OnConnectedCallback(IAsyncResult Result)
 		{
-			if (IsReady)
+			if (Socket.Connected)
 			{
 				lock (Socket)
 				{
