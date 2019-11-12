@@ -94,6 +94,8 @@ namespace GameFramework.NetworkingManaged
 
 		public ServerSocket(Protocols Type, uint MaxConnection) : base(Type)
 		{
+			Socket.ExclusiveAddressUse = true;
+
 			clients = new ClientList();
 
 			this.MaxConnection = MaxConnection;
@@ -281,6 +283,8 @@ namespace GameFramework.NetworkingManaged
 				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
 
 				Send(Client.Socket, pingBuffer);
+
+				Console.WriteLine("Ping");
 			}
 		}
 

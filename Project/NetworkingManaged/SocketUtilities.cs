@@ -33,7 +33,7 @@ namespace GameFramework.NetworkingManaged
 			Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoChecksum, (!Value ? 0 : 1));
 		}
 
-		public static void SetDelayEnabled(Socket Socket, bool Value)
+		public static void SetNagleAlgorithmEnabled(Socket Socket, bool Value)
 		{
 			Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, !Value);
 		}
