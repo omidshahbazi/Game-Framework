@@ -2,7 +2,7 @@
 
 using GameFramework.BinarySerializer;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	public class TCPClientSocket : ClientSocket
 	{

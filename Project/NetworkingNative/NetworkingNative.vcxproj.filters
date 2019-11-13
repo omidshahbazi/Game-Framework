@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Compile">
+      <UniqueIdentifier>{e8ca6088-c887-437b-9487-c69f38112a0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{b9635a37-d4f0-4eff-bd5c-f6bec1cf4f9c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\BaseSocket.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Constants.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Enums.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SocketUtilities.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

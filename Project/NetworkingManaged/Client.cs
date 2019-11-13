@@ -3,7 +3,7 @@ using GameFramework.Common.Timing;
 using System.Collections.Generic;
 using System.Net.Sockets;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	public class Client
 	{

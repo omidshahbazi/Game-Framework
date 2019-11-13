@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	public abstract class BaseSocket
 	{

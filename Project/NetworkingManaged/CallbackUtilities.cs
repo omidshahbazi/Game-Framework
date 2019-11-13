@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	static class CallbackUtilities
 	{

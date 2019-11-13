@@ -3,7 +3,7 @@ using GameFramework.BinarySerializer;
 using GameFramework.Common.Timing;
 using GameFramework.Common.Utilities;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	static class Constants
 	{

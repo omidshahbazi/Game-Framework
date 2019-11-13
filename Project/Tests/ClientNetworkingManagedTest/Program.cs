@@ -1,5 +1,5 @@
 ﻿using GameFramework.BinarySerializer;
-using GameFramework.NetworkingManaged;
+using GameFramework.Networking;
 using System;
 
 namespace ClientNetworkingManagedTest

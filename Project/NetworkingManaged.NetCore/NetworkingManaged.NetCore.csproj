@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>GameFramework.NetworkingManaged</RootNamespace>
+    <RootNamespace>GameFramework.Networking</RootNamespace>
     <AssemblyName>NetworkingManaged.NetCore</AssemblyName>
     <ApplicationIcon />
     <StartupObject />

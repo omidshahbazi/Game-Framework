@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	public class UDPServerSocket : ServerSocket
 	{

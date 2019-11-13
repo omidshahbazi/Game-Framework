@@ -3,7 +3,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	static class SocketUtilities
 	{

@@ -5,7 +5,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace GameFramework.NetworkingManaged
+namespace GameFramework.Networking
 {
 	public abstract class ServerSocket : BaseSocket
 	{
