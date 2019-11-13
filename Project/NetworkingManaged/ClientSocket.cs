@@ -42,6 +42,7 @@ namespace GameFramework.NetworkingManaged
 		public delegate void ConnectionEventHandler();
 		public delegate void BufferReceivedEventHandler(BufferStream Buffer);
 
+		private bool isConnected = false;
 		private double lastPingTime = 0;
 		private double timeOffset = 0;
 
@@ -137,6 +138,9 @@ namespace GameFramework.NetworkingManaged
 
 		protected override void Receive()
 		{
+			if (!isConnected)
+				return;
+
 			try
 			{
 				int size = 0;
@@ -144,7 +148,12 @@ namespace GameFramework.NetworkingManaged
 				lock (Socket)
 				{
 					if (Socket.Available == 0)
+					{
+						if (!IsReady)
+							HandleDisconnection(Socket);
+
 						return;
+					}
 
 					size = Socket.Receive(ReceiveBuffer);
 				}
@@ -260,6 +269,8 @@ namespace GameFramework.NetworkingManaged
 			{
 				AddEvent(new DisconnectedEvent());
 			}
+
+			isConnected = false;
 		}
 
 		protected abstract void ProcessReceivedBuffer(BufferStream Buffer);
@@ -298,6 +309,8 @@ namespace GameFramework.NetworkingManaged
 				{
 					AddEvent(new ConnectedEvent());
 				}
+
+				isConnected = true;
 			}
 			else
 			{
@@ -310,6 +323,8 @@ namespace GameFramework.NetworkingManaged
 				{
 					AddEvent(new ConnectionFailedEvent());
 				}
+
+				isConnected = false;
 			}
 		}
 
