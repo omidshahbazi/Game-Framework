@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Compile\BufferStream.cpp" />
     <ClCompile Include="Compile\Serializer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\BufferStream.h" />
     <ClInclude Include="Include\Serializer.h" />
+    <ClInclude Include="Include\Utilities.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0414F719-E45A-4465-9E23-79F219806737}</ProjectGuid>

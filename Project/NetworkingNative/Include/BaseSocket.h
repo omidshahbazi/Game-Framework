@@ -1,4 +1,9 @@
 ﻿// Copyright 2019. All Rights Reserved.
+#pragma once
+
+#ifndef BASE_SOCKET_H
+#define BASE_SOCKET_H
+
 
 namespace GameFramework::NetworkingManaged
 {
@@ -274,3 +279,5 @@ namespace GameFramework::NetworkingManaged
 		}
 	};
 }
+
+#endif

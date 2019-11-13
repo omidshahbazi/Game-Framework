@@ -96,12 +96,12 @@ namespace GameFramework.BinarySerializer
 
 		public string ReadString()
 		{
-			int bufferLen = ReadInt32();
+			uint bufferLen = ReadUInt32();
 
 			byte[] data = new byte[bufferLen];
 			ReadBytes(data, 0, bufferLen);
 
-			return Encoding.UTF8.GetString(data, 0, bufferLen);
+			return Encoding.UTF8.GetString(data, 0, (int)bufferLen);
 		}
 
 		public byte ReadByte()
@@ -109,9 +109,9 @@ namespace GameFramework.BinarySerializer
 			return Convert.ToByte(stream.ReadByte());
 		}
 
-		public void ReadBytes(byte[] Data, int Index, int Length)
+		public void ReadBytes(byte[] Data, uint Index, uint Length)
 		{
-			stream.Read(Data, Index, Length);
+			stream.Read(Data, (int)Index, (int)Length);
 		}
 
 		public void WriteBool(bool Value)
@@ -163,9 +163,9 @@ namespace GameFramework.BinarySerializer
 			Size += (uint)Data.Length;
 		}
 
-		public void BeginWriteArray(int Length)
+		public void BeginWriteArray(uint Length)
 		{
-			WriteInt32(Length);
+			WriteUInt32(Length);
 		}
 
 		public void EndWriteArray()
@@ -180,9 +180,9 @@ namespace GameFramework.BinarySerializer
 		{
 		}
 
-		public int BeginReadArray()
+		public uint BeginReadArray()
 		{
-			return ReadInt32();
+			return ReadUInt32();
 		}
 
 		public void ReadArrayElement()
@@ -192,10 +192,10 @@ namespace GameFramework.BinarySerializer
 		public void Print(int BytesPerLine = 8)
 		{
 			Console.Write("Size: ");
-			Console.Write(Buffer.Length);
+			Console.Write(Size);
 			Console.WriteLine();
 
-			int rowCount = (int)Math.Ceiling(Buffer.Length / (float)BytesPerLine);
+			int rowCount = (int)Math.Ceiling(Size / (float)BytesPerLine);
 
 			for (int i = 0; i < rowCount; ++i)
 			{
@@ -205,7 +205,7 @@ namespace GameFramework.BinarySerializer
 
 					string hexValue = "  ";
 
-					if (index < Buffer.Length)
+					if (index < Size)
 						hexValue = Buffer[index].ToString("X2");
 
 					Console.Write(hexValue);
@@ -218,7 +218,7 @@ namespace GameFramework.BinarySerializer
 				{
 					int index = (i * BytesPerLine) + j;
 
-					if (index >= Buffer.Length)
+					if (index >= Size)
 						break;
 
 					byte b = Buffer[index];

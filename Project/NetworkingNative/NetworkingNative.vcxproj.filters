@@ -22,4 +22,9 @@
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Compile\Constants.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+  </ItemGroup>
 </Project>

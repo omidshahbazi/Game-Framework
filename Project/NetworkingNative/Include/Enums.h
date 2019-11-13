@@ -1,9 +1,16 @@
 ﻿// Copyright 2019. All Rights Reserved.
-namespace GameFramework.Networking
+#pragma once
+
+#ifndef ENUMS_H
+#define ENUMS_H
+
+namespace GameFramework::Networking
 {
-	public enum Protocols
+	enum class Protocols
 	{
 		TCP = 0,
 		UDP = 1
-	}
+	};
 }
+
+#endif

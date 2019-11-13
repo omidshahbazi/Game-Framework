@@ -17,8 +17,8 @@ namespace GameFramework.Networking
 
 		public static class Packet
 		{
-			public const int PACKET_SIZE_SIZE = sizeof(uint);
-			public const int HEADER_SIZE = Control.SIZE;
+			public const uint PACKET_SIZE_SIZE = sizeof(uint);
+			public const uint HEADER_SIZE = Control.SIZE;
 
 			public static BufferStream CreateOutgoingBufferStream(uint Length)
 			{
@@ -57,7 +57,7 @@ namespace GameFramework.Networking
 		public const uint SEND_BUFFER_SIZE = 8 * 1024;
 
 		// https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.ttl?view=netframework-4.8#System_Net_Sockets_Socket_Ttl
-		public const short TIME_TO_LIVE = 64;
+		public const ushort TIME_TO_LIVE = 64;
 		public const float PING_TIME = 5;
 
 		public static readonly Random Random = new Random();

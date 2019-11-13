@@ -12,9 +12,18 @@
     <ClInclude Include="Include\Serializer.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\BufferStream.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Utilities.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Serializer.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\BufferStream.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>

@@ -143,6 +143,9 @@
     <ClInclude Include="Include\Enums.h" />
     <ClInclude Include="Include\SocketUtilities.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Compile\Constants.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

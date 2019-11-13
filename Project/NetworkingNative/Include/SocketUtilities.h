@@ -1,4 +1,9 @@
 ﻿// Copyright 2019. All Rights Reserved.
+#pragma once
+
+#ifndef SOCKET_UTILITIES_H
+#define SOCKET_UTILITIES_H
+
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -78,3 +83,5 @@ namespace GameFramework.Networking
 		}
 	}
 }
+
+#endif

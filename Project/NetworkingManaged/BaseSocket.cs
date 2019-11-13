@@ -124,7 +124,7 @@ namespace GameFramework.Networking
 			Socket.SendBufferSize = (int)Constants.SEND_BUFFER_SIZE;
 			Socket.ReceiveTimeout = (int)Constants.RECEIVE_TIMEOUT;
 			Socket.SendTimeout = (int)Constants.SEND_TIMEOUT;
-			Socket.Ttl = Constants.TIME_TO_LIVE;
+			Socket.Ttl = (short)Constants.TIME_TO_LIVE;
 
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);

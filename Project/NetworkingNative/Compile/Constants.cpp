@@ -8,8 +8,8 @@ namespace GameFramework::Networking
 	const byte Constants::Control::BUFFER = (byte)1;
 	const byte Constants::Control::PING = (byte)2;
 
-	const int Constants::Packet::PACKET_SIZE_SIZE = sizeof(uint32_t32_t);
-	const int Constants::Packet::HEADER_SIZE = Control::SIZE;
+	const uint32_t Constants::Packet::PACKET_SIZE_SIZE = sizeof(uint32_t32_t);
+	const uint32_t Constants::Packet::HEADER_SIZE = Control::SIZE;
 
 	BufferStream Constants::Packet::CreateOutgoingBufferStream(uint32_t Length)
 	{

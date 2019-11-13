@@ -1,4 +1,9 @@
 ﻿// Copyright 2019. All Rights Reserved.
+#pragma once
+
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
 #include <cstddef>
 #include <stdint.h>
 
@@ -22,8 +27,8 @@ namespace GameFramework::Networking
 		static class Packet
 		{
 		public:
-			static const int PACKET_SIZE_SIZE;
-			static const int HEADER_SIZE;
+			static const uint32_t PACKET_SIZE_SIZE;
+			static const uint32_t HEADER_SIZE;
 
 		public:
 			static BufferStream CreateOutgoingBufferStream(uint32_t Length);
@@ -40,11 +45,11 @@ namespace GameFramework::Networking
 		static const uint32_t SEND_BUFFER_SIZE;
 
 		// https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.ttl?view=netframework-4.8#System_Net_Sockets_Socket_Ttl
-		static const short TIME_TO_LIVE;
+		static const uint16_t TIME_TO_LIVE;
 		static const float PING_TIME;
 
 		//static Random Random = new Random();
 	};
-
-	const float Constants::PING_TIME = 5;
 }
+
+#endif
