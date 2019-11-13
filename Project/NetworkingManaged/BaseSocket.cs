@@ -27,9 +27,16 @@ namespace GameFramework.NetworkingManaged
 				private set;
 			}
 
-			public SendCommand(BufferStream Buffer)
+			public double SendTime
+			{
+				get;
+				private set;
+			}
+
+			public SendCommand(BufferStream Buffer, double SendTime)
 			{
 				this.Buffer = Buffer;
+				this.SendTime = SendTime;
 			}
 		}
 
@@ -55,6 +62,11 @@ namespace GameFramework.NetworkingManaged
 		}
 
 		public abstract bool IsReady
+		{
+			get;
+		}
+
+		public abstract double Timestamp
 		{
 			get;
 		}
@@ -95,7 +107,7 @@ namespace GameFramework.NetworkingManaged
 			set;
 		}
 
-		public int LatencySimulation // TODO: use this
+		public int LatencySimulation
 		{
 			get;
 			set;
@@ -252,9 +264,12 @@ namespace GameFramework.NetworkingManaged
 			lock (sendCommands)
 			{
 				for (int i = 0; i < sendCommands.Count; ++i)
-					HandleSendCommand(sendCommands[i]);
+				{
+					if (!HandleSendCommand(sendCommands[i]))
+						continue;
 
-				sendCommands.Clear();
+					sendCommands.RemoveAt(i--);
+				}
 			}
 		}
 	}

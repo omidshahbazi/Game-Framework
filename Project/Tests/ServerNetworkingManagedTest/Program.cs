@@ -49,7 +49,7 @@ namespace ServerNetworkingManagedTest
 			server.OnClientDisconnected += Server_OnClientDisconnected;
 			server.OnBufferReceived += Server_OnBufferReceived;
 
-			server.Bind("::1", 433);
+			server.Bind("127.0.0.1", 433);
 			Console.WriteLine("TCPServerSocket bound");
 
 			server.Listen();

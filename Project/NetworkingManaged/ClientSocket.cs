@@ -50,7 +50,7 @@ namespace GameFramework.NetworkingManaged
 			get { return SocketUtilities.IsSocketReady(Socket); }
 		}
 
-		public double ServerTime
+		public override double Timestamp
 		{
 			get { return Time.CurrentEpochTime + timeOffset; }
 		}
@@ -132,7 +132,7 @@ namespace GameFramework.NetworkingManaged
 
 		protected virtual void Send(BufferStream Buffer)
 		{
-			AddSendCommand(new SendCommand(Buffer));
+			AddSendCommand(new SendCommand(Buffer, Timestamp));
 		}
 
 		protected override void Receive()
@@ -215,6 +215,9 @@ namespace GameFramework.NetworkingManaged
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
+			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
+				return false;
+
 			if (!SocketUtilities.IsSocketReady(Socket))
 				return false;
 

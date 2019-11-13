@@ -57,7 +57,7 @@ namespace GameFramework.NetworkingManaged
 				private set;
 			}
 
-			public ServerSendCommand(Socket Socket, BufferStream Buffer) : base(Buffer)
+			public ServerSendCommand(Socket Socket, BufferStream Buffer, double SendTime) : base(Buffer, SendTime)
 			{
 				this.Socket = Socket;
 			}
@@ -71,6 +71,11 @@ namespace GameFramework.NetworkingManaged
 		public override bool IsReady
 		{
 			get { return Socket.IsBound; }
+		}
+
+		public override double Timestamp
+		{
+			get { return Time.CurrentEpochTime; }
 		}
 
 		public uint MaxConnection
@@ -163,7 +168,7 @@ namespace GameFramework.NetworkingManaged
 
 		protected virtual void Send(Client Target, BufferStream Buffer)
 		{
-			AddSendCommand(new ServerSendCommand(Target.Socket, Buffer));
+			AddSendCommand(new ServerSendCommand(Target.Socket, Buffer, Timestamp));
 		}
 
 		protected override void Receive()
@@ -298,6 +303,9 @@ namespace GameFramework.NetworkingManaged
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
+			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
+				return false;
+
 			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 
 			if (!SocketUtilities.IsSocketReady(sendCommand.Socket))

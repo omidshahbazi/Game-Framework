@@ -41,16 +41,16 @@ namespace ClientNetworkingManagedTest
 			//client.MultithreadedReceive = true;
 			//client.MultithreadedSend = true;
 
-			//client.MultithreadedCallbacks = true;
-			//client.MultithreadedReceive = true;
-			//client.MultithreadedSend = true;
+			client.MultithreadedCallbacks = true;
+			client.MultithreadedReceive = true;
+			client.MultithreadedSend = true;
 
 			client.OnConnected += Client_OnConnected;
 			client.OnConnectionFailed += Client_OnConnectionFailed;
 			client.OnDisconnected += Client_OnDisconnected;
 			client.OnBufferReceived += Client_OnBufferReceived;
 
-			client.Connect("::1", 433);
+			client.Connect("127.0.0.1", 433);
 			Console.WriteLine("TCPClientSocket started connecting");
 
 			while (true)
