@@ -63,6 +63,9 @@
     <ClInclude Include="Include\PredefinedFunctions.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Common.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Expression.cpp">

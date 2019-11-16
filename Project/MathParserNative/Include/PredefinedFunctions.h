@@ -4,6 +4,7 @@
 #ifndef PREFEFINEDFUNCTIONS_H
 #define PREFEFINEDFUNCTIONS_H
 
+#include "Common.h"
 #include "TreeNodeCalculator.h"
 #include "FunctionDefinition.h"
 #include <string>
@@ -12,7 +13,7 @@
 
 namespace GameFramework::MathParser
 {
-	class PredefinedFunctions
+	class MATH_PARSER_API PredefinedFunctions
 	{
 	public:
 		typedef std::map<std::string, FunctionDefinition> FunctionsMap;

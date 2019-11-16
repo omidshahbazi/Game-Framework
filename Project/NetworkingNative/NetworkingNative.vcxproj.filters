@@ -21,9 +21,18 @@
     <ClInclude Include="Include\SocketUtilities.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Common.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\PlatformNetwork.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Constants.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\PlatformNetwork.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>

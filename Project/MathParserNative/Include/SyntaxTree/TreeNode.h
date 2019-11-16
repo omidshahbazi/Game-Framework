@@ -4,11 +4,12 @@
 #ifndef TREENODE_H
 #define TREENODE_H
 
+#include "..\Common.h"
 #include <list>
 
 namespace GameFramework::MathParser::SyntaxTree
 {
-	class TreeNode
+	class MATH_PARSER_API TreeNode
 	{
 	public:
 		virtual ~TreeNode(void)

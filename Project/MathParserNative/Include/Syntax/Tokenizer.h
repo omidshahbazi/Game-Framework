@@ -4,12 +4,13 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
+#include "..\Common.h"
 #include "..\Syntax\Token.h"
 #include <string>
 
 namespace GameFramework::MathParser::Syntax
 {
-	class Tokenizer
+	class MATH_PARSER_API Tokenizer
 	{
 	public:
 		Tokenizer(const std::string &Expr);

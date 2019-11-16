@@ -13,14 +13,38 @@
     <Filter Include="Compile\Utilities">
       <UniqueIdentifier>{8b1190dd-ac99-4d24-aace-ee6230a8d50c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Timing">
+      <UniqueIdentifier>{575c6800-8491-44a6-b5f2-41d0841270ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compile\Timing">
+      <UniqueIdentifier>{014d97c5-5331-4b0b-b577-2c44ba0b7b96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Utilities\CRC32.h">
       <Filter>Include\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Timing\Time.h">
+      <Filter>Include\Timing</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Utilities\Random.h">
+      <Filter>Include\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Common.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Utilities\BitwiseHelper.h">
+      <Filter>Include\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Utilities\CRC32.cpp">
+      <Filter>Compile\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\Timing\Time.cpp">
+      <Filter>Compile\Timing</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\Utilities\Random.cpp">
       <Filter>Compile\Utilities</Filter>
     </ClCompile>
   </ItemGroup>

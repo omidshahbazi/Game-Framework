@@ -4,12 +4,13 @@
 #ifndef PARAMETERNODE_H
 #define PARAMETERNODE_H
 
+#include "..\Common.h"
 #include "..\SyntaxTree\TreeNode.h"
 #include <string>
 
 namespace GameFramework::MathParser::SyntaxTree
 {
-	class ParameterNode : public TreeNode
+	class MATH_PARSER_API ParameterNode : public TreeNode
 	{
 	public:
 		ParameterNode(const std::string &Name) :

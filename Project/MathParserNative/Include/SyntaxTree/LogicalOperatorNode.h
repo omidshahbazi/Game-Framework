@@ -4,11 +4,12 @@
 #ifndef LOGICALOPERATORNODE_H
 #define LOGICALOPERATORNODE_H
 
+#include "..\Common.h"
 #include "..\SyntaxTree\OperatorNode.h"
 
 namespace GameFramework::MathParser::SyntaxTree
 {
-	class LogicalOperatorNode : public OperatorNode
+	class MATH_PARSER_API LogicalOperatorNode : public OperatorNode
 	{
 	public:
 		enum class Operators

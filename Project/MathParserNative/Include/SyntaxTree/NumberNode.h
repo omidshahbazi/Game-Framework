@@ -4,11 +4,12 @@
 #ifndef NUMBERNODE_H
 #define NUMBERNODE_H
 
+#include "..\Common.h"
 #include "..\SyntaxTree\TreeNode.h"
 
 namespace GameFramework::MathParser::SyntaxTree
 {
-	class NumberNode : public TreeNode
+	class MATH_PARSER_API NumberNode : public TreeNode
 	{
 	public:
 		NumberNode(double Number) :

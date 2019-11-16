@@ -18,6 +18,9 @@
     <ClInclude Include="Include\Utilities.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Common.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Serializer.cpp">

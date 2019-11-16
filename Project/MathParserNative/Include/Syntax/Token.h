@@ -4,12 +4,13 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include "..\Common.h"
 #include <string>
 #include <map>
 
 namespace GameFramework::MathParser::Syntax
 {
-	class Token
+	class MATH_PARSER_API Token
 	{
 	public:
 		enum class Types

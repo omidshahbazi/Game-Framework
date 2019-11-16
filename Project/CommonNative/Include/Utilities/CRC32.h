@@ -4,64 +4,25 @@
 #ifndef CRC32_H
 #define CRC32_H
 
+#include "..\Common.h"
+#include <stdint.h>
+
 namespace GameFramework::Common::Utilities
 {
-	class CRC32
+	class COMMON_API CRC32
 	{
 	private:
-		CRC32(void)
-		{
-			InitializeTable();
-		}
+		CRC32(void);
 
-		unsigned int Calculate(const char * const Data, unsigned int Count)
-		{
-			unsigned int crc32 = 0xffffffff;
+		uint32_t Calculate(const char* const Data, uint32_t Count);
 
-			for (unsigned int i = 0; i < Count; ++i)
-			{
-				unsigned int index = (crc32 ^ Data[i]) & 0xFF;
-				crc32 = (crc32 >> 8) ^ m_Table[index];
-			}
-
-			crc32 = crc32 ^ 0xFFFFFFFF;
-
-			return crc32;
-		}
-
-		void InitializeTable(void)
-		{
-			const int POLYNOMIAL = 0x04C11DB7;
-			const unsigned int TABLE_COUNT = 256;
-
-			unsigned int crc;
-			m_Table = new unsigned int[TABLE_COUNT];
-
-			for (int i = 0; i < TABLE_COUNT; ++i)
-			{
-				crc = (unsigned int)i;
-				for (int j = 8; j > 0; --j)
-				{
-					if ((crc & 1) == 1)
-						crc = (crc >> 1) ^ POLYNOMIAL;
-					else
-						crc >>= 1;
-				}
-
-				m_Table[i] = crc;
-			}
-		}
+		void InitializeTable(void);
 
 	public:
-		static unsigned int CalculateHash(const char * const Data, unsigned int Count)
-		{
-			static CRC32 crc;
-
-			return crc.Calculate(Data, Count);
-		}
+		static uint32_t CalculateHash(const char* const Data, uint32_t Count);
 
 	private:
-		unsigned int *m_Table;
+		uint32_t* m_Table;
 	};
 }
 

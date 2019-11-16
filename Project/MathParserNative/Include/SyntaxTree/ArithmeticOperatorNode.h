@@ -4,11 +4,12 @@
 #ifndef ARITHMETICOPERATORNODE_H
 #define ARITHMETICOPERATORNODE_H
 
+#include "..\Common.h"
 #include "..\SyntaxTree\OperatorNode.h"
 
 namespace GameFramework::MathParser::SyntaxTree
 {
-	class ArithmeticOperatorNode : public OperatorNode
+	class MATH_PARSER_API ArithmeticOperatorNode : public OperatorNode
 	{
 	public:
 		enum class Operators

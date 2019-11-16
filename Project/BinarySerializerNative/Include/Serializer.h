@@ -4,12 +4,13 @@
 #ifndef SERIALIZER_H
 #define SERIALIZER_H
 
+#include "Common.h"
 #include <streambuf>
 #include <vector>
 
 namespace GameFramework::BinarySerializer
 {
-	class Serializer
+	class BINARY_SERIALIZE_API Serializer
 	{
 	private:
 		template<typename T>

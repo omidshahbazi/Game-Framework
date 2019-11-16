@@ -4,11 +4,12 @@
 #ifndef OPERATORNODE_H
 #define OPERATORNODE_H
 
+#include "..\Common.h"
 #include "..\SyntaxTree\TreeNode.h"
 
 namespace GameFramework::MathParser::SyntaxTree
 {
-	class OperatorNode : public TreeNode
+	class MATH_PARSER_API OperatorNode : public TreeNode
 	{
 	public:
 		inline TreeNode *GetLeftNode(void) const

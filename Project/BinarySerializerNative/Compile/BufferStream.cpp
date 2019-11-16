@@ -1,34 +1,15 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\BufferStream.h"
-#include "..\Include\Utilities.h"
 #include <memory>
 #include <iostream>
 
 namespace GameFramework::BinarySerializer
 {
-	template<typename T>
-	BytesOf<T> ReadBytesOf(byte* const Buffer, uint32_t& Index)
+	BufferStream::BufferStream(uint32_t Capacity) :
+		m_ReadIndex(0),
+		m_Size(0)
 	{
-		BytesOf<T> value;
-
-		memcpy(Buffer + Index, value.Bytes, sizeof(T));
-
-		Index += sizeof(T);
-
-		return value;
-	}
-
-	template<typename T>
-	void WriteBytesOf(T Value, byte* Buffer, uint32_t& Index)
-	{
-		BytesOf<T> value;
-		value.Value = Value;
-
-		memcpy(value.Bytes, Buffer + Index, sizeof(T));
-
-		Index += sizeof(T);
-
-		return value;
+		m_Buffer = reinterpret_cast<byte*>(malloc(Capacity));
 	}
 
 	BufferStream::BufferStream(byte* const Buffer, uint32_t Length) : BufferStream(Buffer, 0, Length)
@@ -113,37 +94,39 @@ namespace GameFramework::BinarySerializer
 
 	void BufferStream::ReadBytes(byte* Data, uint32_t Index, uint32_t Length)
 	{
-		memcpy(m_Buffer + m_ReadIndex, Data + Index, Length);
+		memcpy(m_Buffer + m_ReadIndex, Data, Length);
+
+		Index += Length;
 	}
 
 	void BufferStream::WriteBool(bool Value)
 	{
-		WriteBytesOf(Value, m_Buffer, m_Size);
+		WriteBytesOf(Value);
 	}
 
 	void BufferStream::WriteInt32(int32_t Value)
 	{
-		WriteBytesOf(Value, m_Buffer, m_Size);
+		WriteBytesOf(Value);
 	}
 
 	void BufferStream::WriteInt64(int64_t Value)
 	{
-		WriteBytesOf(Value, m_Buffer, m_Size);
+		WriteBytesOf(Value);
 	}
 
 	void BufferStream::WriteUInt32(uint32_t Value)
 	{
-		WriteBytesOf(Value, m_Buffer, m_Size);
+		WriteBytesOf(Value);
 	}
 
 	void BufferStream::WriteFloat32(float Value)
 	{
-		WriteBytesOf(Value, m_Buffer, m_Size);
+		WriteBytesOf(Value);
 	}
 
 	void BufferStream::WriteFloat64(double Value)
 	{
-		WriteBytesOf(Value, m_Buffer, m_Size);
+		WriteBytesOf(Value);
 	}
 
 	void BufferStream::WriteString(wstring Value)
@@ -153,10 +136,15 @@ namespace GameFramework::BinarySerializer
 		WriteBytes(reinterpret_cast<byte*>(const_cast<wstring::value_type*>(Value.c_str())), 0, size);
 	}
 
-	void BufferStream::WriteBytes(byte* const Data, uint32_t Index, uint32_t Length)
+	void BufferStream::WriteBytes(byte Buffer)
 	{
-		stream.Write(Data, (int)Index, (int)Length);
-		Size += (uint)Data.Length;
+		WriteBytes(&Buffer, 0, 1);
+	}
+
+	void BufferStream::WriteBytes(byte* const Buffer, uint32_t Index, uint32_t Length)
+	{
+		memcpy(Buffer + Index, Buffer + m_Size, Length);
+		m_Size += Length;
 	}
 
 	void BufferStream::BeginWriteArray(uint32_t Length)
@@ -185,7 +173,7 @@ namespace GameFramework::BinarySerializer
 	{
 	}
 
-	void BufferStream::Print(uint32_t BytesPerLine = 8) const
+	void BufferStream::Print(uint32_t BytesPerLine) const
 	{
 		cout << "Size: ";
 		cout << m_Size;

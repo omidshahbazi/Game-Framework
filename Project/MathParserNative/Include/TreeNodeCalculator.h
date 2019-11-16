@@ -4,6 +4,7 @@
 #ifndef TREENODECALCULATOR_H
 #define TREENODECALCULATOR_H
 
+#include "Common.h"
 #include "SyntaxTree\TreeNode.h"
 #include <map>
 #include <string>
@@ -12,7 +13,7 @@ using namespace GameFramework::MathParser::SyntaxTree;
 
 namespace GameFramework::MathParser
 {
-	class TreeNodeCalculator
+	class MATH_PARSER_API TreeNodeCalculator
 	{
 	public:
 		typedef std::map<std::string, double> ArgumentsMap;

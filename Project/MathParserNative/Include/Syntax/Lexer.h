@@ -4,6 +4,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include "..\Common.h"
 #include <string>
 #include <list>
 #include <stack>
@@ -19,7 +20,7 @@ namespace GameFramework::MathParser::Syntax
 {
 	class Token;
 
-	class Lexer
+	class MATH_PARSER_API Lexer
 	{
 	public:
 		Lexer(const std::string &Expr);

@@ -22,6 +22,11 @@ namespace GameFramework.BinarySerializer
 			private set;
 		}
 
+		public BufferStream(uint Capacity)
+		{
+			stream = new MemoryStream((int)Capacity);
+		}
+
 		public BufferStream(byte[] Buffer)
 		{
 			stream = new MemoryStream(Buffer, true);
@@ -151,16 +156,15 @@ namespace GameFramework.BinarySerializer
 			WriteBytes(buffer);
 		}
 
-		public void WriteBytes(params byte[] Data)
+		public void WriteBytes(params byte[] Buffer)
 		{
-			stream.Write(Data, 0, Data.Length);
-			Size += (uint)Data.Length;
+			WriteBytes(Buffer, 0, (uint)Buffer.Length);
 		}
 
-		public void WriteBytes(byte[] Data, uint Index, uint Length)
+		public void WriteBytes(byte[] Buffer, uint Index, uint Length)
 		{
-			stream.Write(Data, (int)Index, (int)Length);
-			Size += (uint)Data.Length;
+			stream.Write(Buffer, (int)Index, (int)Length);
+			Size += (uint)Buffer.Length;
 		}
 
 		public void BeginWriteArray(uint Length)

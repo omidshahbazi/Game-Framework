@@ -4,14 +4,19 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include "Common.h"
 #include <cstddef>
 #include <stdint.h>
+#include <BufferStream.h>
+#include <Utilities/Random.h>
 
 using namespace std;
+using namespace GameFramework::BinarySerializer;
+using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
-	static class Constants
+	static class NETWORKING_API Constants
 	{
 	public:
 		static class Control
@@ -33,7 +38,7 @@ namespace GameFramework::Networking
 		public:
 			static BufferStream CreateOutgoingBufferStream(uint32_t Length);
 
-			static BufferStream CreateIncommingBufferStream(byte[] Buffer);
+			static BufferStream CreateIncommingBufferStream(byte* const Buffer, uint32_t Length);
 
 			static BufferStream CreatePingBufferStream(void);
 		};
@@ -48,7 +53,7 @@ namespace GameFramework::Networking
 		static const uint16_t TIME_TO_LIVE;
 		static const float PING_TIME;
 
-		//static Random Random = new Random();
+		static GameFramework::Common::Utilities::Random Random;
 	};
 }
 

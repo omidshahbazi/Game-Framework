@@ -4,12 +4,13 @@
 #ifndef ARGUMENT_H
 #define ARGUMENT_H
 
+#include "Common.h"
 #include <string>
 #include <vector>
 
 namespace GameFramework::MathParser
 {
-	class Argument
+	class MATH_PARSER_API Argument
 	{
 	public:
 		Argument(const std::string &Name, double Value) :

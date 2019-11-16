@@ -4,6 +4,7 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
+#include "Common.h"
 #include "Argument.h"
 #include "TreeNodeCalculator.h"
 #include <string>
@@ -17,7 +18,7 @@ namespace GameFramework::MathParser
 		class TreeNode;
 	}
 
-	class Expression
+	class MATH_PARSER_API Expression
 	{
 	private:
 

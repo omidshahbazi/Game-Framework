@@ -4,6 +4,7 @@
 #ifndef FUNCTIONDEFINITION_H
 #define FUNCTIONDEFINITION_H
 
+#include "Common.h"
 #include "SyntaxTree\TreeNode.h"
 #include "TreeNodeCalculator.h"
 #include <functional>
@@ -13,7 +14,7 @@ using namespace GameFramework::MathParser::SyntaxTree;
 
 namespace GameFramework::MathParser
 {
-	class FunctionDefinition
+	class MATH_PARSER_API FunctionDefinition
 	{
 	public:
 		typedef std::function<double(const TreeNodeCollection&, const TreeNodeCalculator::ArgumentsMap&)> FunctionSignature;

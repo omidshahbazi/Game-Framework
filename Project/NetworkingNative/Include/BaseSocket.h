@@ -4,10 +4,11 @@
 #ifndef BASE_SOCKET_H
 #define BASE_SOCKET_H
 
+#include "Common.h"
 
 namespace GameFramework::NetworkingManaged
 {
-	class BaseSocket
+	class NETWORKING_API BaseSocket
 	{
 	protected:
 		class EventBase
@@ -19,11 +20,11 @@ namespace GameFramework::NetworkingManaged
 		};
 
 	private:
-		class EventBaseList : List<EventBase>
+		class NETWORKING_API EventBaseList : List<EventBase>
 		{ };
 
 	protected:
-		class SendCommand
+		class NETWORKING_API SendCommand
 		{
 			public BufferStream Buffer
 			{
@@ -45,7 +46,7 @@ namespace GameFramework::NetworkingManaged
 		};
 
 	private:
-		class SendCommandList : List<SendCommand>
+		class NETWORKING_API SendCommandList : List<SendCommand>
 		{ };
 
 		private Thread receiveThread = null;

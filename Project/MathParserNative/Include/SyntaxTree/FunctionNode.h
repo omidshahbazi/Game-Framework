@@ -4,11 +4,12 @@
 #ifndef FUNCTIONNODE_H
 #define FUNCTIONNODE_H
 
+#include "..\Common.h"
 #include "..\SyntaxTree\TreeNode.h"
 
 namespace GameFramework::MathParser::SyntaxTree
 {
-	class FunctionNode : public TreeNode
+	class MATH_PARSER_API FunctionNode : public TreeNode
 	{
 	public:
 		FunctionNode(const std::string &Name) :

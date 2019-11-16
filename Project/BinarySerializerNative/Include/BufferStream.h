@@ -4,9 +4,11 @@
 #ifndef BUFFER_STREAM_H
 #define BUFFER_STREAM_H
 
+#include "Common.h"
 #include <cstddef>
 #include <inttypes.h>
 #include <string>
+#include "..\Include\Utilities.h"
 
 using namespace std;
 
@@ -14,9 +16,11 @@ namespace GameFramework::BinarySerializer
 {
 	//|value|
 	//|array|count|element-1|element-n|
-	class BufferStream
+	class BINARY_SERIALIZE_API BufferStream
 	{
 	public:
+		BufferStream(uint32_t Capacity);
+
 		BufferStream(byte* const Buffer, uint32_t Length);
 
 		BufferStream(byte* const Buffer, uint32_t Index, uint32_t Length);
@@ -55,6 +59,7 @@ namespace GameFramework::BinarySerializer
 
 		void WriteString(wstring Value);
 
+		void WriteBytes(byte Buffer);
 		void WriteBytes(byte* const Data, uint32_t Index, uint32_t Length);
 
 		void BeginWriteArray(uint32_t Length);
@@ -79,6 +84,26 @@ namespace GameFramework::BinarySerializer
 		__forceinline uint32_t GetSize(void) const
 		{
 			return m_Size;
+		}
+
+	private:
+		template<typename T>
+		BytesOf<T> ReadBytesOf(byte* const Buffer, uint32_t& Index)
+		{
+			BytesOf<T> value;
+
+			ReadBytes(value.Bytes, 0, sizeof(T));
+
+			return value;
+		}
+
+		template<typename T>
+		void WriteBytesOf(T Value)
+		{
+			BytesOf<T> value;
+			value.Value = Value;
+
+			WriteBytes(value.Bytes, 0, sizeof(T));
 		}
 
 	private:
