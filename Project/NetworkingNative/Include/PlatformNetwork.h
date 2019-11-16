@@ -170,6 +170,8 @@ namespace GameFramework::Networking
 
 		static bool Bind(Handle Handle, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port);
 
+		static bool SetSocketOption(Handle Handle, bool Enabled);
+
 		static bool SetNonBlocking(Handle Handle, bool Enabled);
 
 		static bool Send(Handle Handle, const byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port, SendModes Mode);

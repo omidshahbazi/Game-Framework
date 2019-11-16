@@ -258,6 +258,15 @@ namespace GameFramework::Networking
 		return (bind(Handle, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_in)) == NO_ERROR);
 	}
 
+	bool PlatformNetwork::SetSocketOption(Handle Handle, bool Enabled)
+	{
+		SOl_tcp
+		setsockopt()
+		DWORD enabled = (Enabled ? 1 : 0);
+
+		return (ioctlsocket(Handle, FIONBIO, &enabled) == NO_ERROR);
+	}
+
 	bool PlatformNetwork::SetNonBlocking(Handle Handle, bool Enabled)
 	{
 		DWORD enabled = (Enabled ? 1 : 0);
