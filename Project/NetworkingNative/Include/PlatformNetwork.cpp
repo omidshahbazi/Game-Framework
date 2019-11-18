@@ -222,6 +222,107 @@ namespace GameFramework::Networking
 		return SD_BOTH;
 	}
 
+	int32_t GetOptionLevel(PlatformNetwork::OptionLevels Option)
+	{
+		switch (Option)
+		{
+		case PlatformNetwork::OptionLevels::IP:
+			return IPPROTO_IP;
+
+		case PlatformNetwork::OptionLevels::TCP:
+			return IPPROTO_TCP;
+
+		case PlatformNetwork::OptionLevels::UDP:
+			return IPPROTO_UDP;
+
+		case PlatformNetwork::OptionLevels::IPV6:
+			return IPPROTO_IPV6;
+
+		case PlatformNetwork::OptionLevels::Socket:
+			return SOL_SOCKET;
+		}
+		
+		return IPPROTO_IP;
+	}
+
+	int32_t GetOption(PlatformNetwork::Options Option)
+	{
+		switch (Option)
+		{
+		case PlatformNetwork::Options::Debug:
+			return SO_DEBUG;
+
+		case PlatformNetwork::Options::AcceptConnection:
+			return SO_ACCEPTCONN;
+
+		case PlatformNetwork::Options::ReuseAddress:
+			return SO_REUSEADDR;
+
+		case PlatformNetwork::Options::KeepAlive:
+			return SO_KEEPALIVE;
+
+		case PlatformNetwork::Options::DontRoute:
+			return SO_DONTROUTE;
+
+		case PlatformNetwork::Options::Broadcast:
+			return SO_BROADCAST;
+
+		case PlatformNetwork::Options::UseLoopback:
+			return SO_USELOOPBACK;
+
+		case PlatformNetwork::Options::Linger:
+			return SO_LINGER;
+
+		case PlatformNetwork::Options::DontLinger:
+			return SO_DONTLINGER;
+
+		case PlatformNetwork::Options::SendBuffer:
+			return SO_SNDBUF;
+
+		case PlatformNetwork::Options::ReceiverBuffer:
+			return SO_RCVBUF;
+
+		case PlatformNetwork::Options::SendTimeout:
+			return SO_SNDTIMEO;
+
+		case PlatformNetwork::Options::ReceiveTimeout:
+			return SO_RCVTIMEO;
+
+		case PlatformNetwork::Options::BSPState:
+			return SO_TYPE;
+
+		case PlatformNetwork::Options::GroupID:
+			return SO_GROUP_ID;
+
+		case PlatformNetwork::Options::GroupPriority:
+			return SO_GROUP_PRIORITY;
+
+		case PlatformNetwork::Options::MaxMessageSize:
+			return SO_MAX_MSG_SIZE;
+
+		case PlatformNetwork::Options::ConditionalAccept:
+			return SO_CONDITIONAL_ACCEPT;
+
+		case PlatformNetwork::Options::PauseAccept:
+			return SO_PAUSE_ACCEPT;
+
+		case PlatformNetwork::Options::RandomizePort:
+			return SO_RANDOMIZE_PORT;
+
+		case PlatformNetwork::Options::PortScalability:
+			return SO_PORT_SCALABILITY;
+
+		case PlatformNetwork::Options::ReuseUnicastPort:
+			return SO_REUSE_UNICASTPORT;
+
+		case PlatformNetwork::Options::ReuseMulticastPort:
+			return SO_REUSE_MULTICASTPORT;
+
+		case PlatformNetwork::Options::NoDelay:
+			return TCP_NODELAY;
+		}
+	}
+
 	bool PlatformNetwork::Initialize(void)
 	{
 		WSADATA data;
@@ -258,13 +359,9 @@ namespace GameFramework::Networking
 		return (bind(Handle, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_in)) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::SetSocketOption(Handle Handle, bool Enabled)
+	bool PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled)
 	{
-		SOl_tcp
-		setsockopt()
-		DWORD enabled = (Enabled ? 1 : 0);
-
-		return (ioctlsocket(Handle, FIONBIO, &enabled) == NO_ERROR);
+		return (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) == NO_ERROR);
 	}
 
 	bool PlatformNetwork::SetNonBlocking(Handle Handle, bool Enabled)

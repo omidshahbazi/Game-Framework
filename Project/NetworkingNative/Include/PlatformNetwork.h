@@ -4,7 +4,6 @@
 #define PLATFORM_NETWORK_H
 
 #include "Common.h"
-#include <utility>
 #include <cstdint>
 #include <cstddef>
 
@@ -153,9 +152,56 @@ namespace GameFramework::Networking
 
 		enum class ShutdownHows
 		{
-			Receive = 0,
-			Send = 1,
-			Both = 2
+			Receive,
+			Send,
+			Both
+		};
+
+		enum class OptionLevels
+		{
+			IP = 0,
+			TCP = 6,
+			UDP = 17,
+			IPV6 = 41,
+			Socket = 65535
+		};
+
+		enum class Options
+		{
+			Debug,
+			AcceptConnection,
+			ReuseAddress,
+			KeepAlive,
+			DontRoute,
+			Broadcast,
+			UseLoopback,
+			Linger,
+			
+			DontLinger,
+			
+			SendBuffer,
+			ReceiverBuffer,
+
+			SendTimeout,
+			ReceiveTimeout,
+
+			BSPState,
+
+			GroupID,
+			GroupPriority,
+
+			MaxMessageSize,
+
+			ConditionalAccept,
+
+			PauseAccept,
+			RandomizePort,
+			PortScalability,
+			ReuseUnicastPort,
+
+			ReuseMulticastPort,
+
+			NoDelay
 		};
 
 		typedef uint32_t Handle;
@@ -170,7 +216,7 @@ namespace GameFramework::Networking
 
 		static bool Bind(Handle Handle, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port);
 
-		static bool SetSocketOption(Handle Handle, bool Enabled);
+		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled);
 
 		static bool SetNonBlocking(Handle Handle, bool Enabled);
 
