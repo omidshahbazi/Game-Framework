@@ -51,9 +51,14 @@ namespace GameFramework.BinarySerializer
 			Size = (uint)Stream.Position;
 		}
 
-		public void Reset()
+		public void ResetRead()
 		{
 			stream.Seek(0, SeekOrigin.Begin);
+		}
+
+		public void ResetWrite()
+		{
+			ResetRead();
 			Size = 0;
 		}
 
