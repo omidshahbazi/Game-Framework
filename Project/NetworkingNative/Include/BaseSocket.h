@@ -5,11 +5,14 @@
 #define BASE_SOCKET_H
 
 #include "Common.h"
+#include "PlatformNetwork.h"
 #include <BufferStream.h>
+#include <thread>
 
 using namespace GameFramework::BinarySerializer;
+using namespace std;
 
-namespace GameFramework::NetworkingManaged
+namespace GameFramework::Networking
 {
 	class NETWORKING_API BaseSocket
 	{
@@ -51,168 +54,41 @@ namespace GameFramework::NetworkingManaged
 			double m_SendTime;
 		};
 
+		typedef PlatformNetwork::Handle Socket;
+
 	private:
 		typedef List<SendCommand> SendCommandList;
 
-		//public BaseSocket(Protocols Type)
-		//{
-		//	events = new EventBaseList();
-		//	sendCommands = new SendCommandList();
+	public:
+		BaseSocket(PlatformNetwork::IPProtocols Type);
 
-		//	Socket = SocketUtilities.CreateSocket(Type);
-		//	Socket.Blocking = false;
-		//	Socket.ReceiveBufferSize = (int)Constants.RECEIVE_BUFFER_SIZE;
-		//	Socket.SendBufferSize = (int)Constants.SEND_BUFFER_SIZE;
-		//	Socket.ReceiveTimeout = (int)Constants.RECEIVE_TIMEOUT;
-		//	Socket.SendTimeout = (int)Constants.SEND_TIMEOUT;
-		//	Socket.Ttl = Constants.TIME_TO_LIVE;
+	protected:
+		void Shutdown(void);
 
-		//	SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
-		//	SocketUtilities.SetChecksumEnabled(Socket, false);
-		//	SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);
-		//	SocketUtilities.SetBSDUrgentEnabled(Socket, true);
+		void RunReceiveThread(void);
 
-		//	ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
+		void RunSenndThread(void);
 
-		//	MultithreadedCallbacks = true;
-		//	MultithreadedReceive = true;
-		//	MultithreadedSend = true;
-		//}
+		virtual void Receive(void) = 0;
 
-		//public virtual void Service()
-		//{
-		//	if (!MultithreadedReceive && IsReady)
-		//		Receive();
+		virtual void Send(Socket Target, BufferStream Buffer);
 
-		//	if (!MultithreadedSend && IsReady)
-		//		HandleSendCommands();
+		virtual bool HandleSendCommand(SendCommand Command) = 0;
 
-		//	if (!MultithreadedCallbacks)
-		//	{
-		//		lock(events)
-		//		{
-		//			for (int i = 0; i < events.Count; ++i)
-		//				ProcessEvent(events[i]);
+		virtual void ProcessEvent(EventBase Event) = 0;
 
-		//			events.Clear();
-		//		}
-		//	}
-		//}
+		void AddEvent(EventBase Event);
 
-		//protected void Shutdown()
-		//{
-		//	SocketUtilities.CloseSocket(Socket);
+		void AddSendCommand(SendCommand Command);
 
-		//	if (MultithreadedReceive)
-		//		receiveThread.Abort();
+		virtual void HandleDisconnection(Socket Socket);
 
-		//	if (MultithreadedSend)
-		//		sendThread.Abort();
-		//}
+	private:
+		void ReceiverWorker(void);
 
-		//protected void RunReceiveThread()
-		//{
-		//	if (!MultithreadedReceive)
-		//		return;
+		void SendWorker(void);
 
-		//	receiveThread = new Thread(ReceiverWorker);
-		//	receiveThread.Start();
-		//}
-
-		//protected void RunSenndThread()
-		//{
-		//	if (!MultithreadedSend)
-		//		return;
-
-		//	sendThread = new Thread(SendWorker);
-		//	sendThread.Start();
-		//}
-
-		//protected abstract void Receive();
-
-		//protected virtual void Send(Socket Target, BufferStream Buffer)
-		//{
-		//	try
-		//	{
-		//		lock(Target)
-		//		{
-		//			if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
-		//				Target.Send(Buffer.Buffer);
-
-		//			BandwidthOut += Buffer.Size;
-		//		}
-		//	}
-		//	catch (SocketException e)
-		//	{
-		//		if (e.SocketErrorCode == SocketError.ConnectionReset)
-		//		{
-		//			HandleDisconnection(Target);
-
-		//			return;
-		//		}
-
-		//		throw e;
-		//	}
-		//	catch (Exception e)
-		//	{
-		//		throw e;
-		//	}
-		//}
-
-		//protected abstract bool HandleSendCommand(SendCommand Command);
-
-		//protected abstract void ProcessEvent(EventBase Event);
-
-		//protected void AddEvent(EventBase Event)
-		//{
-		//	lock(events)
-		//		events.Add(Event);
-		//}
-
-		//protected void AddSendCommand(SendCommand Command)
-		//{
-		//	lock(sendCommands)
-		//		sendCommands.Add(Command);
-		//}
-
-		//protected virtual void HandleDisconnection(Socket Socket)
-		//{
-		//	//Internationally Left Blank
-		//}
-
-		//private void ReceiverWorker()
-		//{
-		//	while (true)
-		//	{
-		//		Thread.Sleep(1);
-
-		//		Receive();
-		//	}
-		//}
-
-		//private void SendWorker()
-		//{
-		//	while (true)
-		//	{
-		//		Thread.Sleep(1);
-
-		//		HandleSendCommands();
-		//	}
-		//}
-
-		//private void HandleSendCommands()
-		//{
-		//	lock(sendCommands)
-		//	{
-		//		for (int i = 0; i < sendCommands.Count; ++i)
-		//		{
-		//			if (!HandleSendCommand(sendCommands[i]))
-		//				continue;
-
-		//			sendCommands.RemoveAt(i--);
-		//		}
-		//	}
-		//}
+		void HandleSendCommands(void);
 
 	protected:
 		Socket& GetSocket(void)
@@ -280,14 +156,14 @@ namespace GameFramework::NetworkingManaged
 		{
 			return m_LatencySimulation;
 		}
-		void SetPacketLossSimulation(bool Value)
+		void SetLatencySimulation(bool Value)
 		{
 			m_LatencySimulation = Value;
 		}
 
 	private:
-		Thread m_ReceiveThread = null;
-		Thread m_SendThread = null;
+		thread m_ReceiveThread;
+		thread m_SendThread;
 
 		EventBaseList m_Events;
 		SendCommandList m_SendCommands;

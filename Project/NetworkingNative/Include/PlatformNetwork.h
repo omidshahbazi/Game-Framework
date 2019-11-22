@@ -1,11 +1,11 @@
-// Copyright 2016-2017 ?????????????. All Rights Reserved.
+// Copyright 2019. All Rights Reserved.
 #pragma once
 #ifndef PLATFORM_NETWORK_H
 #define PLATFORM_NETWORK_H
 
 #include "Common.h"
-#include <cstdint>
 #include <cstddef>
+#include <inttypes.h>
 
 namespace GameFramework::Networking
 {
@@ -220,10 +220,10 @@ namespace GameFramework::Networking
 
 		static bool SetNonBlocking(Handle Handle, bool Enabled);
 
-		static bool Send(Handle Handle, const byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port, SendModes Mode);
-		static bool Send(Handle Handle, const byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, IP Address, uint16_t Port, SendModes Mode);
+		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port, SendModes Mode);
+		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, IP Address, uint16_t Port, SendModes Mode);
 
-		static bool Receive(Handle Handle, byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, IP& Address, uint16_t& Port, ReceiveModes Mode);
+		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, IP& Address, uint16_t& Port, ReceiveModes Mode);
 
 		static Errors GetLastError(void);
 

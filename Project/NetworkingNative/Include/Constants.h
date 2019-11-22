@@ -46,7 +46,7 @@ namespace GameFramework::Networking
 	public:
 		static const uint32_t RECEIVE_TIMEOUT;
 		static const uint32_t SEND_TIMEOUT;
-		static constexpr uint32_t RECEIVE_BUFFER_SIZE;
+		static const uint32_t RECEIVE_BUFFER_SIZE;
 		static const uint32_t SEND_BUFFER_SIZE;
 
 		// https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.ttl?view=netframework-4.8#System_Net_Sockets_Socket_Ttl

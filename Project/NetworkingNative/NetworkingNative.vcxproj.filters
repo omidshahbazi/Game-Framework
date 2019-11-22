@@ -32,7 +32,10 @@
     <ClCompile Include="Compile\Constants.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
-    <ClCompile Include="Include\PlatformNetwork.cpp">
+    <ClCompile Include="Compile\PlatformNetwork.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\BaseSocket.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>
