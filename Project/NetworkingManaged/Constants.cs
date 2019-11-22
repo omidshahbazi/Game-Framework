@@ -25,7 +25,7 @@ namespace GameFramework.Networking
 				uint length = HEADER_SIZE + Length;
 
 				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.Reset();
+				buffer.ResetWrite();
 				buffer.WriteUInt32(length);
 				buffer.WriteBytes(Control.BUFFER);
 
@@ -42,7 +42,7 @@ namespace GameFramework.Networking
 				uint length = HEADER_SIZE + sizeof(double);
 
 				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.Reset();
+				buffer.ResetWrite();
 				buffer.WriteUInt32(length);
 				buffer.WriteBytes(Control.PING);
 				buffer.WriteFloat64(Time.CurrentEpochTime);

@@ -129,11 +129,33 @@ namespace GameFramework::BinarySerializer
 		WriteBytesOf(Value);
 	}
 
+	void BufferStream::WriteString(const char* Value, uint32_t Length)
+	{
+		uint32_t size = Length * sizeof(char);
+		WriteUInt32(size);
+
+		for (int i = 0; i < Length; ++i)
+		{
+			wchar_t ch = Value[i];
+			WriteBytesOf(ch);
+		}
+	}
+
+	void BufferStream::WriteString(string Value)
+	{
+		WriteString(Value.c_str(), Value.length());
+	}
+
+	void BufferStream::WriteString(const wchar_t* Value, uint32_t Length)
+	{
+		uint32_t size = Length * sizeof(wchar_t);
+		WriteUInt32(size);
+		WriteBytes(reinterpret_cast<byte*>(const_cast<wchar_t*>(Value)), 0, size);
+	}
+
 	void BufferStream::WriteString(wstring Value)
 	{
-		uint32_t size = Value.length() * sizeof(wstring::value_type);
-		WriteUInt32(size);
-		WriteBytes(reinterpret_cast<byte*>(const_cast<wstring::value_type*>(Value.c_str())), 0, size);
+		WriteString(Value.c_str(), Value.length());
 	}
 
 	void BufferStream::WriteBytes(byte Buffer)

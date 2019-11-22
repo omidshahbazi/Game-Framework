@@ -57,6 +57,10 @@ namespace GameFramework::BinarySerializer
 
 		void WriteFloat64(double Value);
 
+		void WriteString(const char* Value, uint32_t Length);
+		void WriteString(string Value);
+
+		void WriteString(const wchar_t* Value, uint32_t Length);
 		void WriteString(wstring Value);
 
 		void WriteBytes(byte Buffer);
