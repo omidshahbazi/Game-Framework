@@ -23,6 +23,36 @@ namespace GameFramework.Networking
 			Socket.Close();
 		}
 
+		public static void SetBlocking(Socket Socket, bool Value)
+		{
+			Socket.Blocking = Value;
+		}
+
+		public static void SetReceiveBufferSize(Socket Socket, uint Value)
+		{
+			Socket.ReceiveBufferSize = (int)Value;
+		}
+
+		public static void SetSendBufferSize(Socket Socket, uint Value)
+		{
+			Socket.SendBufferSize = (int)Value;
+		}
+
+		public static void SetReceiveTimeout(Socket Socket, uint Value)
+		{
+			Socket.ReceiveTimeout = (int)Value;
+		}
+
+		public static void SetSendTimeout(Socket Socket, uint Value)
+		{
+			Socket.SendTimeout = (int)Value;
+		}
+
+		public static void SetTimeToLive(Socket Socket, ushort Value)
+		{
+			Socket.Ttl = (short)Value;
+		}
+
 		public static void SetIPv6OnlyEnabled(Socket Socket, bool Value)
 		{
 			Socket.SetSocketOption(SocketOptionLevel.IPv6, IPV6_ONLY_OPTION, Value);

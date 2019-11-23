@@ -27,6 +27,9 @@
     <ClInclude Include="Include\PlatformNetwork.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\ServerSocket.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Constants.cpp">
@@ -36,6 +39,12 @@
       <Filter>Compile</Filter>
     </ClCompile>
     <ClCompile Include="Compile\BaseSocket.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\SocketUtilities.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\ServerSocket.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>

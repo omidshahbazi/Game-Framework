@@ -7,10 +7,10 @@ using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
-	const int Constants::Control::SIZE = sizeof(byte);
+	const int Constants::Control::SIZE = sizeof(std::byte);
 
-	const byte Constants::Control::BUFFER = (byte)1;
-	const byte Constants::Control::PING = (byte)2;
+	const std::byte Constants::Control::BUFFER = (std::byte)1;
+	const std::byte Constants::Control::PING = (std::byte)2;
 
 	const uint32_t Constants::Packet::PACKET_SIZE_SIZE = sizeof(uint32_t);
 	const uint32_t Constants::Packet::HEADER_SIZE = Control::SIZE;
@@ -27,7 +27,7 @@ namespace GameFramework::Networking
 		return buffer;
 	}
 
-	BufferStream Constants::Packet::CreateIncommingBufferStream(byte* const Buffer, uint32_t Length)
+	BufferStream Constants::Packet::CreateIncommingBufferStream(std::byte* const Buffer, uint32_t Length)
 	{
 		return BufferStream(Buffer, HEADER_SIZE, (uint32_t)(Length - HEADER_SIZE));
 	}

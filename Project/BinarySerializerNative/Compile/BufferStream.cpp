@@ -124,7 +124,7 @@ namespace GameFramework::BinarySerializer
 		WriteBytesOf(Value);
 	}
 
-	void BufferStream::WriteFloat64(double Value)
+	void BufferStream::WriteFloat64(const double &Value)
 	{
 		WriteBytesOf(Value);
 	}
@@ -141,7 +141,7 @@ namespace GameFramework::BinarySerializer
 		}
 	}
 
-	void BufferStream::WriteString(string Value)
+	void BufferStream::WriteString(const string &Value)
 	{
 		WriteString(Value.c_str(), Value.length());
 	}
@@ -153,7 +153,7 @@ namespace GameFramework::BinarySerializer
 		WriteBytes(reinterpret_cast<byte*>(const_cast<wchar_t*>(Value)), 0, size);
 	}
 
-	void BufferStream::WriteString(wstring Value)
+	void BufferStream::WriteString(const wstring &Value)
 	{
 		WriteString(Value.c_str(), Value.length());
 	}

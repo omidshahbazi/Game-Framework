@@ -5,22 +5,22 @@
 #define BASE_SOCKET_H
 
 #include "Common.h"
-#include "PlatformNetwork.h"
+#include "SocketUtilities.h"
 #include <BufferStream.h>
 #include <thread>
+#include <atomic>
 
 using namespace GameFramework::BinarySerializer;
-using namespace std;
 
 namespace GameFramework::Networking
 {
 	class NETWORKING_API BaseSocket
 	{
 	protected:
-		class EventBase
+		class NETWORKING_API EventBase
 		{
 		public:
-			EventBase()
+			EventBase(void)
 			{
 			}
 		};
@@ -54,13 +54,16 @@ namespace GameFramework::Networking
 			double m_SendTime;
 		};
 
-		typedef PlatformNetwork::Handle Socket;
-
 	private:
 		typedef List<SendCommand> SendCommandList;
 
+		friend static void GlobalReceiverWorker(BaseSocket* Instance);
+		friend static void GlobalSendWorker(BaseSocket* Instance);
+
 	public:
 		BaseSocket(PlatformNetwork::IPProtocols Type);
+
+		virtual void Service(void);
 
 	protected:
 		void Shutdown(void);
@@ -71,15 +74,15 @@ namespace GameFramework::Networking
 
 		virtual void Receive(void) = 0;
 
-		virtual void Send(Socket Target, BufferStream Buffer);
+		virtual void Send(Socket Target, const BufferStream& Buffer);
 
-		virtual bool HandleSendCommand(SendCommand Command) = 0;
+		virtual bool HandleSendCommand(const SendCommand& Command) = 0;
 
-		virtual void ProcessEvent(EventBase Event) = 0;
+		virtual void ProcessEvent(const EventBase& Event) = 0;
 
-		void AddEvent(EventBase Event);
+		void AddEvent(const EventBase& Event);
 
-		void AddSendCommand(SendCommand Command);
+		void AddSendCommand(const SendCommand& Command);
 
 		virtual void HandleDisconnection(Socket Socket);
 
@@ -96,7 +99,7 @@ namespace GameFramework::Networking
 			return m_Socket;
 		}
 
-		byte* GetReceiveBuffer(void)
+		std::byte* GetReceiveBuffer(void)
 		{
 			return m_ReceiveBuffer;
 		}
@@ -162,16 +165,19 @@ namespace GameFramework::Networking
 		}
 
 	private:
-		thread m_ReceiveThread;
-		thread m_SendThread;
+		thread* m_ReceiveThread;
+		thread* m_SendThread;
 
 		EventBaseList m_Events;
+		atomic_bool m_EventsLock;
+
 		SendCommandList m_SendCommands;
+		atomic_bool m_SendCommandsLock;
 
 	private:
 		Socket m_Socket;
 
-		byte* m_ReceiveBuffer;
+		std::byte* m_ReceiveBuffer;
 
 		uint64_t m_BandwidthIn;
 		uint64_t m_BandwidthOut;

@@ -119,13 +119,12 @@ namespace GameFramework.Networking
 			sendCommands = new SendCommandList();
 
 			Socket = SocketUtilities.CreateSocket(Type);
-			Socket.Blocking = false;
-			Socket.ReceiveBufferSize = (int)Constants.RECEIVE_BUFFER_SIZE;
-			Socket.SendBufferSize = (int)Constants.SEND_BUFFER_SIZE;
-			Socket.ReceiveTimeout = (int)Constants.RECEIVE_TIMEOUT;
-			Socket.SendTimeout = (int)Constants.SEND_TIMEOUT;
-			Socket.Ttl = (short)Constants.TIME_TO_LIVE;
-
+			SocketUtilities.SetBlocking(Socket, false);
+			SocketUtilities.SetReceiveBufferSize(Socket, Constants.RECEIVE_BUFFER_SIZE);
+			SocketUtilities.SetSendBufferSize(Socket, Constants.SEND_BUFFER_SIZE);
+			SocketUtilities.SetReceiveTimeout(Socket, Constants.RECEIVE_TIMEOUT);
+			SocketUtilities.SetSendTimeout(Socket, Constants.SEND_TIMEOUT);
+			SocketUtilities.SetTimeToLive(Socket, Constants.TIME_TO_LIVE);
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);
 			SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);

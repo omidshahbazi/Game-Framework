@@ -6,80 +6,49 @@
 
 #include "Common.h"
 #include "PlatformNetwork.h"
+#include <string>
 
 namespace GameFramework::Networking
 {
+	typedef PlatformNetwork::Handle Socket;
+	typedef long IPAddress;
+
 	static class NETWORKING_API SocketUtilities
 	{
 	public:
-		typedef PlatformNetwork::Handle Socket;
+		static Socket CreateSocket(PlatformNetwork::IPProtocols Protocol);
 
-	public:
-		static Socket CreateSocket(PlatformNetwork::IPProtocols Protocol)
-		{
-			PlatformNetwork::Types type = (Protocol == PlatformNetwork::IPProtocols::TCP ? PlatformNetwork::Types::Stream : PlatformNetwork::Types::Datagram);
+		static void CloseSocket(Socket Socket);
 
-			return PlatformNetwork::Create(PlatformNetwork::AddressFamilies::InterNetworkV6, type, Protocol);
-		}
+		static void SetBlocking(Socket Socket, bool Value);
 
-		static void CloseSocket(Socket Socket)
-		{
-			PlatformNetwork::Close(Socket);
-		}
+		static void SetReceiveBufferSize(Socket Socket, uint32_t Value);
 
-		static void SetIPv6OnlyEnabled(Socket Socket, bool Value)
-		{
-			Socket.SetSocketOption(SocketOptionLevel.IPv6, IPV6_ONLY_OPTION, Value);
-		}
+		static void SetSendBufferSize(Socket Socket, uint32_t Value);
 
-		static void SetChecksumEnabled(Socket Socket, bool Value)
-		{
-			Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoChecksum, (!Value ? 0 : 1));
-		}
+		static void SetReceiveTimeout(Socket Socket, uint32_t Value);
 
-		static void SetBSDUrgentEnabled(Socket Socket, bool Value)
-		{
-			Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.BsdUrgent, Value);
-		}
+		static void SetSendTimeout(Socket Socket, uint32_t Value);
+
+		static void SetTimeToLive(Socket Socket, uint16_t Value);
+
+		static void SetIPv6OnlyEnabled(Socket Socket, bool Value);
+
+		static void SetChecksumEnabled(Socket Socket, bool Value);
+
+		static void SetBSDUrgentEnabled(Socket Socket, bool Value);
 
 		// After many researches around NoDelay and the Nagle algorithm, I found out that using this algorithm on TCP
 		// will apply a bad effect on the send/receive protocol under TCP connection
 		// Altough, NoDelay and the function doesn't work properly as described in MSDN and I desired
 		// https://support.microsoft.com/en-us/help/214397/design-issues-sending-small-data-segments-over-tcp-with-winsock
-		static void SetNagleAlgorithmEnabled(Socket Socket, bool Value)
-		{
-			Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, !Value);
-		}
+		static void SetNagleAlgorithmEnabled(Socket Socket, bool Value);
 
-		static bool IsSocketReady(Socket Socket)
-		{
-			return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0);
-		}
+		static bool IsSocketReady(Socket Socket);
 
-		static IPAddress ResolveDomain(string Domain)
-		{
-			try
-			{
-				IPHostEntry entry = Dns.GetHostEntry(Domain);
+		static IPAddress ResolveDomain(const std::string& Domain);
 
-				if (entry == null || entry.AddressList == null || entry.AddressList.Length == 0)
-					return null;
-
-				return entry.AddressList[0];
-			}
-			catch
-			{
-				return IPAddress.Parse(Domain);
-			}
-		}
-
-		static IPAddress MapIPv4ToIPv6(IPAddress IP)
-		{
-			if (IP.AddressFamily != AddressFamily.InterNetwork)
-				throw new ArgumentException("IP must be v4");
-
-			return IPAddress.Parse("::ffff:" + IP.ToString());
-		}
+		static IPAddress MapIPv4ToIPv6(IPAddress IP);
 	};
 }
 

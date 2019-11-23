@@ -10,7 +10,6 @@
 #include <BufferStream.h>
 #include <Utilities/Random.h>
 
-using namespace std;
 using namespace GameFramework::BinarySerializer;
 using namespace GameFramework::Common::Utilities;
 
@@ -24,8 +23,8 @@ namespace GameFramework::Networking
 		public:
 			static const int SIZE;
 
-			static const byte BUFFER;
-			static const byte PING;
+			static const std::byte BUFFER;
+			static const std::byte PING;
 		};
 
 	public:
@@ -38,7 +37,7 @@ namespace GameFramework::Networking
 		public:
 			static BufferStream CreateOutgoingBufferStream(uint32_t Length);
 
-			static BufferStream CreateIncommingBufferStream(byte* const Buffer, uint32_t Length);
+			static BufferStream CreateIncommingBufferStream(std::byte* const Buffer, uint32_t Length);
 
 			static BufferStream CreatePingBufferStream(void);
 		};
