@@ -11,7 +11,35 @@
 namespace GameFramework::Networking
 {
 	typedef PlatformNetwork::Handle Socket;
-	typedef long IPAddress;
+
+	struct IPAddress
+	{
+	public:
+		IPAddress(PlatformNetwork::AddressFamilies Family, long Address) :
+			m_Family(Family),
+			m_Address(Address)
+		{
+		}
+
+		PlatformNetwork::AddressFamilies GetFamily(void) const
+		{
+			return m_Family;
+		}
+
+		long GetAddress(void) const
+		{
+			return m_Address;
+		}
+
+		std::string ToString(void) const
+		{
+			return "";
+		}
+
+	private:
+		PlatformNetwork::AddressFamilies m_Family;
+		long m_Address;
+	};
 
 	static class NETWORKING_API SocketUtilities
 	{
