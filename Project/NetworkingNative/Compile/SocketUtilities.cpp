@@ -90,24 +90,24 @@ namespace GameFramework::Networking
 		hintInfo.ai_family = AF_UNSPEC;
 
 		PADDRINFOA queryResult;
-		int32_t host = getaddrinfo(Domain.c_str(), "", &hintInfo, &queryResult);
-
-		PADDRINFOA result = queryResult;
+		int32_t result = getaddrinfo(Domain.c_str(), "", &hintInfo, &queryResult);
+		if (result != 0)
+			throw new exception("Invalid Domain");
 
 		for (addrinfo* ptr = queryResult; ptr != NULL; ptr = ptr->ai_next)
 		{
 			if (ptr->ai_family != AF_INET6)
 				continue;
 
-			result = ptr;
-			break;
+			sockaddr_in6* ipv6 = (struct sockaddr_in6*)ptr->ai_addr;
+
+			return IPAddress(PlatformNetwork::AddressFamilies::InterNetworkV6, ipv6->sin6_addr.u.Byte);
 		}
 
-		sockaddr_in* sockaddr_ipv4 = (struct sockaddr_in*)result->ai_addr;
+		sockaddr_in* ipv4 = (struct sockaddr_in*)queryResult->ai_addr;
 
-		sockaddr_in6* sockaddr_ipv6 = (struct sockaddr_in6*)result->ai_addr;
+		return IPAddress(PlatformNetwork::AddressFamilies::InterNetwork, ipv4->sin_addr.S_un.S_addr);
 
-		return IPAddress(PlatformNetwork::AddressFamilies::InterNetwork, 0);
 
 
 		//printf("\tFlags: 0x%x\n", ptr->ai_flags);
@@ -199,6 +199,24 @@ namespace GameFramework::Networking
 
 		//return IPAddress.Parse("::ffff:" + IP.ToString());
 
-		return IPAddress(PlatformNetwork::AddressFamilies::InterNetwork, 0);
+		return IPAddress(PlatformNetwork::AddressFamilies::InterNetwork, (uint64_t)0);
+	}
+
+	std::string SocketUtilities::IPAddressToString(const IPAddress& IP)
+	{
+		//if (IP.GetFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
+		//{
+		//	char buffer[INET_ADDRSTRLEN];
+
+		//	uint64_t ip = IP.GetIPv4Address();
+
+		//	return inet_ntop(AF_INET, &ip, buffer, sizeof(buffer));
+		//}
+
+		char buffer[INET6_ADDRSTRLEN];
+
+		const uint8_t* ip = IP.GetIPv6Address();
+
+		return inet_ntop((IP.GetFamily() == PlatformNetwork::AddressFamilies::InterNetwork ? AF_INET : AF_INET6), &ip, buffer, sizeof(buffer));
 	}
 }

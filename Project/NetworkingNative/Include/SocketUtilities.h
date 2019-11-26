@@ -15,10 +15,16 @@ namespace GameFramework::Networking
 	struct IPAddress
 	{
 	public:
-		IPAddress(PlatformNetwork::AddressFamilies Family, long Address) :
-			m_Family(Family),
-			m_Address(Address)
+		IPAddress(PlatformNetwork::AddressFamilies Family, uint64_t Address) :
+			m_Family(Family)
 		{
+			m_Address.IPv4 = Address;
+		}
+
+		IPAddress(PlatformNetwork::AddressFamilies Family, uint8_t Address[16]) :
+			m_Family(Family)
+		{
+			memcpy(m_Address.IPv6, Address, sizeof(m_Address.IPv6));
 		}
 
 		PlatformNetwork::AddressFamilies GetFamily(void) const
@@ -26,19 +32,29 @@ namespace GameFramework::Networking
 			return m_Family;
 		}
 
-		long GetAddress(void) const
+		uint64_t GetIPv4Address(void) const
 		{
-			return m_Address;
+			return m_Address.IPv4;
 		}
 
-		std::string ToString(void) const
+		uint64_t GetIPv4Address(void)
 		{
-			return "";
+			return m_Address.IPv4;
+		}
+
+		const uint8_t* GetIPv6Address(void) const
+		{
+			return m_Address.IPv6;
 		}
 
 	private:
 		PlatformNetwork::AddressFamilies m_Family;
-		long m_Address;
+
+		union
+		{
+			uint64_t IPv4;
+			uint8_t IPv6[16];
+		} m_Address;
 	};
 
 	static class NETWORKING_API SocketUtilities
@@ -77,6 +93,8 @@ namespace GameFramework::Networking
 		static IPAddress ResolveDomain(const std::string& Domain);
 
 		static IPAddress MapIPv4ToIPv6(IPAddress IP);
+
+		static std::string IPAddressToString(const IPAddress& IP);
 	};
 }
 

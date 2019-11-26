@@ -10,7 +10,8 @@ namespace GameFramework::Networking
 
 	void ServerSocket::Bind(const std::string& Host, uint16_t Port)
 	{
-		SocketUtilities::ResolveDomain(Host);
+		IPAddress address = SocketUtilities::ResolveDomain(Host);
+		auto str = SocketUtilities::IPAddressToString(address);
 	}
 
 	void ServerSocket::Receive(void)
