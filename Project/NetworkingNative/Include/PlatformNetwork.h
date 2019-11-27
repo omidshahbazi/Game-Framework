@@ -18,14 +18,6 @@ namespace GameFramework::Networking
 			InterNetworkV6
 		};
 
-		enum class InterfaceAddresses
-		{
-			Any,
-			LoopBack,
-			Broadcast,
-			None
-		};
-
 		enum class Types
 		{
 			Stream,
@@ -180,7 +172,7 @@ namespace GameFramework::Networking
 			DontLinger,
 			
 			SendBuffer,
-			ReceiverBuffer,
+			ReceiveBuffer,
 
 			SendTimeout,
 			ReceiveTimeout,
@@ -201,7 +193,10 @@ namespace GameFramework::Networking
 
 			ReuseMulticastPort,
 
-			NoDelay
+			NoDelay,
+			TimeToLive,
+			IPv6Only,
+			Checksum
 		};
 
 		typedef uint32_t Handle;
@@ -214,15 +209,16 @@ namespace GameFramework::Networking
 		static bool Shutdown(Handle Handle, ShutdownHows How);
 		static bool Close(Handle Handle);
 
-		static bool Bind(Handle Handle, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port);
+		static bool Bind(Handle Handle, AddressFamilies AddressFamily, IP Address, uint16_t Port);
 
 		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled);
+		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value);
 
 		static bool SetNonBlocking(Handle Handle, bool Enabled);
 
-		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port, SendModes Mode);
 		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, IP Address, uint16_t Port, SendModes Mode);
 
+		static uint64_t AvailableBytes(Handle Handle);
 		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, IP& Address, uint16_t& Port, ReceiveModes Mode);
 
 		static Errors GetLastError(void);

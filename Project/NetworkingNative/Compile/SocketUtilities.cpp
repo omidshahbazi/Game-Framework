@@ -24,47 +24,47 @@ namespace GameFramework::Networking
 
 	void SocketUtilities::SetBlocking(Socket Socket, bool Value)
 	{
-		//Socket.Blocking = Value;
+		PlatformNetwork::SetNonBlocking(Socket, Value);
 	}
 
 	void SocketUtilities::SetReceiveBufferSize(Socket Socket, uint32_t Value)
 	{
-		//Socket.ReceiveBufferSize = (int)Value;
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::Socket, PlatformNetwork::Options::ReceiveBuffer, (int32_t)Value);
 	}
 
 	void SocketUtilities::SetSendBufferSize(Socket Socket, uint32_t Value)
 	{
-		//Socket.SendBufferSize = (int)Value;
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::Socket, PlatformNetwork::Options::SendBuffer, (int32_t)Value);
 	}
 
 	void SocketUtilities::SetReceiveTimeout(Socket Socket, uint32_t Value)
 	{
-		//Socket.ReceiveTimeout = (int)Value;
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::Socket, PlatformNetwork::Options::ReceiveTimeout, (int32_t)Value);
 	}
 
 	void SocketUtilities::SetSendTimeout(Socket Socket, uint32_t Value)
 	{
-		//Socket.SendTimeout = (int)Value;
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::Socket, PlatformNetwork::Options::SendTimeout, (int32_t)Value);
 	}
 
 	void SocketUtilities::SetTimeToLive(Socket Socket, uint16_t Value)
 	{
-		//Socket.Ttl = (short)Value;
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::Socket, PlatformNetwork::Options::TimeToLive, (int32_t)Value);
 	}
 
 	void SocketUtilities::SetIPv6OnlyEnabled(Socket Socket, bool Value)
 	{
-		//Socket.SetSocketOption(SocketOptionLevel.IPv6, IPV6_ONLY_OPTION, Value);
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::IPv6Only, (int32_t)Value);
 	}
 
 	void SocketUtilities::SetChecksumEnabled(Socket Socket, bool Value)
 	{
-		//Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoChecksum, (!Value ? 0 : 1));
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::Checksum, Value);
 	}
 
 	void SocketUtilities::SetBSDUrgentEnabled(Socket Socket, bool Value)
 	{
-		//Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.BsdUrgent, Value);
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::TCP, PlatformNetwork::Options::BSPState, Value);
 	}
 
 	// After many researches around NoDelay and the Nagle algorithm, I found out that using this algorithm on TCP
@@ -73,13 +73,17 @@ namespace GameFramework::Networking
 	// https://support.microsoft.com/en-us/help/214397/design-issues-sending-small-data-segments-over-tcp-with-winsock
 	void SocketUtilities::SetNagleAlgorithmEnabled(Socket Socket, bool Value)
 	{
-		//Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, !Value);
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::TCP, PlatformNetwork::Options::NoDelay, !Value);
 	}
 
 	bool SocketUtilities::IsSocketReady(Socket Socket)
 	{
-		//return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0);
-		return false;
+		return !(PlatformNetwork::AvailableBytes(Socket) == 0);
+	}
+
+	void SocketUtilities::Bind(Socket Socket, const IPEndPoint& EndPoint)
+	{
+		PlatformNetwork::Bind(Socket, EndPoint.GetAddress().GetAddressFamily(), EndPoint.GetAddress().GetIPv4Address(), EndPoint.GetPort());
 	}
 
 	IPAddress SocketUtilities::ResolveDomain(const string& Domain)
@@ -194,29 +198,27 @@ namespace GameFramework::Networking
 
 	IPAddress SocketUtilities::MapIPv4ToIPv6(IPAddress IP)
 	{
-		//if (IP.AddressFamily != AddressFamily.InterNetwork)
-		//	throw new ArgumentException("IP must be v4");
+		if (IP.GetAddressFamily() != PlatformNetwork::AddressFamilies::InterNetwork)
+			throw new exception("IP must be v4");
 
-		//return IPAddress.Parse("::ffff:" + IP.ToString());
-
-		return IPAddress(PlatformNetwork::AddressFamilies::InterNetwork, (uint64_t)0);
+		return ResolveDomain("::ffff:" + IPAddressToString(IP));
 	}
 
 	std::string SocketUtilities::IPAddressToString(const IPAddress& IP)
 	{
-		//if (IP.GetFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
-		//{
-		//	char buffer[INET_ADDRSTRLEN];
+		if (IP.GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
+		{
+			char buffer[INET_ADDRSTRLEN];
 
-		//	uint64_t ip = IP.GetIPv4Address();
+			uint64_t ipv4 = IP.GetIPv4Address();
 
-		//	return inet_ntop(AF_INET, &ip, buffer, sizeof(buffer));
-		//}
+			return inet_ntop(AF_INET, &ipv4, buffer, INET_ADDRSTRLEN);
+		}
 
 		char buffer[INET6_ADDRSTRLEN];
 
-		const uint8_t* ip = IP.GetIPv6Address();
+		const in6_addr* ipv6 = reinterpret_cast<const in6_addr*>(IP.GetIPv6Address());
 
-		return inet_ntop((IP.GetFamily() == PlatformNetwork::AddressFamilies::InterNetwork ? AF_INET : AF_INET6), &ip, buffer, sizeof(buffer));
+		return inet_ntop(AF_INET6, &ipv6, buffer, INET6_ADDRSTRLEN);
 	}
 }

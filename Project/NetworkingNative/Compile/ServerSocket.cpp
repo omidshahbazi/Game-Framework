@@ -10,8 +10,22 @@ namespace GameFramework::Networking
 
 	void ServerSocket::Bind(const std::string& Host, uint16_t Port)
 	{
-		IPAddress address = SocketUtilities::ResolveDomain(Host);
-		auto str = SocketUtilities::IPAddressToString(address);
+		Bind(SocketUtilities::ResolveDomain(Host), Port);
+	}
+
+	void ServerSocket::Bind(const IPAddress& IP, uint16_t Port)
+	{
+		Bind(IPEndPoint(IP, Port));
+	}
+
+	void ServerSocket::Bind(const IPEndPoint& EndPoint)
+	{
+		IPEndPoint endPoint = EndPoint;
+
+		if (endPoint.GetAddress().GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
+			endPoint.SetAddress(SocketUtilities::MapIPv4ToIPv6(endPoint.GetAddress()));
+
+		SocketUtilities::Bind(GetSocket(), endPoint);
 	}
 
 	void ServerSocket::Receive(void)

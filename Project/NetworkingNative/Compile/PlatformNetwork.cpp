@@ -3,6 +3,7 @@
 #include "..\Include\PlatformNetwork.h"
 #include <Utilities\BitwiseHelper.h>
 #include <winsock2.h>
+#include <ws2ipdef.h>
 
 #pragma comment(lib, "wsock32.lib")
 
@@ -22,23 +23,6 @@ namespace GameFramework::Networking
 		}
 
 		return AF_UNSPEC;
-	}
-
-	int32_t GetInterfaceAddress(PlatformNetwork::InterfaceAddresses Interface)
-	{
-		switch (Interface)
-		{
-		case PlatformNetwork::InterfaceAddresses::Any:
-			return INADDR_ANY;
-		case PlatformNetwork::InterfaceAddresses::LoopBack:
-			return INADDR_LOOPBACK;
-		case PlatformNetwork::InterfaceAddresses::Broadcast:
-			return INADDR_BROADCAST;
-		case PlatformNetwork::InterfaceAddresses::None:
-			return INADDR_NONE;
-		}
-
-		return 0;
 	}
 
 	int32_t GetType(PlatformNetwork::Types Type)
@@ -241,7 +225,7 @@ namespace GameFramework::Networking
 		case PlatformNetwork::OptionLevels::Socket:
 			return SOL_SOCKET;
 		}
-		
+
 		return IPPROTO_IP;
 	}
 
@@ -279,7 +263,7 @@ namespace GameFramework::Networking
 		case PlatformNetwork::Options::SendBuffer:
 			return SO_SNDBUF;
 
-		case PlatformNetwork::Options::ReceiverBuffer:
+		case PlatformNetwork::Options::ReceiveBuffer:
 			return SO_RCVBUF;
 
 		case PlatformNetwork::Options::SendTimeout:
@@ -320,6 +304,15 @@ namespace GameFramework::Networking
 
 		case PlatformNetwork::Options::NoDelay:
 			return TCP_NODELAY;
+
+		case PlatformNetwork::Options::TimeToLive:
+			return IP_TTL;
+
+		case PlatformNetwork::Options::IPv6Only:
+			return IPV6_V6ONLY;
+
+		case PlatformNetwork::Options::Checksum:
+			return IPV6_CHECKSUM;
 		}
 	}
 
@@ -349,11 +342,11 @@ namespace GameFramework::Networking
 		return (closesocket(Handle) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port)
+	bool PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, IP Address, uint16_t Port)
 	{
 		sockaddr_in address;
 		address.sin_family = GetAddressFamiliy(AddressFamily);
-		address.sin_addr.S_un.S_addr = GetInterfaceAddress(InterfaceAddress);
+		address.sin_addr.S_un.S_addr = Address;
 		address.sin_port = htons(Port);
 
 		return (bind(Handle, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_in)) == NO_ERROR);
@@ -364,21 +357,16 @@ namespace GameFramework::Networking
 		return (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) == NO_ERROR);
 	}
 
+	bool PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value)
+	{
+		return (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Value), sizeof(int32_t)) == NO_ERROR);
+	}
+
 	bool PlatformNetwork::SetNonBlocking(Handle Handle, bool Enabled)
 	{
 		DWORD enabled = (Enabled ? 1 : 0);
 
 		return (ioctlsocket(Handle, FIONBIO, &enabled) == NO_ERROR);
-	}
-
-	bool PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, InterfaceAddresses InterfaceAddress, uint16_t Port, SendModes Mode)
-	{
-		sockaddr_in address;
-		address.sin_family = GetAddressFamiliy(AddressFamily);
-		address.sin_addr.s_addr = GetInterfaceAddress(InterfaceAddress);
-		address.sin_port = htons(Port);
-
-		return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_in)) == Length);
 	}
 
 	bool PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, IP Address, uint16_t Port, SendModes Mode)
@@ -389,6 +377,13 @@ namespace GameFramework::Networking
 		address.sin_port = htons(Port);
 
 		return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_in)) == Length);
+	}
+
+	uint64_t PlatformNetwork::AvailableBytes(Handle Handle)
+	{
+		u_long availableBytes;
+		ioctlsocket(Handle, FIONREAD, &availableBytes);
+		return availableBytes;
 	}
 
 	bool PlatformNetwork::Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, IP& Address, uint16_t& Port, ReceiveModes Mode)

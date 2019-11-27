@@ -10,8 +10,6 @@
 
 namespace GameFramework::Networking
 {
-	typedef PlatformNetwork::Handle Socket;
-
 	struct IPAddress
 	{
 	public:
@@ -21,13 +19,13 @@ namespace GameFramework::Networking
 			m_Address.IPv4 = Address;
 		}
 
-		IPAddress(PlatformNetwork::AddressFamilies Family, uint8_t Address[16]) :
+		IPAddress(PlatformNetwork::AddressFamilies Family, uint8_t* Address) :
 			m_Family(Family)
 		{
 			memcpy(m_Address.IPv6, Address, sizeof(m_Address.IPv6));
 		}
 
-		PlatformNetwork::AddressFamilies GetFamily(void) const
+		PlatformNetwork::AddressFamilies GetAddressFamily(void) const
 		{
 			return m_Family;
 		}
@@ -56,6 +54,42 @@ namespace GameFramework::Networking
 			uint8_t IPv6[16];
 		} m_Address;
 	};
+
+	struct IPEndPoint
+	{
+	public:
+		IPEndPoint(const IPAddress& Address, uint16_t Port) :
+			m_Address(Address),
+			m_Port(Port)
+		{
+		}
+
+		const IPAddress& GetAddress(void) const
+		{
+			return m_Address;
+		}
+
+		void SetAddress(const IPAddress& Value)
+		{
+			m_Address = Value;
+		}
+
+		uint16_t GetPort(void) const
+		{
+			return m_Port;
+		}
+
+		void SetPort(uint16_t Value)
+		{
+			m_Port = Value;
+		}
+
+	private:
+		IPAddress m_Address;
+		uint16_t m_Port;
+	};
+
+	typedef PlatformNetwork::Handle Socket;
 
 	static class NETWORKING_API SocketUtilities
 	{
@@ -89,6 +123,8 @@ namespace GameFramework::Networking
 		static void SetNagleAlgorithmEnabled(Socket Socket, bool Value);
 
 		static bool IsSocketReady(Socket Socket);
+
+		static void Bind(Socket Socket, const IPEndPoint& EndPoint);
 
 		static IPAddress ResolveDomain(const std::string& Domain);
 

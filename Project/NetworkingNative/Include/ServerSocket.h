@@ -15,6 +15,10 @@ namespace GameFramework::Networking
 
 		void Bind(const std::string& Host, uint16_t Port);
 
+		void Bind(const IPAddress& IP, uint16_t Port);
+
+		void Bind(const IPEndPoint& EndPoint);
+
 	protected:
 		virtual void Receive(void) override;
 
