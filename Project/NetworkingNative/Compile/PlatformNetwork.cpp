@@ -4,6 +4,7 @@
 #include <Utilities\BitwiseHelper.h>
 #include <winsock2.h>
 #include <ws2ipdef.h>
+#include <WS2tcpip.h>
 
 #pragma comment(lib, "wsock32.lib")
 
@@ -11,6 +12,42 @@ using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
+#define BUILD_SOCKET_ADDRESS(AddressFamily, Address, Port) \
+		sockaddr* address = nullptr; \
+		int32_t addressSize = 0; \
+		\
+		sockaddr_in addressV4; \
+		sockaddr_in6 addressV6; \
+		\
+		if (AddressFamily == AddressFamilies::InterNetwork) \
+		{ \
+			addressV4.sin_family = GetAddressFamiliy(AddressFamily); \
+			addressV4.sin_port = htons(Port); \
+			\
+			inet_pton(addressV4.sin_family, Address, reinterpret_cast<void*>(&addressV4.sin_addr)); \
+			\
+			address = reinterpret_cast<sockaddr*>(&addressV4); \
+			addressSize = sizeof(sockaddr_in); \
+		} \
+		else \
+		{ \
+			addressV6.sin6_family = GetAddressFamiliy(AddressFamily); \
+			addressV6.sin6_port = htons(Port); \
+			addressV6.sin6_scope_id = 0; \
+			\
+			inet_pton(addressV6.sin6_family, Address, reinterpret_cast<void*>(&addressV6.sin6_addr)); \
+			\
+			address = reinterpret_cast<sockaddr*>(&addressV6); \
+			addressSize = sizeof(sockaddr_in6); \
+		} \
+
+	std::string AddressToString(PlatformNetwork::AddressFamilies Family, const void* Address)
+	{
+		char buffer[INET6_ADDRSTRLEN];
+
+		return inet_ntop((Family == PlatformNetwork::AddressFamilies::InterNetwork ? AF_INET : AF_INET6), Address, buffer, (Family == PlatformNetwork::AddressFamilies::InterNetwork ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN));
+	}
+
 	int32_t GetAddressFamiliy(PlatformNetwork::AddressFamilies Family)
 	{
 		switch (Family)
@@ -342,14 +379,26 @@ namespace GameFramework::Networking
 		return (closesocket(Handle) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, IP Address, uint16_t Port)
+	bool PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port)
 	{
-		sockaddr_in address;
-		address.sin_family = GetAddressFamiliy(AddressFamily);
-		address.sin_addr.S_un.S_addr = Address;
-		address.sin_port = htons(Port);
+		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
-		return (bind(Handle, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_in)) == NO_ERROR);
+		return (bind(Handle, address, addressSize) == NO_ERROR);
+
+		//sockaddr* address = nullptr;
+		//int32_t addressSize = 0;
+		//sockaddr_in6 addressV6;
+
+		//addressV6.sin6_family = GetAddressFamiliy(AddressFamily);
+		//addressV6.sin6_port = htons(Port);
+		//addressV6.sin6_scope_id = 0;
+
+		//inet_pton(addressV6.sin6_family, Address.c_str(), reinterpret_cast<void*>(&addressV6.sin6_addr));
+
+		//address = reinterpret_cast<sockaddr*>(&addressV6);
+		//addressSize = sizeof(sockaddr_in6);
+
+		//return (bind(Handle, address, addressSize) == NO_ERROR);
 	}
 
 	bool PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled)
@@ -369,14 +418,11 @@ namespace GameFramework::Networking
 		return (ioctlsocket(Handle, FIONBIO, &enabled) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, IP Address, uint16_t Port, SendModes Mode)
+	bool PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
 	{
-		sockaddr_in address;
-		address.sin_family = GetAddressFamiliy(AddressFamily);
-		address.sin_addr.s_addr = htonl(Address);
-		address.sin_port = htons(Port);
+		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
-		return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr_in)) == Length);
+		return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), address, addressSize) == Length);
 	}
 
 	uint64_t PlatformNetwork::AvailableBytes(Handle Handle)
@@ -386,10 +432,10 @@ namespace GameFramework::Networking
 		return availableBytes;
 	}
 
-	bool PlatformNetwork::Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, IP& Address, uint16_t& Port, ReceiveModes Mode)
+	bool PlatformNetwork::Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
 	{
 		sockaddr_in address;
-		int32_t addressSize = sizeof(address);
+		int32_t addressSize = sizeof(sockaddr_in);
 
 		int receivedLength = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
 
@@ -398,13 +444,127 @@ namespace GameFramework::Networking
 
 		if (receivedLength != 0)
 		{
-			Address = ntohl(address.sin_addr.s_addr);
+			//Address = ntohl(address.sin_addr.s_addr);
 			Port = ntohs(address.sin_port);
 		}
 
 		ReceivedLength = receivedLength;
 
 		return true;
+	}
+
+	void PlatformNetwork::ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address)
+	{
+		ADDRINFO hintInfo;
+		ZeroMemory(&hintInfo, sizeof(ADDRINFO));
+		hintInfo.ai_flags = 0;
+		hintInfo.ai_family = AF_UNSPEC;
+
+		PADDRINFOA queryResult;
+		int32_t result = getaddrinfo(Domain.c_str(), "", &hintInfo, &queryResult);
+		if (result != 0)
+			throw new std::exception("Invalid Domain");
+
+		for (addrinfo* ptr = queryResult; ptr != NULL; ptr = ptr->ai_next)
+		{
+			if (ptr->ai_family != AF_INET6)
+				continue;
+
+			sockaddr_in6* ipv6 = (struct sockaddr_in6*)ptr->ai_addr;
+
+			AddressFamily = PlatformNetwork::AddressFamilies::InterNetworkV6;
+			Address = AddressToString(AddressFamily, &ipv6->sin6_addr);
+
+			return;
+		}
+
+		sockaddr_in* ipv4 = (struct sockaddr_in*)queryResult->ai_addr;
+
+		AddressFamily = PlatformNetwork::AddressFamilies::InterNetwork;
+		Address = AddressToString(AddressFamily, &ipv4->sin_addr);
+
+
+
+		//printf("\tFlags: 0x%x\n", ptr->ai_flags);
+		//printf("\tFamily: ");
+		//switch (ptr->ai_family) {
+		//case AF_UNSPEC:
+		//	printf("Unspecified\n");
+		//	break;
+		//case AF_INET:
+		//	printf("AF_INET (IPv4)\n");
+		//	sockaddr_in* sockaddr_ipv4 = (struct sockaddr_in*) ptr->ai_addr;
+		//	//printf("\tIPv4 address %s\n", inet_ntop(ptr->ai_family, sockaddr_ipv4->sin_addr));
+		//	break;
+		//case AF_INET6:
+		//	printf("AF_INET6 (IPv6)\n");
+		//	// the InetNtop function is available on Windows Vista and later
+		//	// sockaddr_ipv6 = (struct sockaddr_in6 *) ptr->ai_addr;
+		//	// printf("\tIPv6 address %s\n",
+		//	//    InetNtop(AF_INET6, &sockaddr_ipv6->sin6_addr, ipstringbuffer, 46) );
+
+		//	// We use WSAAddressToString since it is supported on Windows XP and later
+		//	LPSOCKADDR sockaddr_ip = (LPSOCKADDR)ptr->ai_addr;
+		//	// The buffer length is changed by each call to WSAAddresstoString
+		//	// So we need to set it for each iteration through the loop for safety
+		//	DWORD ipbufferlength = 46;
+		//	wchar_t ipstringbuffer[46];
+
+		//	INT iRetval = WSAAddressToStringW(sockaddr_ip, (DWORD)ptr->ai_addrlen, NULL,
+		//		ipstringbuffer, &ipbufferlength);
+		//	if (iRetval)
+		//		printf("WSAAddressToString failed with %u\n", WSAGetLastError());
+		//	else
+		//		printf("\tIPv6 address %s\n", ipstringbuffer);
+		//	break;
+		//case AF_NETBIOS:
+		//	printf("AF_NETBIOS (NetBIOS)\n");
+		//	break;
+		//default:
+		//	printf("Other %ld\n", ptr->ai_family);
+		//	break;
+		//}
+		//printf("\tSocket type: ");
+		//switch (ptr->ai_socktype) {
+		//case 0:
+		//	printf("Unspecified\n");
+		//	break;
+		//case SOCK_STREAM:
+		//	printf("SOCK_STREAM (stream)\n");
+		//	break;
+		//case SOCK_DGRAM:
+		//	printf("SOCK_DGRAM (datagram) \n");
+		//	break;
+		//case SOCK_RAW:
+		//	printf("SOCK_RAW (raw) \n");
+		//	break;
+		//case SOCK_RDM:
+		//	printf("SOCK_RDM (reliable message datagram)\n");
+		//	break;
+		//case SOCK_SEQPACKET:
+		//	printf("SOCK_SEQPACKET (pseudo-stream packet)\n");
+		//	break;
+		//default:
+		//	printf("Other %ld\n", ptr->ai_socktype);
+		//	break;
+		//}
+		//printf("\tProtocol: ");
+		//switch (ptr->ai_protocol) {
+		//case 0:
+		//	printf("Unspecified\n");
+		//	break;
+		//case IPPROTO_TCP:
+		//	printf("IPPROTO_TCP (TCP)\n");
+		//	break;
+		//case IPPROTO_UDP:
+		//	printf("IPPROTO_UDP (UDP) \n");
+		//	break;
+		//default:
+		//	printf("Other %ld\n", ptr->ai_protocol);
+		//	break;
+		//}
+		//printf("\tLength of this sockaddr: %d\n", ptr->ai_addrlen);
+		//printf("\tCanonical name: %s\n", ptr->ai_canonname);
 	}
 
 	PlatformNetwork::Errors PlatformNetwork::GetLastError(void)

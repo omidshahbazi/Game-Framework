@@ -6,6 +6,7 @@
 #include "Common.h"
 #include <cstddef>
 #include <inttypes.h>
+#include <string>
 
 namespace GameFramework::Networking
 {
@@ -168,9 +169,9 @@ namespace GameFramework::Networking
 			Broadcast,
 			UseLoopback,
 			Linger,
-			
+
 			DontLinger,
-			
+
 			SendBuffer,
 			ReceiveBuffer,
 
@@ -200,7 +201,6 @@ namespace GameFramework::Networking
 		};
 
 		typedef uint32_t Handle;
-		typedef uint32_t IP;
 
 		static bool Initialize(void);
 		static bool Shutdown(void);
@@ -209,32 +209,21 @@ namespace GameFramework::Networking
 		static bool Shutdown(Handle Handle, ShutdownHows How);
 		static bool Close(Handle Handle);
 
-		static bool Bind(Handle Handle, AddressFamilies AddressFamily, IP Address, uint16_t Port);
+		static bool Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port);
 
 		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled);
 		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value);
 
 		static bool SetNonBlocking(Handle Handle, bool Enabled);
 
-		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, IP Address, uint16_t Port, SendModes Mode);
+		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
 
 		static uint64_t AvailableBytes(Handle Handle);
-		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, IP& Address, uint16_t& Port, ReceiveModes Mode);
+		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode);
+
+		static void ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address);
 
 		static Errors GetLastError(void);
-
-		static IP GetIP(uint8_t A, uint8_t B, uint8_t C, uint8_t D)
-		{
-			return ((A << 24) | (B << 16) | (C << 8) | D);
-		}
-
-		static void GetAddress(IP IP, uint8_t& A, uint8_t& B, uint8_t& C, uint8_t& D)
-		{
-			A = IP >> 24;
-			B = IP >> 16;
-			C = IP >> 8;
-			D = IP;
-		}
 	};
 }
 

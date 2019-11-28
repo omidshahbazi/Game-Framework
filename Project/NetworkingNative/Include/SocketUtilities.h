@@ -13,16 +13,10 @@ namespace GameFramework::Networking
 	struct IPAddress
 	{
 	public:
-		IPAddress(PlatformNetwork::AddressFamilies Family, uint64_t Address) :
-			m_Family(Family)
+		IPAddress(PlatformNetwork::AddressFamilies Family, const std::string &IP) :
+			m_Family(Family),
+			m_IP(IP)
 		{
-			m_Address.IPv4 = Address;
-		}
-
-		IPAddress(PlatformNetwork::AddressFamilies Family, uint8_t* Address) :
-			m_Family(Family)
-		{
-			memcpy(m_Address.IPv6, Address, sizeof(m_Address.IPv6));
 		}
 
 		PlatformNetwork::AddressFamilies GetAddressFamily(void) const
@@ -30,29 +24,19 @@ namespace GameFramework::Networking
 			return m_Family;
 		}
 
-		uint64_t GetIPv4Address(void) const
+		const std::string &GetIP(void) const
 		{
-			return m_Address.IPv4;
+			return m_IP;
 		}
 
-		uint64_t GetIPv4Address(void)
+		void SetIP(const std::string& IP)
 		{
-			return m_Address.IPv4;
-		}
-
-		const uint8_t* GetIPv6Address(void) const
-		{
-			return m_Address.IPv6;
+			m_IP = IP;
 		}
 
 	private:
 		PlatformNetwork::AddressFamilies m_Family;
-
-		union
-		{
-			uint64_t IPv4;
-			uint8_t IPv6[16];
-		} m_Address;
+		std::string m_IP;
 	};
 
 	struct IPEndPoint
@@ -129,8 +113,6 @@ namespace GameFramework::Networking
 		static IPAddress ResolveDomain(const std::string& Domain);
 
 		static IPAddress MapIPv4ToIPv6(IPAddress IP);
-
-		static std::string IPAddressToString(const IPAddress& IP);
 	};
 }
 
