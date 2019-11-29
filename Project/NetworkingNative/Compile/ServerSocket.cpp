@@ -112,6 +112,8 @@ namespace GameFramework::Networking
 			WAIT_FOR_BOOL(m_ClientsLock);
 			ClientList disconnectedClients;
 
+			std::byte* receiveBuffer = GetReceiveBuffer();
+
 			for (auto client : m_Clients)
 			{
 				try
@@ -133,7 +135,7 @@ namespace GameFramework::Networking
 					}
 
 					size = Constants::RECEIVE_BUFFER_SIZE;
-					if (!SocketUtilities::Receive(clientSocket, GetReceiveBuffer(), size))
+					if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
 						size = 0;
 
 					AddBandwidthIn(size);
@@ -141,13 +143,13 @@ namespace GameFramework::Networking
 					uint32_t index = 0;
 					while (index != size)
 					{
-						//uint32_t packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
+						uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
 
-						//index += Constants::Packet.PACKET_SIZE_SIZE;
+						index += Constants::Packet::PACKET_SIZE_SIZE;
 
-						//HandleIncommingBuffer(client, new BufferStream(ReceiveBuffer, index, packetSize));
+						HandleIncommingBuffer(client, BufferStream(receiveBuffer, index, packetSize));
 
-						//index += packetSize;
+						index += packetSize;
 					}
 				}
 				catch (exception e)
@@ -158,7 +160,7 @@ namespace GameFramework::Networking
 					//{
 					//	disconnectedClients.Add(client);
 
-					HandleClientDisconnection(client);
+					//	HandleClientDisconnection(client);
 
 					//	continue;
 					//}
