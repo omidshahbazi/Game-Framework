@@ -97,10 +97,8 @@ namespace GameFramework::Networking
 	{
 		try
 		{
-			//lock(Target)
-
-			//if (m_PacketLossSimulation == 0 || Constants::Random.NextDouble() > m_PacketLossSimulation)
-			//	Target.Send(Buffer.Buffer);
+			if (m_PacketLossSimulation == 0 || Constants::Random.NextDouble() > m_PacketLossSimulation)
+				SocketUtilities::Send(Target, Buffer.GetBuffer(), Buffer.GetSize());
 
 			m_BandwidthOut += Buffer.GetSize();
 		}
@@ -128,7 +126,7 @@ namespace GameFramework::Networking
 		m_Events.push_back(Event);
 	}
 
-	void BaseSocket::AddSendCommand(const SendCommand& Command)
+	void BaseSocket::AddSendCommand(SendCommand* Command)
 	{
 		WAIT_FOR_BOOL(m_SendCommandsLock);
 

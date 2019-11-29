@@ -7,6 +7,8 @@
 #include <WS2tcpip.h>
 
 #pragma comment(lib, "wsock32.lib")
+#pragma comment(lib, "Ws2_32.lib")
+
 
 using namespace GameFramework::Common::Utilities;
 
@@ -379,28 +381,6 @@ namespace GameFramework::Networking
 		return (closesocket(Handle) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port)
-	{
-		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
-
-		return (bind(Handle, address, addressSize) == NO_ERROR);
-
-		//sockaddr* address = nullptr;
-		//int32_t addressSize = 0;
-		//sockaddr_in6 addressV6;
-
-		//addressV6.sin6_family = GetAddressFamiliy(AddressFamily);
-		//addressV6.sin6_port = htons(Port);
-		//addressV6.sin6_scope_id = 0;
-
-		//inet_pton(addressV6.sin6_family, Address.c_str(), reinterpret_cast<void*>(&addressV6.sin6_addr));
-
-		//address = reinterpret_cast<sockaddr*>(&addressV6);
-		//addressSize = sizeof(sockaddr_in6);
-
-		//return (bind(Handle, address, addressSize) == NO_ERROR);
-	}
-
 	bool PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled)
 	{
 		return (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) == NO_ERROR);
@@ -418,12 +398,71 @@ namespace GameFramework::Networking
 		return (ioctlsocket(Handle, FIONBIO, &enabled) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
+	bool PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port)
 	{
 		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
-		return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), address, addressSize) == Length);
+		return (bind(Handle, address, addressSize) == NO_ERROR);
 	}
+
+	bool PlatformNetwork::Listen(Handle Handle, uint32_t MaxConnections)
+	{
+		return (listen(Handle, MaxConnections) == NO_ERROR);
+	}
+
+	bool PlatformNetwork::Accept(Handle Handle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port)
+	{
+		sockaddr* address = nullptr;
+		int32_t size = 0;
+
+		sockaddr_in ipv4;
+		sockaddr_in6 ipv6;
+
+		if (AddressFamily == PlatformNetwork::AddressFamilies::InterNetwork)
+		{
+			address = reinterpret_cast<sockaddr*>(&ipv4);
+			size = sizeof(sockaddr_in);
+		}
+		else
+		{
+			address = reinterpret_cast<sockaddr*>(&ipv6);
+			size = sizeof(sockaddr_in6);
+		}
+
+		SOCKET socket = accept(Handle, address, &size);
+
+		if (socket == INVALID_SOCKET)
+			return false;
+
+		if (size == sizeof(sockaddr_in))
+		{
+			AddressFamily = PlatformNetwork::AddressFamilies::InterNetwork;
+			Address = AddressToString(AddressFamily, &ipv4.sin_addr);
+			Port = ntohs(ipv4.sin_port);
+		}
+		else if (size == sizeof(sockaddr_in6))
+		{
+			AddressFamily = PlatformNetwork::AddressFamilies::InterNetworkV6;
+			Address = AddressToString(AddressFamily, &ipv6.sin6_addr);
+			Port = ntohs(ipv6.sin6_port);
+		}
+		else
+			return false;
+
+		return true;
+	}
+
+	bool PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode)
+	{
+		return (send(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode)) == NO_ERROR);
+	}
+
+	//bool PlatformNetwork::SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
+	//{
+	//	BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
+
+	//	return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), address, addressSize) == Length);
+	//}
 
 	uint64_t PlatformNetwork::AvailableBytes(Handle Handle)
 	{
@@ -432,26 +471,26 @@ namespace GameFramework::Networking
 		return availableBytes;
 	}
 
-	bool PlatformNetwork::Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
-	{
-		sockaddr_in address;
-		int32_t addressSize = sizeof(sockaddr_in);
+	//bool PlatformNetwork::ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
+	//{
+	//	sockaddr_in address;
+	//	int32_t addressSize = sizeof(sockaddr_in);
 
-		int receivedLength = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
+	//	int receivedLength = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
 
-		if (receivedLength == SOCKET_ERROR)
-			return false;
+	//	if (receivedLength == SOCKET_ERROR)
+	//		return false;
 
-		if (receivedLength != 0)
-		{
-			//Address = ntohl(address.sin_addr.s_addr);
-			Port = ntohs(address.sin_port);
-		}
+	//	if (receivedLength != 0)
+	//	{
+	//		//Address = ntohl(address.sin_addr.s_addr); ????????????????????????????????????????????????
+	//		Port = ntohs(address.sin_port);
+	//	}
 
-		ReceivedLength = receivedLength;
+	//	ReceivedLength = receivedLength;
 
-		return true;
-	}
+	//	return true;
+	//}
 
 	void PlatformNetwork::ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address)
 	{
@@ -482,89 +521,6 @@ namespace GameFramework::Networking
 
 		AddressFamily = PlatformNetwork::AddressFamilies::InterNetwork;
 		Address = AddressToString(AddressFamily, &ipv4->sin_addr);
-
-
-
-		//printf("\tFlags: 0x%x\n", ptr->ai_flags);
-		//printf("\tFamily: ");
-		//switch (ptr->ai_family) {
-		//case AF_UNSPEC:
-		//	printf("Unspecified\n");
-		//	break;
-		//case AF_INET:
-		//	printf("AF_INET (IPv4)\n");
-		//	sockaddr_in* sockaddr_ipv4 = (struct sockaddr_in*) ptr->ai_addr;
-		//	//printf("\tIPv4 address %s\n", inet_ntop(ptr->ai_family, sockaddr_ipv4->sin_addr));
-		//	break;
-		//case AF_INET6:
-		//	printf("AF_INET6 (IPv6)\n");
-		//	// the InetNtop function is available on Windows Vista and later
-		//	// sockaddr_ipv6 = (struct sockaddr_in6 *) ptr->ai_addr;
-		//	// printf("\tIPv6 address %s\n",
-		//	//    InetNtop(AF_INET6, &sockaddr_ipv6->sin6_addr, ipstringbuffer, 46) );
-
-		//	// We use WSAAddressToString since it is supported on Windows XP and later
-		//	LPSOCKADDR sockaddr_ip = (LPSOCKADDR)ptr->ai_addr;
-		//	// The buffer length is changed by each call to WSAAddresstoString
-		//	// So we need to set it for each iteration through the loop for safety
-		//	DWORD ipbufferlength = 46;
-		//	wchar_t ipstringbuffer[46];
-
-		//	INT iRetval = WSAAddressToStringW(sockaddr_ip, (DWORD)ptr->ai_addrlen, NULL,
-		//		ipstringbuffer, &ipbufferlength);
-		//	if (iRetval)
-		//		printf("WSAAddressToString failed with %u\n", WSAGetLastError());
-		//	else
-		//		printf("\tIPv6 address %s\n", ipstringbuffer);
-		//	break;
-		//case AF_NETBIOS:
-		//	printf("AF_NETBIOS (NetBIOS)\n");
-		//	break;
-		//default:
-		//	printf("Other %ld\n", ptr->ai_family);
-		//	break;
-		//}
-		//printf("\tSocket type: ");
-		//switch (ptr->ai_socktype) {
-		//case 0:
-		//	printf("Unspecified\n");
-		//	break;
-		//case SOCK_STREAM:
-		//	printf("SOCK_STREAM (stream)\n");
-		//	break;
-		//case SOCK_DGRAM:
-		//	printf("SOCK_DGRAM (datagram) \n");
-		//	break;
-		//case SOCK_RAW:
-		//	printf("SOCK_RAW (raw) \n");
-		//	break;
-		//case SOCK_RDM:
-		//	printf("SOCK_RDM (reliable message datagram)\n");
-		//	break;
-		//case SOCK_SEQPACKET:
-		//	printf("SOCK_SEQPACKET (pseudo-stream packet)\n");
-		//	break;
-		//default:
-		//	printf("Other %ld\n", ptr->ai_socktype);
-		//	break;
-		//}
-		//printf("\tProtocol: ");
-		//switch (ptr->ai_protocol) {
-		//case 0:
-		//	printf("Unspecified\n");
-		//	break;
-		//case IPPROTO_TCP:
-		//	printf("IPPROTO_TCP (TCP)\n");
-		//	break;
-		//case IPPROTO_UDP:
-		//	printf("IPPROTO_UDP (UDP) \n");
-		//	break;
-		//default:
-		//	printf("Other %ld\n", ptr->ai_protocol);
-		//	break;
-		//}
-		//printf("\tLength of this sockaddr: %d\n", ptr->ai_addrlen);
-		//printf("\tCanonical name: %s\n", ptr->ai_canonname);
 	}
 
 	PlatformNetwork::Errors PlatformNetwork::GetLastError(void)

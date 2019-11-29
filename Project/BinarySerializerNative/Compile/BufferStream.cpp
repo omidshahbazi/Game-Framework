@@ -26,6 +26,11 @@ namespace GameFramework::BinarySerializer
 		memcpy(m_Buffer, reinterpret_cast<void*>(Buffer + Index), m_Size);
 	}
 
+	BufferStream::BufferStream(const BufferStream& Other)
+	{
+		*this = Other;
+	}
+
 	void BufferStream::Reset(void)
 	{
 		m_ReadIndex = 0;
@@ -124,7 +129,7 @@ namespace GameFramework::BinarySerializer
 		WriteBytesOf(Value);
 	}
 
-	void BufferStream::WriteFloat64(const double &Value)
+	void BufferStream::WriteFloat64(const double& Value)
 	{
 		WriteBytesOf(Value);
 	}
@@ -141,7 +146,7 @@ namespace GameFramework::BinarySerializer
 		}
 	}
 
-	void BufferStream::WriteString(const string &Value)
+	void BufferStream::WriteString(const string& Value)
 	{
 		WriteString(Value.c_str(), Value.length());
 	}
@@ -153,7 +158,7 @@ namespace GameFramework::BinarySerializer
 		WriteBytes(reinterpret_cast<byte*>(const_cast<wchar_t*>(Value)), 0, size);
 	}
 
-	void BufferStream::WriteString(const wstring &Value)
+	void BufferStream::WriteString(const wstring& Value)
 	{
 		WriteString(Value.c_str(), Value.length());
 	}
@@ -193,6 +198,19 @@ namespace GameFramework::BinarySerializer
 
 	void BufferStream::ReadArrayElement(void)
 	{
+	}
+
+	BufferStream& BufferStream::operator=(const BufferStream& Other)
+	{
+		m_ReadIndex = 0;
+		m_Size = 0;
+
+		m_Size = Other.m_Size;
+		m_Buffer = reinterpret_cast<byte*>(malloc(m_Size));
+
+		memcpy(m_Buffer, Other.m_Buffer, m_Size);
+
+		return *this;
 	}
 
 	void BufferStream::Print(uint32_t BytesPerLine) const

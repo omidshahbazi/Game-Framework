@@ -55,7 +55,7 @@ namespace GameFramework::Networking
 		};
 
 	private:
-		typedef List<SendCommand> SendCommandList;
+		typedef List<SendCommand*> SendCommandList;
 
 		friend static void GlobalReceiverWorker(BaseSocket* Instance);
 		friend static void GlobalSendWorker(BaseSocket* Instance);
@@ -76,13 +76,13 @@ namespace GameFramework::Networking
 
 		virtual void Send(Socket Target, const BufferStream& Buffer);
 
-		virtual bool HandleSendCommand(const SendCommand& Command) = 0;
+		virtual bool HandleSendCommand(SendCommand *Command) = 0;
 
 		virtual void ProcessEvent(const EventBase& Event) = 0;
 
 		void AddEvent(const EventBase& Event);
 
-		void AddSendCommand(const SendCommand& Command);
+		void AddSendCommand(SendCommand* Command);
 
 		virtual void HandleDisconnection(Socket Socket);
 

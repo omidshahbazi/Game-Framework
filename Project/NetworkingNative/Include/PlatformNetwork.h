@@ -209,17 +209,21 @@ namespace GameFramework::Networking
 		static bool Shutdown(Handle Handle, ShutdownHows How);
 		static bool Close(Handle Handle);
 
-		static bool Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port);
-
 		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled);
 		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value);
-
 		static bool SetNonBlocking(Handle Handle, bool Enabled);
 
-		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
+		static bool Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port);
+
+		static bool Listen(Handle Handle, uint32_t MaxConnections);
+
+		static bool Accept(Handle Handle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port);
+
+		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
+		//static bool SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
 
 		static uint64_t AvailableBytes(Handle Handle);
-		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode);
+		//static bool ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode);
 
 		static void ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address);
 

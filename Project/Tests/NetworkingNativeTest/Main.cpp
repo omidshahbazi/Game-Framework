@@ -1,15 +1,30 @@
-
 #include <ServerSocket.h>
+#include <iostream>
 
 using namespace GameFramework::Networking;
 
-
-
 void main()
 {
-	ServerSocket socket(PlatformNetwork::IPProtocols::TCP, 32);
-	socket.Bind("127.0.0.1", 80);
+	ServerSocket server(PlatformNetwork::IPProtocols::TCP, 32);
+	std::cout << "TCPServerSocket created" << std::endl;
+
+	server.Bind("::0", 80);
 	//socket.Bind("fe80::c011:8430:ece7:975f%15", 80);
+	std::cout << "TCPServerSocket bound" << std::endl;
+
+	server.SetMultithreadedCallbacks(false);
+	server.SetMultithreadedReceive(false);
+	server.SetMultithreadedSend(false);
+
+	server.Listen();
+	std::cout << "TCPServerSocket started listening" << std::endl;
+
+	while (true)
+	{
+		//_sleep(100);
+
+		server.Service();
+	}
 
 	PlatformNetwork::Shutdown();
 }

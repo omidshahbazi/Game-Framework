@@ -30,6 +30,9 @@
     <ClInclude Include="Include\ServerSocket.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Client.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Constants.cpp">

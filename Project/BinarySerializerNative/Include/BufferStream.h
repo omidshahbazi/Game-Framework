@@ -25,6 +25,8 @@ namespace GameFramework::BinarySerializer
 
 		BufferStream(byte* const Buffer, uint32_t Index, uint32_t Length);
 
+		BufferStream(const BufferStream &Other);
+
 		void Reset(void);
 
 		bool ReadBool(void);
@@ -77,6 +79,8 @@ namespace GameFramework::BinarySerializer
 		uint32_t BeginReadArray(void);
 
 		void ReadArrayElement(void);
+
+		BufferStream& operator=(const BufferStream& Other);
 
 		void Print(uint32_t BytesPerLine = 8) const;
 

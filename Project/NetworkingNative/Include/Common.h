@@ -15,7 +15,14 @@
 #endif
 
 template<typename T>
-using List = std::vector<T>;
+class List : public std::vector<T>
+{
+public:
+	void remove(const T& Value)
+	{
+		std::vector<T>::erase(find(std::vector<T>::begin(), std::vector<T>::end(), Value));
+	}
+};
 
 template<typename T>
 struct WaitFor

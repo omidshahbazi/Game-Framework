@@ -1,8 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
 #include "..\Include\SocketUtilities.h"
-#include <ws2tcpip.h>
-
-#pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
 
@@ -81,9 +78,34 @@ namespace GameFramework::Networking
 		return !(PlatformNetwork::AvailableBytes(Socket) == 0);
 	}
 
-	void SocketUtilities::Bind(Socket Socket, const IPEndPoint& EndPoint)
+	bool SocketUtilities::Bind(Socket Socket, const IPEndPoint& EndPoint)
 	{
-		PlatformNetwork::Bind(Socket, EndPoint.GetAddress().GetAddressFamily(), EndPoint.GetAddress().GetIP().c_str(), EndPoint.GetPort());
+		return PlatformNetwork::Bind(Socket, EndPoint.GetAddress().GetAddressFamily(), EndPoint.GetAddress().GetIP().c_str(), EndPoint.GetPort());
+	}
+
+	bool SocketUtilities::Listen(Socket Socket, uint32_t MaxConnections)
+	{
+		return PlatformNetwork::Listen(Socket, MaxConnections);
+	}
+
+	bool SocketUtilities::Accept(Socket Socket, IPEndPoint& EndPoint)
+	{
+		PlatformNetwork::AddressFamilies family = PlatformNetwork::AddressFamilies::InterNetworkV6;
+		std::string ip;
+		uint16_t port;
+
+		if (!PlatformNetwork::Accept(Socket, family, ip, port))
+			return false;
+
+		EndPoint.SetAddress(IPAddress(family, ip));
+		EndPoint.SetPort(port);
+
+		return true;
+	}
+
+	bool SocketUtilities::Send(Socket Socket, const std::byte* Buffer, uint32_t Length)
+	{
+		return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
 	}
 
 	IPAddress SocketUtilities::ResolveDomain(const string& Domain)

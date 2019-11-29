@@ -50,7 +50,7 @@ namespace ClientNetworkingManagedTest
 			client.OnDisconnected += Client_OnDisconnected;
 			client.OnBufferReceived += Client_OnBufferReceived;
 
-			client.Connect("127.0.0.1", 433);
+			client.Connect("192.168.1.104", 80);
 			Console.WriteLine("TCPClientSocket started connecting");
 
 			while (true)

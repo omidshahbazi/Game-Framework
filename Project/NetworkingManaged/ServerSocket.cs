@@ -99,8 +99,6 @@ namespace GameFramework.Networking
 
 		public ServerSocket(Protocols Type, uint MaxConnection) : base(Type)
 		{
-			Socket.ExclusiveAddressUse = true;
-
 			clients = new ClientList();
 
 			this.MaxConnection = MaxConnection;

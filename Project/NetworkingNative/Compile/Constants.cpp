@@ -51,4 +51,6 @@ namespace GameFramework::Networking
 	const uint32_t Constants::SEND_BUFFER_SIZE = 8 * 1024;
 	const uint16_t Constants::TIME_TO_LIVE = 64;
 	const float Constants::PING_TIME = 5;
+
+	GameFramework::Common::Utilities::Random Constants::Random;
 }

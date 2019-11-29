@@ -14,7 +14,7 @@ namespace GameFramework.Networking
 			ProtocolType protocol = (Protocol == Protocols.TCP ? ProtocolType.Tcp : ProtocolType.Udp);
 			SocketType type = (Protocol == Protocols.TCP ? SocketType.Stream : SocketType.Dgram);
 
-			return new Socket(AddressFamily.InterNetworkV6, type, protocol);
+			return new Socket(AddressFamily.InterNetwork, type, protocol);
 		}
 
 		public static void CloseSocket(Socket Socket)
@@ -84,12 +84,20 @@ namespace GameFramework.Networking
 
 		public static IPAddress ResolveDomain(string Domain)
 		{
+			IPAddress ip;
+			if (IPAddress.TryParse(Domain, out ip))
+				return ip;
+
 			try
 			{
 				IPHostEntry entry = Dns.GetHostEntry(Domain);
 
 				if (entry == null || entry.AddressList == null || entry.AddressList.Length == 0)
 					return null;
+
+				for (int i = 0; i < entry.AddressList.Length; ++i)
+					if (entry.AddressList[i].AddressFamily == AddressFamily.InterNetworkV6)
+						return entry.AddressList[i];
 
 				return entry.AddressList[0];
 			}

@@ -13,7 +13,12 @@ namespace GameFramework::Networking
 	struct IPAddress
 	{
 	public:
-		IPAddress(PlatformNetwork::AddressFamilies Family, const std::string &IP) :
+		IPAddress(void) :
+			m_Family(PlatformNetwork::AddressFamilies::InterNetwork)
+		{
+		}
+
+		IPAddress(PlatformNetwork::AddressFamilies Family, const std::string& IP) :
 			m_Family(Family),
 			m_IP(IP)
 		{
@@ -24,7 +29,7 @@ namespace GameFramework::Networking
 			return m_Family;
 		}
 
-		const std::string &GetIP(void) const
+		const std::string& GetIP(void) const
 		{
 			return m_IP;
 		}
@@ -42,6 +47,11 @@ namespace GameFramework::Networking
 	struct IPEndPoint
 	{
 	public:
+		IPEndPoint(void) :
+			m_Port(0)
+		{
+		}
+
 		IPEndPoint(const IPAddress& Address, uint16_t Port) :
 			m_Address(Address),
 			m_Port(Port)
@@ -108,7 +118,13 @@ namespace GameFramework::Networking
 
 		static bool IsSocketReady(Socket Socket);
 
-		static void Bind(Socket Socket, const IPEndPoint& EndPoint);
+		static bool Bind(Socket Socket, const IPEndPoint& EndPoint);
+
+		static bool Listen(Socket Socket, uint32_t MaxConnections);
+
+		static bool Accept(Socket Socket, IPEndPoint& EndPoint);
+
+		static bool Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
 
 		static IPAddress ResolveDomain(const std::string& Domain);
 
