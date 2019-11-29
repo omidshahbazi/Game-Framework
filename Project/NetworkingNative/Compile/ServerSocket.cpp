@@ -112,75 +112,73 @@ namespace GameFramework::Networking
 			throw e;
 		}
 
+		WAIT_FOR_BOOL(m_ClientsLock);
+		ClientList disconnectedClients;
+
+		std::byte* receiveBuffer = GetReceiveBuffer();
+
+		for (auto client : m_Clients)
 		{
-			WAIT_FOR_BOOL(m_ClientsLock);
-			ClientList disconnectedClients;
-
-			std::byte* receiveBuffer = GetReceiveBuffer();
-
-			for (auto client : m_Clients)
+			try
 			{
-				try
+				Socket clientSocket = client->GetSocket();
+
+				uint32_t size = 0;
+
+				if (SocketUtilities::GetAvailableBytes(clientSocket) == 0)
 				{
-					Socket clientSocket = client->GetSocket();
-
-					uint32_t size = 0;
-
-					if (SocketUtilities::GetAvailableBytes(clientSocket) == 0)
+					if (!SocketUtilities::IsReady(clientSocket))
 					{
-						if (!SocketUtilities::IsReady(clientSocket))
-						{
-							disconnectedClients.push_back(client);
+						disconnectedClients.push_back(client);
 
-							HandleClientDisconnection(client);
-						}
-
-						continue;
+						HandleClientDisconnection(client);
 					}
 
-					size = Constants::RECEIVE_BUFFER_SIZE;
-					if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
-						size = 0;
-
-					AddBandwidthIn(size);
-
-					uint32_t index = 0;
-					while (index != size)
-					{
-						uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
-
-						index += Constants::Packet::PACKET_SIZE_SIZE;
-
-						BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
-
-						HandleIncommingBuffer(client, buffer);
-
-						index += packetSize;
-					}
+					continue;
 				}
-				catch (exception e)
+
+				size = Constants::RECEIVE_BUFFER_SIZE;
+				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
+					size = 0;
+
+				AddBandwidthIn(size);
+
+				uint32_t index = 0;
+				while (index != size)
 				{
-					//if (e.SocketErrorCode == SocketError.WouldBlock)
-					//	continue;
-					//else if (e.SocketErrorCode == SocketError.ConnectionReset)
-					//{
-					//	disconnectedClients.Add(client);
+					uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
 
-					//	HandleClientDisconnection(client);
+					index += Constants::Packet::PACKET_SIZE_SIZE;
 
-					//	continue;
-					//}
+					BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
 
-					throw e;
+					HandleIncommingBuffer(client, buffer);
+
+					index += packetSize;
 				}
 			}
-
-			for (auto client : disconnectedClients)
+			catch (exception e)
 			{
-				m_Clients.remove(client);
+				//if (e.SocketErrorCode == SocketError.WouldBlock)
+				//	continue;
+				//else if (e.SocketErrorCode == SocketError.ConnectionReset)
+				//{
+				//	disconnectedClients.Add(client);
 
-				delete client;
+				//	HandleClientDisconnection(client);
+
+				//	continue;
+				//}
+
+				throw e;
 			}
+		}
+
+		for (auto client : disconnectedClients)
+		{
+			m_Clients.remove(client);
+
+			delete client;
 		}
 	}
 
