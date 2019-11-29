@@ -59,7 +59,7 @@ namespace GameFramework::Networking
 		{
 			WAIT_FOR_BOOL(m_EventsLock);
 
-			for (const EventBase& ev : m_Events)
+			for (EventBase* ev : m_Events)
 				ProcessEvent(ev);
 
 			m_Events.clear();
@@ -102,24 +102,20 @@ namespace GameFramework::Networking
 
 			m_BandwidthOut += Buffer.GetSize();
 		}
-		//catch (exception e)
-		//{
-		//	if (e.SocketErrorCode == SocketError.ConnectionReset)
-		//	{
-		//		HandleDisconnection(Target);
-
-		//		return;
-		//	}
-
-		//	throw e;
-		//}
 		catch (exception e)
 		{
+			//if (e.SocketErrorCode == SocketError.ConnectionReset)
+			//{
+			//	HandleDisconnection(Target);
+
+			//	return;
+			//}
+
 			throw e;
 		}
 	}
 
-	void BaseSocket::AddEvent(const EventBase& Event)
+	void BaseSocket::AddEvent(EventBase* Event)
 	{
 		WAIT_FOR_BOOL(m_EventsLock);
 

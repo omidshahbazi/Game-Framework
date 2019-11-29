@@ -12,11 +12,18 @@ namespace GameFramework::Networking
 	class NETWORKING_API Client
 	{
 	public:
+		Client(Socket Socket) :
+			m_Socket(Socket)
+		{
+		}
 
 		Socket GetSocket(void) const
 		{
-			return 0;
+			return m_Socket;
 		}
+
+	private:
+		Socket m_Socket;
 	};
 
 	typedef List<Client*> ClientList;

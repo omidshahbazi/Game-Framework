@@ -33,6 +33,9 @@
     <ClInclude Include="Include\Client.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\TCPServerSocket.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Constants.cpp">
@@ -48,6 +51,9 @@
       <Filter>Compile</Filter>
     </ClCompile>
     <ClCompile Include="Compile\ServerSocket.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\TCPServerSocket.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>

@@ -26,7 +26,7 @@ namespace GameFramework::Networking
 		};
 
 	private:
-		typedef List<EventBase> EventBaseList;
+		typedef List<EventBase*> EventBaseList;
 
 	protected:
 		class NETWORKING_API SendCommand
@@ -76,11 +76,11 @@ namespace GameFramework::Networking
 
 		virtual void Send(Socket Target, const BufferStream& Buffer);
 
-		virtual bool HandleSendCommand(SendCommand *Command) = 0;
+		virtual bool HandleSendCommand(SendCommand* Command) = 0;
 
-		virtual void ProcessEvent(const EventBase& Event) = 0;
+		virtual void ProcessEvent(EventBase* Event) = 0;
 
-		void AddEvent(const EventBase& Event);
+		void AddEvent(EventBase* Event);
 
 		void AddSendCommand(SendCommand* Command);
 
@@ -108,13 +108,24 @@ namespace GameFramework::Networking
 
 		virtual double GetTimestamp(void) = 0;
 
+	protected:
+		void AddBandwidthIn(uint32_t Value)
+		{
+			m_BandwidthIn += Value;
+		}
+
+		void AddBandwidthOut(uint32_t Value)
+		{
+			m_BandwidthOut += Value;
+		}
+
 	public:
 		const uint64_t& GetBandwidthIn(void) const
 		{
 			return m_BandwidthIn;
 		}
 
-		const uint64_t& GetBBandwidthOut(void) const
+		const uint64_t& GetBandwidthOut(void) const
 		{
 			return m_BandwidthOut;
 		}

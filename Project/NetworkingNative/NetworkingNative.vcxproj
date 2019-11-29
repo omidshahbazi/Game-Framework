@@ -157,6 +157,7 @@
     <ClInclude Include="Include\PlatformNetwork.h" />
     <ClInclude Include="Include\SocketUtilities.h" />
     <ClInclude Include="Include\ServerSocket.h" />
+    <ClInclude Include="Include\TCPServerSocket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\BaseSocket.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="Compile\PlatformNetwork.cpp" />
     <ClCompile Include="Compile\SocketUtilities.cpp" />
     <ClCompile Include="Compile\ServerSocket.cpp" />
+    <ClCompile Include="Compile\TCPServerSocket.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

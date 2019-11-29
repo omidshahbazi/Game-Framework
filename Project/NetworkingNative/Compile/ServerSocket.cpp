@@ -46,7 +46,7 @@ namespace GameFramework::Networking
 
 		m_Clients.remove(Client);
 
-		//HandleClientDisconnection(Client);
+		HandleClientDisconnection(Client);
 	}
 
 	void ServerSocket::Listen()
@@ -78,101 +78,106 @@ namespace GameFramework::Networking
 
 	void ServerSocket::Receive(void)
 	{
-		IPEndPoint endPoint;
-		SocketUtilities::Accept(GetSocket(), endPoint);
+		try
+		{
+			Socket clientSocket = 0;
+			IPEndPoint endPoint;
+			SocketUtilities::Accept(GetSocket(), clientSocket, endPoint);
 
-		//try
-		//{
-		//	Socket clientSocket =  Socket.Accept();
+			Client* client = new Client(clientSocket);
 
-		//	Client client = new Client(clientSocket);
+			{
+				WAIT_FOR_BOOL(m_ClientsLock);
 
-		//	lock(clients)
-		//		clients.Add(client);
+				m_Clients.push_back(client);
+			}
 
-		//	if (MultithreadedCallbacks)
-		//	{
-		//		if (OnClientConnected != null)
-		//			CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
-		//	}
-		//	else
-		//	{
-		//		AddEvent(new ClientConnectedEvent(client));
-		//	}
-		//}
-		//catch (SocketException e)
-		//{
-		//	if (e.SocketErrorCode != SocketError.WouldBlock)
-		//		throw e;
-		//}
+			if (GetMultithreadedCallbacks())
+			{
+				//if (OnClientConnected != null)
+				//	CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
+			}
+			else
+			{
+				AddEvent(new ClientConnectedEvent(client));
+			}
+		}
+		catch (exception e)
+		{
+			//if (e.SocketErrorCode != SocketError.WouldBlock)
+			throw e;
+		}
 
-		//lock(clients)
-		//{
-		//	ClientList disconnectedClients = new ClientList();
+		{
+			WAIT_FOR_BOOL(m_ClientsLock);
+			ClientList disconnectedClients;
 
-		//	for (int i = 0; i < clients.Count; ++i)
-		//	{
-		//		Client client = clients[i];
+			for (auto client : m_Clients)
+			{
+				try
+				{
+					Socket clientSocket = client->GetSocket();
 
-		//		try
-		//		{
-		//			int size = 0;
+					uint32_t size = 0;
 
-		//			lock(Socket)
-		//			{
-		//				if (client.Socket.Available == 0)
-		//				{
-		//					if (!client.IsReady)
-		//					{
-		//						disconnectedClients.Add(client);
+					if (SocketUtilities::GetAvailableBytes(clientSocket) == 0)
+					{
+						if (!SocketUtilities::IsReady(clientSocket))
+						{
+							disconnectedClients.push_back(client);
 
-		//						HandleClientDisconnection(client);
-		//					}
+							HandleClientDisconnection(client);
+						}
 
-		//					continue;
-		//				}
+						continue;
+					}
 
-		//				size = client.Socket.Receive(ReceiveBuffer);
-		//			}
+					size = Constants::RECEIVE_BUFFER_SIZE;
+					if (!SocketUtilities::Receive(clientSocket, GetReceiveBuffer(), size))
+						size = 0;
 
-		//			BandwidthIn += (uint)size;
+					AddBandwidthIn(size);
 
-		//			uint index = 0;
-		//			while (index != size)
-		//			{
-		//				uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
+					uint32_t index = 0;
+					while (index != size)
+					{
+						//uint32_t packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
-		//				index += Constants.Packet.PACKET_SIZE_SIZE;
+						//index += Constants::Packet.PACKET_SIZE_SIZE;
 
-		//				HandleIncommingBuffer(client, new BufferStream(ReceiveBuffer, index, packetSize));
+						//HandleIncommingBuffer(client, new BufferStream(ReceiveBuffer, index, packetSize));
 
-		//				index += packetSize;
-		//			}
-		//		}
-		//		catch (SocketException e)
-		//		{
-		//			if (e.SocketErrorCode == SocketError.WouldBlock)
-		//				continue;
-		//			else if (e.SocketErrorCode == SocketError.ConnectionReset)
-		//			{
-		//				disconnectedClients.Add(client);
+						//index += packetSize;
+					}
+				}
+				catch (exception e)
+				{
+					//if (e.SocketErrorCode == SocketError.WouldBlock)
+					//	continue;
+					//else if (e.SocketErrorCode == SocketError.ConnectionReset)
+					//{
+					//	disconnectedClients.Add(client);
 
-		//				HandleClientDisconnection(client);
+					HandleClientDisconnection(client);
 
-		//				continue;
-		//			}
+					//	continue;
+					//}
 
-		//			throw e;
-		//		}
-		//		catch (Exception e)
-		//		{
-		//			throw e;
-		//		}
-		//	}
+					throw e;
+				}
+			}
 
-		//	for (int i = 0; i < disconnectedClients.Count; ++i)
-		//		clients.Remove(disconnectedClients[i]);
-		//}
+			for (auto client : disconnectedClients)
+			{
+				m_Clients.remove(client);
+
+				delete client;
+			}
+		}
+	}
+
+	void ServerSocket::HandleIncommingBuffer(Client* Client, const BufferStream& Buffer)
+	{
 	}
 
 	bool ServerSocket::HandleSendCommand(SendCommand* Command)
@@ -180,13 +185,21 @@ namespace GameFramework::Networking
 		return false;
 	}
 
-	void ServerSocket::ProcessEvent(const EventBase& Event)
+	void ServerSocket::ProcessEvent(EventBase* Event)
 	{
 
+	}
+
+	void ServerSocket::HandleReceivedBuffer(Client* Sender, const BufferStream& Buffer)
+	{
 	}
 
 	double ServerSocket::GetTimestamp(void)
 	{
 		return 0;
+	}
+
+	void ServerSocket::HandleClientDisconnection(Client* Client)
+	{
 	}
 }

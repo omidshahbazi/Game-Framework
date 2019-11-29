@@ -1,8 +1,8 @@
 ﻿// Copyright 2019. All Rights Reserved.
 #pragma once
 
-#ifndef TCP_SERVER_SOCKET_H
-#define TCP_SERVER_SOCKET_H
+#ifndef SERVER_SOCKET_H
+#define SERVER_SOCKET_H
 
 #include "BaseSocket.h"
 #include "Client.h"
@@ -12,7 +12,7 @@ namespace GameFramework::Networking
 	class NETWORKING_API ServerSocket : public BaseSocket
 	{
 	private:
-		class ServerEventBase : EventBase
+		class ServerEventBase : public EventBase
 		{
 		public:
 			ServerEventBase(Client* Client) :
@@ -103,17 +103,25 @@ namespace GameFramework::Networking
 
 		virtual void Receive(void) override;
 
+		virtual void HandleIncommingBuffer(Client* Client, const BufferStream& Buffer);
+
 		virtual bool HandleSendCommand(SendCommand* Command) override;
 
-		virtual void ProcessEvent(const EventBase& Event)  override;
+		virtual void ProcessEvent(EventBase* Event)  override;
 
-	protected:
+		virtual	void ProcessReceivedBuffer(Client* Sender, const BufferStream& Buffer) = 0;
+
+		void HandleReceivedBuffer(Client* Sender, const BufferStream& Buffer);
+
 		virtual bool GetIsReady(void) override
 		{
 			return m_IsBound;
 		}
 
 		virtual double GetTimestamp(void)  override;
+
+	private:
+		void HandleClientDisconnection(Client* Client);
 
 	private:
 		bool m_IsBound;

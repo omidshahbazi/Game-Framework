@@ -116,15 +116,19 @@ namespace GameFramework::Networking
 		// https://support.microsoft.com/en-us/help/214397/design-issues-sending-small-data-segments-over-tcp-with-winsock
 		static void SetNagleAlgorithmEnabled(Socket Socket, bool Value);
 
-		static bool IsSocketReady(Socket Socket);
+		static bool IsReady(Socket Socket);
 
 		static bool Bind(Socket Socket, const IPEndPoint& EndPoint);
 
 		static bool Listen(Socket Socket, uint32_t MaxConnections);
 
-		static bool Accept(Socket Socket, IPEndPoint& EndPoint);
+		static bool Accept(Socket ListenerSocket, Socket& AcceptedSocket, IPEndPoint& EndPoint);
 
 		static bool Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
+
+		static uint64_t GetAvailableBytes(Socket Socket);
+
+		static bool Receive(Socket Socket, std::byte* Buffer, uint32_t& Length);
 
 		static IPAddress ResolveDomain(const std::string& Domain);
 

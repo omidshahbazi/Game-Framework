@@ -391,9 +391,9 @@ namespace GameFramework::Networking
 		return (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Value), sizeof(int32_t)) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::SetNonBlocking(Handle Handle, bool Enabled)
+	bool PlatformNetwork::SetBlocking(Handle Handle, bool Enabled)
 	{
-		DWORD enabled = (Enabled ? 1 : 0);
+		DWORD enabled = (Enabled ? 0 : 1);
 
 		return (ioctlsocket(Handle, FIONBIO, &enabled) == NO_ERROR);
 	}
@@ -410,7 +410,7 @@ namespace GameFramework::Networking
 		return (listen(Handle, MaxConnections) == NO_ERROR);
 	}
 
-	bool PlatformNetwork::Accept(Handle Handle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port)
+	bool PlatformNetwork::Accept(Handle ListenerHandle, Handle& AcceptedHandle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port)
 	{
 		sockaddr* address = nullptr;
 		int32_t size = 0;
@@ -429,9 +429,9 @@ namespace GameFramework::Networking
 			size = sizeof(sockaddr_in6);
 		}
 
-		SOCKET socket = accept(Handle, address, &size);
+		AcceptedHandle = accept(ListenerHandle, address, &size);
 
-		if (socket == INVALID_SOCKET)
+		if (AcceptedHandle == INVALID_SOCKET)
 			return false;
 
 		if (size == sizeof(sockaddr_in))
@@ -464,11 +464,24 @@ namespace GameFramework::Networking
 	//	return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), address, addressSize) == Length);
 	//}
 
-	uint64_t PlatformNetwork::AvailableBytes(Handle Handle)
+	uint64_t PlatformNetwork::GetAvailableBytes(Handle Handle)
 	{
 		u_long availableBytes;
 		ioctlsocket(Handle, FIONREAD, &availableBytes);
 		return availableBytes;
+	}
+
+	bool PlatformNetwork::Receive(Handle Handle, std::byte* Buffer, uint32_t& Length, ReceiveModes Mode)
+	{
+		int32_t result = recv(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode));
+
+		if (result > 0)
+		{
+			Length = result;
+			return true;
+		}
+
+		return false;
 	}
 
 	//bool PlatformNetwork::ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
