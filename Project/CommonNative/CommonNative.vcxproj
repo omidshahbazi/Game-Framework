@@ -139,6 +139,7 @@
     <ClInclude Include="Include\Utilities\BitwiseHelper.h" />
     <ClInclude Include="Include\Utilities\CRC32.h" />
     <ClInclude Include="Include\Utilities\Random.h" />
+    <ClInclude Include="Include\Utilities\TypeHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

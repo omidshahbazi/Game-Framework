@@ -20,6 +20,8 @@ namespace GameFramework::Networking
 			{
 			}
 
+			virtual ~ServerEventBase(void) = default;
+
 			const Client* GetClient(void) const
 			{
 				return m_Client;
@@ -69,7 +71,7 @@ namespace GameFramework::Networking
 			{
 			}
 
-			Socket GetBuffer(void) const
+			Socket GetSocket(void) const
 			{
 				return m_Socket;
 			}
@@ -103,7 +105,7 @@ namespace GameFramework::Networking
 
 		virtual void Receive(void) override;
 
-		virtual void HandleIncommingBuffer(Client* Client, const BufferStream& Buffer);
+		virtual void HandleIncommingBuffer(Client* Client, BufferStream& Buffer);
 
 		virtual bool HandleSendCommand(SendCommand* Command) override;
 

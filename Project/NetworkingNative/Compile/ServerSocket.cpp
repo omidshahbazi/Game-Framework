@@ -1,6 +1,10 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\ServerSocket.h"
 #include "..\Include\Constants.h"
+#include <Timing\Time.h>
+#include <Utilities\TypeHelper.h>
+
+using namespace GameFramework::Common::Timing;
 
 namespace GameFramework::Networking
 {
@@ -147,7 +151,9 @@ namespace GameFramework::Networking
 
 						index += Constants::Packet::PACKET_SIZE_SIZE;
 
-						HandleIncommingBuffer(client, BufferStream(receiveBuffer, index, packetSize));
+						BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
+
+						HandleIncommingBuffer(client, buffer);
 
 						index += packetSize;
 					}
@@ -178,30 +184,108 @@ namespace GameFramework::Networking
 		}
 	}
 
-	void ServerSocket::HandleIncommingBuffer(Client* Client, const BufferStream& Buffer)
+	void ServerSocket::HandleIncommingBuffer(Client* Client, BufferStream& Buffer)
 	{
+		byte control = Buffer.ReadByte();
+
+		double time = Time::GetCurrentEpochTime();
+
+		Client->UpdateLastTouchTime(time);
+
+		if (control == Constants::Control::BUFFER)
+		{
+			BufferStream buffer = Constants::Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
+
+			if (GetMultithreadedCallbacks())
+			{
+				//if (OnBufferReceived != null)
+				//	CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Client, buffer);
+			}
+			else
+			{
+				AddEvent(new BufferReceivedvent(Client, buffer));
+			}
+		}
+		else if (control == Constants::Control::PING)
+		{
+			double sendTime = Buffer.ReadFloat64();
+
+			Client->UpdateLatency((time - sendTime) * 1000);
+
+			BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
+
+			BaseSocket::Send(Client->GetSocket(), pingBuffer);
+		}
 	}
 
 	bool ServerSocket::HandleSendCommand(SendCommand* Command)
 	{
-		return false;
+		if (GetTimestamp() < Command->GetSendTime() + (GetLatencySimulation() / 1000.0F))
+			return false;
+
+		ServerSendCommand* sendCommand = reinterpret_cast<ServerSendCommand*>(Command);
+
+		if (!SocketUtilities::IsReady(sendCommand->GetSocket()))
+			return false;
+
+		BaseSocket::Send(sendCommand->GetSocket(), Command->GetBuffer());
+
+		return true;
 	}
 
 	void ServerSocket::ProcessEvent(EventBase* Event)
 	{
+		ServerEventBase* ev = reinterpret_cast<ServerEventBase*>(Event);
 
+		if (IS_TYPE_OF(ev, ClientConnectedEvent))
+		{
+			//if (OnClientConnected != null)
+			//	CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, ev->GetClient());
+		}
+		else if (IS_TYPE_OF(ev, ClientDisconnectedEvent))
+		{
+			//if (OnClientDisconnected != null)
+			//	CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, ev->GetClient());
+
+			SocketUtilities::CloseSocket(ev->GetClient()->GetSocket());
+		}
+		else if (IS_TYPE_OF(ev, BufferReceivedvent))
+		{
+			//if (OnBufferReceived != null)
+			//	CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, ev->GetClient(), ((BufferReceivedvent)ev).Buffer);
+		}
 	}
 
 	void ServerSocket::HandleReceivedBuffer(Client* Sender, const BufferStream& Buffer)
 	{
+		if (GetMultithreadedCallbacks())
+		{
+			//if (OnBufferReceived != null)
+			//	CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Sender, Buffer);
+		}
+		else
+		{
+			AddEvent(new BufferReceivedvent(Sender, Buffer));
+		}
 	}
 
 	double ServerSocket::GetTimestamp(void)
 	{
-		return 0;
+		return Time::GetCurrentEpochTime();
 	}
 
 	void ServerSocket::HandleClientDisconnection(Client* Client)
 	{
+		if (GetMultithreadedCallbacks())
+		{
+			//if (OnClientDisconnected != null)
+			//	CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, Client);
+
+			SocketUtilities::CloseSocket(Client->GetSocket());
+		}
+		else
+		{
+			AddEvent(new ClientDisconnectedEvent(Client));
+		}
 	}
 }

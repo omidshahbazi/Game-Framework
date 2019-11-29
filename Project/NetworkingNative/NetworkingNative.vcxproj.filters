@@ -56,5 +56,8 @@
     <ClCompile Include="Compile\TCPServerSocket.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
+    <ClCompile Include="Compile\Client.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

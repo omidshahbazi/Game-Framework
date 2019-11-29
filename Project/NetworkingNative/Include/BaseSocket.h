@@ -157,20 +157,20 @@ namespace GameFramework::Networking
 			m_MultithreadedSend = Value;
 		}
 
-		bool GetPacketLossSimulation(void) const
+		float GetPacketLossSimulation(void) const
 		{
 			return m_PacketLossSimulation;
 		}
-		void SetPacketLossSimulation(bool Value)
+		void SetPacketLossSimulation(float Value)
 		{
 			m_PacketLossSimulation = Value;
 		}
 
-		bool GetLatencySimulation(void) const
+		int GetLatencySimulation(void) const
 		{
 			return m_LatencySimulation;
 		}
-		void SetLatencySimulation(bool Value)
+		void SetLatencySimulation(int Value)
 		{
 			m_LatencySimulation = Value;
 		}

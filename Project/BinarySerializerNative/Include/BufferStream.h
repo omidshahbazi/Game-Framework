@@ -25,7 +25,7 @@ namespace GameFramework::BinarySerializer
 
 		BufferStream(byte* const Buffer, uint32_t Index, uint32_t Length);
 
-		BufferStream(const BufferStream &Other);
+		BufferStream(const BufferStream& Other);
 
 		void Reset(void);
 
@@ -57,13 +57,13 @@ namespace GameFramework::BinarySerializer
 
 		void WriteFloat32(float Value);
 
-		void WriteFloat64(const double &Value);
+		void WriteFloat64(const double& Value);
 
 		void WriteString(const char* Value, uint32_t Length);
-		void WriteString(const string &Value);
+		void WriteString(const string& Value);
 
 		void WriteString(const wchar_t* Value, uint32_t Length);
-		void WriteString(const wstring &Value);
+		void WriteString(const wstring& Value);
 
 		void WriteBytes(byte Buffer);
 		void WriteBytes(byte* const Data, uint32_t Index, uint32_t Length);
@@ -84,7 +84,7 @@ namespace GameFramework::BinarySerializer
 
 		void Print(uint32_t BytesPerLine = 8) const;
 
-		__forceinline const byte* GetBuffer(void) const
+		__forceinline byte* const GetBuffer(void) const
 		{
 			return m_Buffer;
 		}

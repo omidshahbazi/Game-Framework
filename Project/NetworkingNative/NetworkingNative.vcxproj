@@ -161,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\BaseSocket.cpp" />
+    <ClCompile Include="Compile\Client.cpp" />
     <ClCompile Include="Compile\Constants.cpp" />
     <ClCompile Include="Compile\PlatformNetwork.cpp" />
     <ClCompile Include="Compile\SocketUtilities.cpp" />

@@ -77,7 +77,7 @@ namespace GameFramework.Networking
 			Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, !Value);
 		}
 
-		public static bool IsSocketReady(Socket Socket)
+		public static bool IsReady(Socket Socket)
 		{
 			return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0);
 		}

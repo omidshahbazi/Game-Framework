@@ -48,7 +48,7 @@ namespace GameFramework.Networking
 
 		public override bool IsReady
 		{
-			get { return SocketUtilities.IsSocketReady(Socket); }
+			get { return SocketUtilities.IsReady(Socket); }
 		}
 
 		public override double Timestamp
@@ -227,7 +227,7 @@ namespace GameFramework.Networking
 			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
 				return false;
 
-			if (!SocketUtilities.IsSocketReady(Socket))
+			if (!SocketUtilities.IsReady(Socket))
 				return false;
 
 			Send(Socket, Command.Buffer);
