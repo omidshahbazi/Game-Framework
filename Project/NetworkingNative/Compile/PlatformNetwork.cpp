@@ -116,7 +116,7 @@ namespace GameFramework::Networking
 
 	int32_t GetReceiveFlags(PlatformNetwork::ReceiveModes Mode)
 	{
-		int flags = 0;
+		int32_t flags = 0;
 
 		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::ReceiveModes::DontRoute))
 			flags |= MSG_DONTROUTE;
@@ -126,6 +126,22 @@ namespace GameFramework::Networking
 
 		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::ReceiveModes::Peek))
 			flags |= MSG_PEEK;
+
+		return flags;
+	}
+
+	int32_t GetSelectFlags(PlatformNetwork::SelectModes Mode)
+	{
+		int32_t flags = 0;
+
+		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::SelectModes::SelectRead))
+			flags |= POLLRDNORM;
+
+		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::SelectModes::SelectWrite))
+			flags |= POLLWRNORM;
+
+		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::SelectModes::SelectError))
+			flags |= POLLERR;
 
 		return flags;
 	}
@@ -463,6 +479,15 @@ namespace GameFramework::Networking
 
 	//	return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), address, addressSize) == Length);
 	//}
+
+	bool PlatformNetwork::Poll(Handle Handle, uint32_t Timeout, SelectModes Mode)
+	{
+		WSAPOLLFD fd;
+		fd.fd = Handle;
+		fd.events = GetSelectFlags(Mode);
+
+		return (WSAPoll(&fd, 1, Timeout) != SOCKET_ERROR);
+	}
 
 	uint64_t PlatformNetwork::GetAvailableBytes(Handle Handle)
 	{

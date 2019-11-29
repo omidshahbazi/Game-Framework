@@ -49,6 +49,13 @@ namespace GameFramework::Networking
 			Peek
 		};
 
+		enum class SelectModes
+		{
+			SelectRead = 0,
+			SelectWrite = 1,
+			SelectError = 2
+		};
+
 		enum class Errors
 		{
 			NoError,
@@ -221,6 +228,8 @@ namespace GameFramework::Networking
 
 		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
 		//static bool SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
+
+		static bool Poll(Handle Handle, uint32_t Timeout, SelectModes Mode);
 
 		static uint64_t GetAvailableBytes(Handle Handle);
 		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t &Length, ReceiveModes Mode);
