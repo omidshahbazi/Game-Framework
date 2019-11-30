@@ -27,6 +27,8 @@ namespace GameFramework::BinarySerializer
 
 		BufferStream(const BufferStream& Other);
 
+		~BufferStream(void);
+
 		void Reset(void);
 
 		bool ReadBool(void);
@@ -95,6 +97,8 @@ namespace GameFramework::BinarySerializer
 		}
 
 	private:
+		void EnsureCapacity(uint32_t AdditonalCapacity);
+
 		template<typename T>
 		BytesOf<T> ReadBytesOf(byte* const Buffer, uint32_t& Index)
 		{
@@ -116,6 +120,7 @@ namespace GameFramework::BinarySerializer
 
 	private:
 		byte* m_Buffer;
+		uint32_t m_Capacity;
 		uint32_t m_ReadIndex;
 		uint32_t m_Size;
 	};

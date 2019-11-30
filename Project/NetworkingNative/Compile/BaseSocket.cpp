@@ -35,7 +35,7 @@ namespace GameFramework::Networking
 		SocketUtilities::SetReceiveTimeout(m_Socket, Constants::RECEIVE_TIMEOUT);
 		SocketUtilities::SetSendTimeout(m_Socket, Constants::SEND_TIMEOUT);
 		SocketUtilities::SetTimeToLive(m_Socket, Constants::TIME_TO_LIVE);
-		//SocketUtilities::SetIPv6OnlyEnabled(m_Socket, false);
+		SocketUtilities::SetIPv6OnlyEnabled(m_Socket, false);
 		//SocketUtilities::SetChecksumEnabled(m_Socket, false);
 		SocketUtilities::SetNagleAlgorithmEnabled(m_Socket, false);
 
@@ -101,14 +101,14 @@ namespace GameFramework::Networking
 
 			m_BandwidthOut += Buffer.GetSize();
 		}
-		catch (exception e)
+		catch (PlatformNetwork::SocketException e)
 		{
-			//if (e.SocketErrorCode == SocketError.ConnectionReset)
-			//{
-			//	HandleDisconnection(Target);
+			if (e.GetError() == PlatformNetwork::Errors::ConnectionReset)
+			{
+				HandleDisconnection(Target);
 
-			//	return;
-			//}
+				return;
+			}
 
 			throw e;
 		}

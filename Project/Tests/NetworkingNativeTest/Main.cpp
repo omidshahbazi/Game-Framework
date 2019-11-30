@@ -43,7 +43,7 @@ void main()
 
 	while (true)
 	{
-		//_sleep(100);
+		this_thread::sleep_for(chrono::seconds(1));
 
 		server.Service();
 	}

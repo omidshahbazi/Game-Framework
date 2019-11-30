@@ -56,7 +56,7 @@ namespace GameFramework::Networking
 
 	void SocketUtilities::SetChecksumEnabled(Socket Socket, bool Value)
 	{
-		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::Checksum, Value);
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::UDP, PlatformNetwork::Options::Checksum, Value);
 	}
 
 	// After many researches around NoDelay and the Nagle algorithm, I found out that using this algorithm on TCP

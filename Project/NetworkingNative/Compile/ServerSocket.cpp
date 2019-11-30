@@ -146,7 +146,7 @@ namespace GameFramework::Networking
 
 				size = Constants::RECEIVE_BUFFER_SIZE;
 				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
-					size = 0;
+					continue;
 
 				AddBandwidthIn(size);
 
@@ -160,8 +160,6 @@ namespace GameFramework::Networking
 					BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
 
 					HandleIncommingBuffer(client, buffer);
-
-					buffer.Print();
 
 					index += packetSize;
 				}

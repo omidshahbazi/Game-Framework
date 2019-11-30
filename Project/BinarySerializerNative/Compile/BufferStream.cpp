@@ -9,7 +9,7 @@ namespace GameFramework::BinarySerializer
 		m_ReadIndex(0),
 		m_Size(0)
 	{
-		m_Buffer = reinterpret_cast<byte*>(malloc(Capacity));
+		EnsureCapacity(Capacity);
 	}
 
 	BufferStream::BufferStream(byte* const Buffer, uint32_t Length) : BufferStream(Buffer, 0, Length)
@@ -21,7 +21,7 @@ namespace GameFramework::BinarySerializer
 		m_Size(0)
 	{
 		m_Size = Length;
-		m_Buffer = reinterpret_cast<byte*>(malloc(m_Size));
+		EnsureCapacity(Length);
 
 		memcpy(m_Buffer, reinterpret_cast<void*>(Buffer + Index), m_Size);
 	}
@@ -29,6 +29,12 @@ namespace GameFramework::BinarySerializer
 	BufferStream::BufferStream(const BufferStream& Other)
 	{
 		*this = Other;
+	}
+
+	BufferStream::~BufferStream(void)
+	{
+		if (m_Buffer != nullptr)
+			free(m_Buffer);
 	}
 
 	void BufferStream::Reset(void)
@@ -99,7 +105,7 @@ namespace GameFramework::BinarySerializer
 
 	void BufferStream::ReadBytes(byte* Data, uint32_t Index, uint32_t Length)
 	{
-		memcpy(m_Buffer + m_ReadIndex, Data, Length);
+		memcpy(Data, m_Buffer + m_ReadIndex, Length);
 
 		Index += Length;
 	}
@@ -170,7 +176,9 @@ namespace GameFramework::BinarySerializer
 
 	void BufferStream::WriteBytes(byte* const Buffer, uint32_t Index, uint32_t Length)
 	{
-		memcpy(Buffer + Index, Buffer + m_Size, Length);
+		EnsureCapacity(Length);
+
+		memcpy(m_Buffer + Index, Buffer + m_Size, Length);
 		m_Size += Length;
 	}
 
@@ -206,7 +214,7 @@ namespace GameFramework::BinarySerializer
 		m_Size = 0;
 
 		m_Size = Other.m_Size;
-		m_Buffer = reinterpret_cast<byte*>(malloc(m_Size));
+		EnsureCapacity(m_Size);
 
 		memcpy(m_Buffer, Other.m_Buffer, m_Size);
 
@@ -256,5 +264,24 @@ namespace GameFramework::BinarySerializer
 		}
 
 		cout << endl;
+	}
+
+	void BufferStream::EnsureCapacity(uint32_t AdditonalCapacity)
+	{
+		if (m_Capacity >= m_Size + AdditonalCapacity)
+			return;
+
+		m_Capacity += AdditonalCapacity;
+
+		byte* newBuffer = reinterpret_cast<byte*>(malloc(m_Capacity));
+
+		if (m_Buffer != nullptr)
+		{
+			memcpy(newBuffer, m_Buffer, m_Size);
+
+			free(m_Buffer);
+		}
+
+		m_Buffer = newBuffer;
 	}
 }
