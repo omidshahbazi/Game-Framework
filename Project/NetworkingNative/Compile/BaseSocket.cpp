@@ -35,10 +35,9 @@ namespace GameFramework::Networking
 		SocketUtilities::SetReceiveTimeout(m_Socket, Constants::RECEIVE_TIMEOUT);
 		SocketUtilities::SetSendTimeout(m_Socket, Constants::SEND_TIMEOUT);
 		SocketUtilities::SetTimeToLive(m_Socket, Constants::TIME_TO_LIVE);
-		SocketUtilities::SetIPv6OnlyEnabled(m_Socket, false);
-		SocketUtilities::SetChecksumEnabled(m_Socket, false);
+		//SocketUtilities::SetIPv6OnlyEnabled(m_Socket, false);
+		//SocketUtilities::SetChecksumEnabled(m_Socket, false);
 		SocketUtilities::SetNagleAlgorithmEnabled(m_Socket, false);
-		SocketUtilities::SetBSDUrgentEnabled(m_Socket, true);
 
 		m_ReceiveBuffer = new std::byte[Constants::RECEIVE_BUFFER_SIZE];
 

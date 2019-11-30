@@ -8,8 +8,9 @@ using namespace GameFramework::Common::Timing;
 
 namespace GameFramework::Networking
 {
-	Client::Client(Socket Socket) :
-		m_Socket(Socket)
+	Client::Client(Socket Socket, const IPEndPoint &EndPoint) :
+		m_Socket(Socket),
+		m_EndPoint(EndPoint)
 	{
 		m_LastTouchTime = Time::GetCurrentEpochTime();
 	}

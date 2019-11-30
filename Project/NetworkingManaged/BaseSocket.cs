@@ -128,7 +128,6 @@ namespace GameFramework.Networking
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			SocketUtilities.SetChecksumEnabled(Socket, false);
 			SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);
-			SocketUtilities.SetBSDUrgentEnabled(Socket, true);
 
 			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 

@@ -128,7 +128,9 @@ namespace GameFramework::Networking
 		void HandleClientDisconnection(Client* Client);
 
 	public:
-		Event<Client*> OnClientConnected;
+		Event<const Client*> OnClientConnected;
+		Event<const Client*> OnClientDisconnected;
+		Event<const Client*, BufferStream&> OnBufferReceived;
 
 	private:
 		bool m_IsBound;

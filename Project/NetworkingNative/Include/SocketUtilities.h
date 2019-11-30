@@ -108,8 +108,6 @@ namespace GameFramework::Networking
 
 		static void SetChecksumEnabled(Socket Socket, bool Value);
 
-		static void SetBSDUrgentEnabled(Socket Socket, bool Value);
-
 		// After many researches around NoDelay and the Nagle algorithm, I found out that using this algorithm on TCP
 		// will apply a bad effect on the send/receive protocol under TCP connection
 		// Altough, NoDelay and the function doesn't work properly as described in MSDN and I desired
@@ -118,13 +116,13 @@ namespace GameFramework::Networking
 
 		static bool IsReady(Socket Socket);
 
-		static bool Bind(Socket Socket, const IPEndPoint& EndPoint);
+		static void Bind(Socket Socket, const IPEndPoint& EndPoint);
 
-		static bool Listen(Socket Socket, uint32_t MaxConnections);
+		static void Listen(Socket Socket, uint32_t MaxConnections);
 
 		static bool Accept(Socket ListenerSocket, Socket& AcceptedSocket, IPEndPoint& EndPoint);
 
-		static bool Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
+		static void Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
 
 		static uint64_t GetAvailableBytes(Socket Socket);
 

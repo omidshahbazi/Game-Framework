@@ -327,9 +327,6 @@ namespace GameFramework::Networking
 		case PlatformNetwork::Options::ReceiveTimeout:
 			return SO_RCVTIMEO;
 
-		case PlatformNetwork::Options::BSPState:
-			return SO_TYPE;
-
 		case PlatformNetwork::Options::GroupID:
 			return SO_GROUP_ID;
 
@@ -371,15 +368,17 @@ namespace GameFramework::Networking
 		}
 	}
 
-	bool PlatformNetwork::Initialize(void)
+	void PlatformNetwork::Initialize(void)
 	{
 		WSADATA data;
-		return (WSAStartup(MAKEWORD(2, 2), &data) == NO_ERROR);
+		if (WSAStartup(MAKEWORD(2, 2), &data) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	bool PlatformNetwork::Shutdown(void)
+	void PlatformNetwork::Shutdown(void)
 	{
-		return  (WSACleanup() == NO_ERROR);
+		if (WSACleanup() != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
 	PlatformNetwork::Handle PlatformNetwork::Create(AddressFamilies AddressFamily, Types Type, IPProtocols IPProtocol)
@@ -387,43 +386,50 @@ namespace GameFramework::Networking
 		return (Handle)socket(GetAddressFamiliy(AddressFamily), GetType(Type), GetIPProtocol(IPProtocol));
 	}
 
-	bool PlatformNetwork::Shutdown(Handle Handle, ShutdownHows How)
+	void PlatformNetwork::Shutdown(Handle Handle, ShutdownHows How)
 	{
-		return (shutdown(Handle, GetShutdownHow(How)) == NO_ERROR);
+		if (shutdown(Handle, GetShutdownHow(How)) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	bool PlatformNetwork::Close(Handle Handle)
+	void PlatformNetwork::Close(Handle Handle)
 	{
-		return (closesocket(Handle) == NO_ERROR);
+		if (closesocket(Handle) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	bool PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled)
+	void PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled)
 	{
-		return (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) == NO_ERROR);
+		if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	bool PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value)
+	void PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value)
 	{
-		return (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Value), sizeof(int32_t)) == NO_ERROR);
+		if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Value), sizeof(int32_t)) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	bool PlatformNetwork::SetBlocking(Handle Handle, bool Enabled)
+	void PlatformNetwork::SetBlocking(Handle Handle, bool Enabled)
 	{
 		DWORD enabled = (Enabled ? 0 : 1);
 
-		return (ioctlsocket(Handle, FIONBIO, &enabled) == NO_ERROR);
+		if (ioctlsocket(Handle, FIONBIO, &enabled) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	bool PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port)
+	void PlatformNetwork::Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port)
 	{
 		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
-		return (bind(Handle, address, addressSize) == NO_ERROR);
+		if (bind(Handle, address, addressSize) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	bool PlatformNetwork::Listen(Handle Handle, uint32_t MaxConnections)
+	void PlatformNetwork::Listen(Handle Handle, uint32_t MaxConnections)
 	{
-		return (listen(Handle, MaxConnections) == NO_ERROR);
+		if (listen(Handle, MaxConnections) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
 	bool PlatformNetwork::Accept(Handle ListenerHandle, Handle& AcceptedHandle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port)
@@ -445,10 +451,19 @@ namespace GameFramework::Networking
 			size = sizeof(sockaddr_in6);
 		}
 
-		AcceptedHandle = accept(ListenerHandle, address, &size);
+		int32_t result = accept(ListenerHandle, address, &size);
 
-		if (AcceptedHandle == INVALID_SOCKET)
-			return false;
+		if (result == INVALID_SOCKET)
+		{
+			Errors error = GetLastError();
+
+			if (error == Errors::WouldBlock)
+				return false;
+
+			throw SocketException(GetLastError());
+		}
+
+		AcceptedHandle = result;
 
 		if (size == sizeof(sockaddr_in))
 		{
@@ -463,17 +478,18 @@ namespace GameFramework::Networking
 			Port = ntohs(ipv6.sin6_port);
 		}
 		else
-			return false;
+			throw SocketException(Errors::InvalidArguments);
 
 		return true;
 	}
 
-	bool PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode)
+	void PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode)
 	{
-		return (send(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode)) == NO_ERROR);
+		if (send(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode)) != NO_ERROR)
+			throw SocketException(GetLastError());
 	}
 
-	//bool PlatformNetwork::SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
+	//void PlatformNetwork::SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
 	//{
 	//	BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
@@ -509,7 +525,7 @@ namespace GameFramework::Networking
 		return false;
 	}
 
-	//bool PlatformNetwork::ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
+	//void PlatformNetwork::ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
 	//{
 	//	sockaddr_in address;
 	//	int32_t addressSize = sizeof(sockaddr_in);

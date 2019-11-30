@@ -5,9 +5,16 @@ using namespace GameFramework::Networking;
 
 TCPServerSocket server(32);
 
-void OnClientConnected(Client* Client)
+void OnClientConnected(const Client* Client)
 {
-	std::cout << "Client Connected" << std::endl;
+	std::cout << "OnClientConnected " << Client->GetEndPoint().GetAddress().GetIP() << Client->GetEndPoint().GetPort() << std::endl;
+
+	//server.OnClientConnected -= OnClientConnected;
+}
+
+void OnClientDisconnected(const Client* Client)
+{
+	std::cout << "OnClientDisconnected " << Client->GetEndPoint().GetAddress().GetIP() << Client->GetEndPoint().GetPort() << std::endl;
 
 	//server.OnClientConnected -= OnClientConnected;
 }

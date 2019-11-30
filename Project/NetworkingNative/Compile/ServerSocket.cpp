@@ -33,7 +33,8 @@ namespace GameFramework::Networking
 		if (endPoint.GetAddress().GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
 			endPoint.SetAddress(SocketUtilities::MapIPv4ToIPv6(endPoint.GetAddress()));
 
-		m_IsBound = SocketUtilities::Bind(GetSocket(), endPoint);
+		SocketUtilities::Bind(GetSocket(), endPoint);
+		m_IsBound = true;
 	}
 
 	void ServerSocket::ServerSocket::UnBind(void)
@@ -87,26 +88,25 @@ namespace GameFramework::Networking
 		{
 			Socket clientSocket = 0;
 			IPEndPoint endPoint;
-			SocketUtilities::Accept(GetSocket(), clientSocket, endPoint);
-
-			Client* client = new Client(clientSocket);
-
+			if (SocketUtilities::Accept(GetSocket(), clientSocket, endPoint))
 			{
-				WAIT_FOR_BOOL(m_ClientsLock);
+				Client* client = new Client(clientSocket, endPoint);
 
-				m_Clients.push_back(client);
-			}
+				{
+					WAIT_FOR_BOOL(m_ClientsLock);
 
-			if (GetMultithreadedCallbacks())
-			{
-				OnClientConnected(client);
+					m_Clients.push_back(client);
+				}
 
-				//if (OnClientConnected != null)
-				//	CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
-			}
-			else
-			{
-				AddEvent(new ClientConnectedEvent(client));
+				if (GetMultithreadedCallbacks())
+				{
+					//if (OnClientConnected != null)
+					//	CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
+				}
+				else
+				{
+					AddEvent(new ClientConnectedEvent(client));
+				}
 			}
 		}
 		catch (exception e)

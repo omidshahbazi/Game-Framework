@@ -59,11 +59,6 @@ namespace GameFramework::Networking
 		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::Checksum, Value);
 	}
 
-	void SocketUtilities::SetBSDUrgentEnabled(Socket Socket, bool Value)
-	{
-		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::TCP, PlatformNetwork::Options::BSPState, Value);
-	}
-
 	// After many researches around NoDelay and the Nagle algorithm, I found out that using this algorithm on TCP
 	// will apply a bad effect on the send/receive protocol under TCP connection
 	// Altough, NoDelay and the function doesn't work properly as described in MSDN and I desired
@@ -78,12 +73,12 @@ namespace GameFramework::Networking
 		return !(PlatformNetwork::Poll(Socket, 10, PlatformNetwork::SelectModes::SelectRead) && GetAvailableBytes(Socket) == 0);
 	}
 
-	bool SocketUtilities::Bind(Socket Socket, const IPEndPoint& EndPoint)
+	void SocketUtilities::Bind(Socket Socket, const IPEndPoint& EndPoint)
 	{
-		return PlatformNetwork::Bind(Socket, EndPoint.GetAddress().GetAddressFamily(), EndPoint.GetAddress().GetIP().c_str(), EndPoint.GetPort());
+		PlatformNetwork::Bind(Socket, EndPoint.GetAddress().GetAddressFamily(), EndPoint.GetAddress().GetIP().c_str(), EndPoint.GetPort());
 	}
 
-	bool SocketUtilities::Listen(Socket Socket, uint32_t MaxConnections)
+	void SocketUtilities::Listen(Socket Socket, uint32_t MaxConnections)
 	{
 		return PlatformNetwork::Listen(Socket, MaxConnections);
 	}
@@ -103,9 +98,9 @@ namespace GameFramework::Networking
 		return true;
 	}
 
-	bool SocketUtilities::Send(Socket Socket, const std::byte* Buffer, uint32_t Length)
+	void SocketUtilities::Send(Socket Socket, const std::byte* Buffer, uint32_t Length)
 	{
-		return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
+		PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
 	}
 
 	uint64_t SocketUtilities::GetAvailableBytes(Socket Socket)

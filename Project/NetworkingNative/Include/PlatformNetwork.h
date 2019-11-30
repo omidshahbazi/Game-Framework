@@ -185,8 +185,6 @@ namespace GameFramework::Networking
 			SendTimeout,
 			ReceiveTimeout,
 
-			BSPState,
-
 			GroupID,
 			GroupPriority,
 
@@ -207,32 +205,49 @@ namespace GameFramework::Networking
 			Checksum
 		};
 
+		class SocketException : public std::exception
+		{
+		public:
+			SocketException(Errors Error) :
+				m_Error(Error)
+			{
+			}
+
+			Errors GetError(void) const
+			{
+				return m_Error;
+			}
+
+		private:
+			Errors m_Error;
+		};
+
 		typedef uint32_t Handle;
 
-		static bool Initialize(void);
-		static bool Shutdown(void);
+		static void Initialize(void);
+		static void Shutdown(void);
 
 		static Handle Create(AddressFamilies AddressFamily, Types Type, IPProtocols IPProtocol);
-		static bool Shutdown(Handle Handle, ShutdownHows How);
-		static bool Close(Handle Handle);
+		static void Shutdown(Handle Handle, ShutdownHows How);
+		static void Close(Handle Handle);
 
-		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled);
-		static bool SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value);
-		static bool SetBlocking(Handle Handle, bool Enabled);
+		static void SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled);
+		static void SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value);
+		static void SetBlocking(Handle Handle, bool Enabled);
 
-		static bool Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port);
+		static void Bind(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port);
 
-		static bool Listen(Handle Handle, uint32_t MaxConnections);
+		static void Listen(Handle Handle, uint32_t MaxConnections);
 
 		static bool Accept(Handle ListenerHandle, Handle& AcceptedHandle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port);
 
-		static bool Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
+		static void Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
 		//static bool SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
 
 		static bool Poll(Handle Handle, uint32_t Timeout, SelectModes Mode);
 
 		static uint64_t GetAvailableBytes(Handle Handle);
-		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t &Length, ReceiveModes Mode);
+		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t& Length, ReceiveModes Mode);
 		//static bool ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode);
 
 		static void ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address);
