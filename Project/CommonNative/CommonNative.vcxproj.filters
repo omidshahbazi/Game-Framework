@@ -39,6 +39,9 @@
     <ClInclude Include="Include\Utilities\TypeHelper.h">
       <Filter>Include\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Utilities\Event.h">
+      <Filter>Include\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Utilities\CRC32.cpp">

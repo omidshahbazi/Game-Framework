@@ -5,6 +5,7 @@
 #include <Utilities\TypeHelper.h>
 
 using namespace GameFramework::Common::Timing;
+using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
@@ -98,6 +99,8 @@ namespace GameFramework::Networking
 
 			if (GetMultithreadedCallbacks())
 			{
+				OnClientConnected(client);
+
 				//if (OnClientConnected != null)
 				//	CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
 			}

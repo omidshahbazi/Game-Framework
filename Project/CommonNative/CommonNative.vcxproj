@@ -138,6 +138,7 @@
     <ClInclude Include="Include\Timing\Time.h" />
     <ClInclude Include="Include\Utilities\BitwiseHelper.h" />
     <ClInclude Include="Include\Utilities\CRC32.h" />
+    <ClInclude Include="Include\Utilities\Event.h" />
     <ClInclude Include="Include\Utilities\Random.h" />
     <ClInclude Include="Include\Utilities\TypeHelper.h" />
   </ItemGroup>

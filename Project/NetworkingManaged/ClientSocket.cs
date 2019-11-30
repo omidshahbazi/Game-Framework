@@ -101,8 +101,8 @@ namespace GameFramework.Networking
 
 		public void Connect(IPEndPoint EndPoint)
 		{
-			//if (EndPoint.AddressFamily == AddressFamily.InterNetwork)
-			//	EndPoint.Address = SocketUtilities.MapIPv4ToIPv6(EndPoint.Address);
+			if (EndPoint.AddressFamily == AddressFamily.InterNetwork)
+				EndPoint.Address = SocketUtilities.MapIPv4ToIPv6(EndPoint.Address);
 
 			Socket.BeginConnect(EndPoint, OnConnectedCallback, null);
 		}

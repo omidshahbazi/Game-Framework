@@ -14,7 +14,7 @@ namespace GameFramework.Networking
 			ProtocolType protocol = (Protocol == Protocols.TCP ? ProtocolType.Tcp : ProtocolType.Udp);
 			SocketType type = (Protocol == Protocols.TCP ? SocketType.Stream : SocketType.Dgram);
 
-			return new Socket(AddressFamily.InterNetwork, type, protocol);
+			return new Socket(AddressFamily.InterNetworkV6, type, protocol);
 		}
 
 		public static void CloseSocket(Socket Socket)

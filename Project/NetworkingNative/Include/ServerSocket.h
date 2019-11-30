@@ -6,6 +6,9 @@
 
 #include "BaseSocket.h"
 #include "Client.h"
+#include <Utilities\Event.h>
+
+using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
@@ -80,7 +83,6 @@ namespace GameFramework::Networking
 			Socket m_Socket;
 		};
 
-
 	public:
 		ServerSocket(PlatformNetwork::IPProtocols Type, uint32_t MaxConnection);
 
@@ -124,6 +126,9 @@ namespace GameFramework::Networking
 
 	private:
 		void HandleClientDisconnection(Client* Client);
+
+	public:
+		Event<Client*> OnClientConnected;
 
 	private:
 		bool m_IsBound;
