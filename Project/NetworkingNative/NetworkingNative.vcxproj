@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Include\BaseSocket.h" />
+    <ClInclude Include="Include\CallbackUtilities.h" />
     <ClInclude Include="Include\Client.h" />
     <ClInclude Include="Include\Common.h" />
     <ClInclude Include="Include\Constants.h" />

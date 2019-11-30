@@ -1,6 +1,7 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\ServerSocket.h"
 #include "..\Include\Constants.h"
+#include "..\Include\CallbackUtilities.h"
 #include <Timing\Time.h>
 #include <Utilities\TypeHelper.h>
 
@@ -100,8 +101,7 @@ namespace GameFramework::Networking
 
 				if (GetMultithreadedCallbacks())
 				{
-					//if (OnClientConnected != null)
-					//	CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
+					CallbackUtilities::InvokeCallback(OnClientConnected, reinterpret_cast<const Client*>(client));
 				}
 				else
 				{
@@ -109,9 +109,13 @@ namespace GameFramework::Networking
 				}
 			}
 		}
+		catch (PlatformNetwork::SocketException e)
+		{
+			if (e.GetError() != PlatformNetwork::Errors::WouldBlock)
+				throw e;
+		}
 		catch (exception e)
 		{
-			//if (e.SocketErrorCode != SocketError.WouldBlock)
 			throw e;
 		}
 
@@ -157,22 +161,28 @@ namespace GameFramework::Networking
 
 					HandleIncommingBuffer(client, buffer);
 
+					buffer.Print();
+
 					index += packetSize;
 				}
 			}
+			catch (PlatformNetwork::SocketException e)
+			{
+				if (e.GetError() == PlatformNetwork::Errors::WouldBlock)
+					continue;
+				if (e.GetError() == PlatformNetwork::Errors::ConnectionReset)
+				{
+					disconnectedClients.push_back(client);
+
+					HandleClientDisconnection(client);
+
+					continue;
+				}
+
+				throw e;
+			}
 			catch (exception e)
 			{
-				//if (e.SocketErrorCode == SocketError.WouldBlock)
-				//	continue;
-				//else if (e.SocketErrorCode == SocketError.ConnectionReset)
-				//{
-				//	disconnectedClients.Add(client);
-
-				//	HandleClientDisconnection(client);
-
-				//	continue;
-				//}
-
 				throw e;
 			}
 		}
@@ -199,8 +209,7 @@ namespace GameFramework::Networking
 
 			if (GetMultithreadedCallbacks())
 			{
-				//if (OnBufferReceived != null)
-				//	CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Client, buffer);
+				CallbackUtilities::InvokeCallback(OnBufferReceived, reinterpret_cast<const Networking::Client*>(Client), buffer);
 			}
 			else
 			{
@@ -240,20 +249,17 @@ namespace GameFramework::Networking
 
 		if (IS_TYPE_OF(ev, ClientConnectedEvent))
 		{
-			//if (OnClientConnected != null)
-			//	CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, ev->GetClient());
+			CallbackUtilities::InvokeCallback(OnClientConnected, ev->GetClient());
 		}
 		else if (IS_TYPE_OF(ev, ClientDisconnectedEvent))
 		{
-			//if (OnClientDisconnected != null)
-			//	CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, ev->GetClient());
+			CallbackUtilities::InvokeCallback(OnClientDisconnected, ev->GetClient());
 
 			SocketUtilities::CloseSocket(ev->GetClient()->GetSocket());
 		}
 		else if (IS_TYPE_OF(ev, BufferReceivedvent))
 		{
-			//if (OnBufferReceived != null)
-			//	CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, ev->GetClient(), ((BufferReceivedvent)ev).Buffer);
+			ProcessReceivedBuffer(const_cast<Client*>(ev->GetClient()), reinterpret_cast<BufferReceivedvent*>(Event)->GetBuffer());
 		}
 	}
 
@@ -261,8 +267,7 @@ namespace GameFramework::Networking
 	{
 		if (GetMultithreadedCallbacks())
 		{
-			//if (OnBufferReceived != null)
-			//	CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Sender, Buffer);
+			CallbackUtilities::InvokeCallback(OnBufferReceived, reinterpret_cast<const Client*>(Sender), Buffer);
 		}
 		else
 		{
@@ -279,8 +284,7 @@ namespace GameFramework::Networking
 	{
 		if (GetMultithreadedCallbacks())
 		{
-			//if (OnClientDisconnected != null)
-			//	CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, Client);
+			CallbackUtilities::InvokeCallback(OnClientDisconnected, reinterpret_cast<const Networking::Client*>(Client));
 
 			SocketUtilities::CloseSocket(Client->GetSocket());
 		}

@@ -33,7 +33,7 @@ namespace GameFramework::Common::Utilities
 		void operator()(ArgsT... Args)
 		{
 			for (CallbackSignature& callback : m_Callbacks)
-				callback(std::forward<ArgsT...>(Args...));
+				callback(std::forward<ArgsT>(Args)...);
 		}
 
 	private:
