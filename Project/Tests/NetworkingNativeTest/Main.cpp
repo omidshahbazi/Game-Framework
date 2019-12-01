@@ -9,7 +9,7 @@ void Server_OnClientConnected(const Client* Client)
 {
 	std::cout << "Server_OnClientConnected " << Client->GetEndPoint().ToString() << std::endl;
 
-	//server.OnClientConnected -= OnClientConnected;
+	server.OnClientConnected -= Server_OnClientConnected;
 }
 
 void Server_OnClientDisconnected(const Client* Client)
