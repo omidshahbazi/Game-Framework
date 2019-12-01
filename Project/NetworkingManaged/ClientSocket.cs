@@ -230,7 +230,7 @@ namespace GameFramework.Networking
 			if (!SocketUtilities.IsReady(Socket))
 				return false;
 
-			Send(Socket, Command.Buffer);
+			SendInternal(Socket, Command.Buffer);
 
 			return true;
 		}

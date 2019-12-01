@@ -92,7 +92,7 @@ namespace GameFramework::Networking
 		m_SendThread = new thread(GlobalSendWorker, this);
 	}
 
-	void BaseSocket::Send(Socket Target, const BufferStream& Buffer)
+	void BaseSocket::SendInternal(Socket Target, const BufferStream& Buffer)
 	{
 		try
 		{
@@ -137,7 +137,7 @@ namespace GameFramework::Networking
 	{
 		while (true)
 		{
-			this_thread::sleep_for(chrono::seconds(1));
+			this_thread::sleep_for(chrono::milliseconds(1));
 
 			Receive();
 		}
@@ -147,7 +147,7 @@ namespace GameFramework::Networking
 	{
 		while (true)
 		{
-			this_thread::sleep_for(chrono::seconds(1));
+			this_thread::sleep_for(chrono::milliseconds(1));
 
 			HandleSendCommands();
 		}

@@ -161,10 +161,10 @@ namespace GameFramework.Networking
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
-			Send(Target, buffer);
+			SendInternal(Target, buffer);
 		}
 
-		protected virtual void Send(Client Target, BufferStream Buffer)
+		protected virtual void SendInternal(Client Target, BufferStream Buffer)
 		{
 			AddSendCommand(new ServerSendCommand(Target.Socket, Buffer, Timestamp));
 		}
@@ -294,7 +294,7 @@ namespace GameFramework.Networking
 
 				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
 
-				Send(Client.Socket, pingBuffer);
+				SendInternal(Client.Socket, pingBuffer);
 			}
 		}
 
@@ -308,7 +308,7 @@ namespace GameFramework.Networking
 			if (!SocketUtilities.IsReady(sendCommand.Socket))
 				return false;
 
-			Send(sendCommand.Socket, Command.Buffer);
+			SendInternal(sendCommand.Socket, Command.Buffer);
 
 			return true;
 		}

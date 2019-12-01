@@ -187,7 +187,7 @@ namespace GameFramework.Networking
 
 		protected abstract void Receive();
 
-		protected virtual void Send(Socket Target, BufferStream Buffer)
+		protected virtual void SendInternal(Socket Target, BufferStream Buffer)
 		{
 			try
 			{

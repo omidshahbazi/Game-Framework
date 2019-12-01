@@ -75,10 +75,10 @@ namespace GameFramework::Networking
 
 		buffer.WriteBytes(Buffer, Index, Length);
 
-		Send(Target, buffer);
+		SendInternal(Target, buffer);
 	}
 
-	void ServerSocket::Send(const Client* Target, const BufferStream& Buffer)
+	void ServerSocket::SendInternal(const Client* Target, const BufferStream& Buffer)
 	{
 		AddSendCommand(new ServerSendCommand(Target->GetSocket(), Buffer, GetTimestamp()));
 	}
@@ -222,7 +222,7 @@ namespace GameFramework::Networking
 
 			BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
 
-			BaseSocket::Send(Client->GetSocket(), pingBuffer);
+			BaseSocket::SendInternal(Client->GetSocket(), pingBuffer);
 		}
 	}
 
@@ -236,7 +236,7 @@ namespace GameFramework::Networking
 		if (!SocketUtilities::IsReady(sendCommand->GetSocket()))
 			return false;
 
-		BaseSocket::Send(sendCommand->GetSocket(), Command->GetBuffer());
+		BaseSocket::SendInternal(sendCommand->GetSocket(), Command->GetBuffer());
 
 		return true;
 	}

@@ -5,30 +5,32 @@ using namespace GameFramework::Networking;
 
 TCPServerSocket server(32);
 
-void OnClientConnected(const Client* Client)
+void Server_OnClientConnected(const Client* Client)
 {
-	std::cout << "OnClientConnected " << Client->GetEndPoint().GetAddress().GetIP() << ":" << Client->GetEndPoint().GetPort() << std::endl;
+	std::cout << "Server_OnClientConnected [" << Client->GetEndPoint().GetAddress().GetIP() << "]:" << Client->GetEndPoint().GetPort() << std::endl;
 
 	//server.OnClientConnected -= OnClientConnected;
 }
 
-void OnClientDisconnected(const Client* Client)
+void Server_OnClientDisconnected(const Client* Client)
 {
-	std::cout << "OnClientDisconnected " << Client->GetEndPoint().GetAddress().GetIP() << ":" << Client->GetEndPoint().GetPort() << std::endl;
+	std::cout << "Server_OnClientDisconnected [" << Client->GetEndPoint().GetAddress().GetIP() << "]:" << Client->GetEndPoint().GetPort() << std::endl;
 }
 
-void OnBufferReceived(const Client* Client, BufferStream Buffer)
+void Server_OnBufferReceived(const Client* Client, BufferStream Buffer)
 {
-	std::cout << "OnBufferReceived " << Client->GetEndPoint().GetAddress().GetIP() << ":" << Client->GetEndPoint().GetPort() << std::endl;
+	std::cout << "Server_OnBufferReceived [" << Client->GetEndPoint().GetAddress().GetIP() << "]:" << Client->GetEndPoint().GetPort() << " " << Buffer.GetSize() << std::endl;
+
+	server.Send(Client, Buffer.GetBuffer(), Buffer.GetSize());
 }
 
 void main()
 {
 	std::cout << "TCPServerSocket created" << std::endl;
 
-	server.OnClientConnected += OnClientConnected;
-	server.OnClientDisconnected += OnClientDisconnected;
-	server.OnBufferReceived += OnBufferReceived;
+	server.OnClientConnected += Server_OnClientConnected;
+	server.OnClientDisconnected += Server_OnClientDisconnected;
+	server.OnBufferReceived += Server_OnBufferReceived;
 
 	server.Bind("::0", 80);
 	//socket.Bind("fe80::c011:8430:ece7:975f%15", 80);
@@ -43,7 +45,7 @@ void main()
 
 	while (true)
 	{
-		this_thread::sleep_for(chrono::seconds(1));
+		this_thread::sleep_for(chrono::milliseconds(1));
 
 		server.Service();
 	}

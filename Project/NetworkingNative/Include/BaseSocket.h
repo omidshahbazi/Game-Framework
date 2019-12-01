@@ -74,7 +74,7 @@ namespace GameFramework::Networking
 
 		virtual void Receive(void) = 0;
 
-		virtual void Send(Socket Target, const BufferStream& Buffer);
+		virtual void SendInternal(Socket Target, const BufferStream& Buffer);
 
 		virtual bool HandleSendCommand(SendCommand* Command) = 0;
 

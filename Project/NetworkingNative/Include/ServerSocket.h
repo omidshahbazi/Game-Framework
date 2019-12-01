@@ -103,7 +103,7 @@ namespace GameFramework::Networking
 		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length);
 
 	protected:
-		virtual void Send(const Client* Target, const BufferStream& Buffer);
+		virtual void SendInternal(const Client* Target, const BufferStream& Buffer);
 
 		virtual void Receive(void) override;
 
