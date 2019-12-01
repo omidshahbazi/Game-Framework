@@ -29,7 +29,9 @@ namespace GameFramework::BinarySerializer
 
 		~BufferStream(void);
 
-		void Reset(void);
+		void ResetRead(void);
+
+		void ResetWrite(void);
 
 		bool ReadBool(void);
 

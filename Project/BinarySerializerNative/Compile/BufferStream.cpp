@@ -6,6 +6,8 @@
 namespace GameFramework::BinarySerializer
 {
 	BufferStream::BufferStream(uint32_t Capacity) :
+		m_Buffer(nullptr),
+		m_Capacity(0),
 		m_ReadIndex(0),
 		m_Size(0)
 	{
@@ -17,6 +19,8 @@ namespace GameFramework::BinarySerializer
 	}
 
 	BufferStream::BufferStream(byte* const Buffer, uint32_t Index, uint32_t Length) :
+		m_Buffer(nullptr),
+		m_Capacity(0),
 		m_ReadIndex(0),
 		m_Size(0)
 	{
@@ -26,7 +30,11 @@ namespace GameFramework::BinarySerializer
 		memcpy(m_Buffer, reinterpret_cast<void*>(Buffer + Index), m_Size);
 	}
 
-	BufferStream::BufferStream(const BufferStream& Other)
+	BufferStream::BufferStream(const BufferStream& Other) :
+		m_Buffer(nullptr),
+		m_Capacity(0),
+		m_ReadIndex(0),
+		m_Size(0)
 	{
 		*this = Other;
 	}
@@ -37,9 +45,14 @@ namespace GameFramework::BinarySerializer
 			free(m_Buffer);
 	}
 
-	void BufferStream::Reset(void)
+	void BufferStream::ResetRead(void)
 	{
 		m_ReadIndex = 0;
+	}
+
+	void BufferStream::ResetWrite(void)
+	{
+		ResetRead();
 		m_Size = 0;
 	}
 
@@ -178,7 +191,7 @@ namespace GameFramework::BinarySerializer
 	{
 		EnsureCapacity(Length);
 
-		memcpy(m_Buffer + Index, Buffer + m_Size, Length);
+		memcpy(m_Buffer + m_Size, Buffer + Index, Length);
 		m_Size += Length;
 	}
 

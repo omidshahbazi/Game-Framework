@@ -20,7 +20,7 @@ namespace GameFramework::Networking
 		uint32_t length = HEADER_SIZE + Length;
 
 		BufferStream buffer(PACKET_SIZE_SIZE + length);
-		buffer.Reset();
+		buffer.ResetWrite();
 		buffer.WriteUInt32(length);
 		buffer.WriteBytes(Control::BUFFER);
 
@@ -37,7 +37,7 @@ namespace GameFramework::Networking
 		uint32_t length = HEADER_SIZE + sizeof(double);
 
 		BufferStream buffer(PACKET_SIZE_SIZE + length);
-		buffer.Reset();
+		buffer.ResetWrite();
 		buffer.WriteUInt32(length);
 		buffer.WriteBytes(Control::PING);
 		buffer.WriteFloat64(Time::GetCurrentEpochTime());
