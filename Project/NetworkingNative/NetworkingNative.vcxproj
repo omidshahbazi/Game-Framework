@@ -152,22 +152,30 @@
     <ClInclude Include="Include\BaseSocket.h" />
     <ClInclude Include="Include\CallbackUtilities.h" />
     <ClInclude Include="Include\Client.h" />
+    <ClInclude Include="Include\ClientSocket.h" />
     <ClInclude Include="Include\Common.h" />
     <ClInclude Include="Include\Constants.h" />
     <ClInclude Include="Include\Enums.h" />
     <ClInclude Include="Include\PlatformNetwork.h" />
     <ClInclude Include="Include\SocketUtilities.h" />
     <ClInclude Include="Include\ServerSocket.h" />
+    <ClInclude Include="Include\TCPClientSocket.h" />
     <ClInclude Include="Include\TCPServerSocket.h" />
+    <ClInclude Include="Include\UDPClientSocket.h" />
+    <ClInclude Include="Include\UDPServerSocket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\BaseSocket.cpp" />
     <ClCompile Include="Compile\Client.cpp" />
+    <ClCompile Include="Compile\ClientSocket.cpp" />
     <ClCompile Include="Compile\Constants.cpp" />
     <ClCompile Include="Compile\PlatformNetwork.cpp" />
     <ClCompile Include="Compile\SocketUtilities.cpp" />
     <ClCompile Include="Compile\ServerSocket.cpp" />
+    <ClCompile Include="Compile\TCPClientSocket.cpp" />
     <ClCompile Include="Compile\TCPServerSocket.cpp" />
+    <ClCompile Include="Compile\UDPClientSocket.cpp" />
+    <ClCompile Include="Compile\UDPServerSocket.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

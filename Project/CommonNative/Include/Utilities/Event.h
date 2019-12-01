@@ -42,6 +42,8 @@ namespace GameFramework::Common::Utilities
 	private:
 		std::vector<CalbackSignaturePointer> m_Callbacks;
 	};
+
+	typedef Event<void> SimpleEvent;
 }
 
 #endif

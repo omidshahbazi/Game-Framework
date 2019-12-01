@@ -128,10 +128,10 @@ namespace GameFramework.Networking
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
-			Send(buffer);
+			SendInternal(buffer);
 		}
 
-		protected virtual void Send(BufferStream Buffer)
+		protected virtual void SendInternal(BufferStream Buffer)
 		{
 			AddSendCommand(new SendCommand(Buffer, Timestamp));
 		}
@@ -334,7 +334,7 @@ namespace GameFramework.Networking
 
 			lastPingTime = Time.CurrentEpochTime;
 
-			Send(pingBuffer);
+			SendInternal(Socket, pingBuffer);
 		}
 	}
 }

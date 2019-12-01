@@ -39,6 +39,18 @@
     <ClInclude Include="Include\CallbackUtilities.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\ClientSocket.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\TCPClientSocket.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UDPClientSocket.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UDPServerSocket.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Constants.cpp">
@@ -60,6 +72,18 @@
       <Filter>Compile</Filter>
     </ClCompile>
     <ClCompile Include="Compile\Client.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\ClientSocket.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\TCPClientSocket.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\UDPClientSocket.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\UDPServerSocket.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>
