@@ -371,13 +371,13 @@ namespace GameFramework::Networking
 	void PlatformNetwork::Initialize(void)
 	{
 		WSADATA data;
-		if (WSAStartup(MAKEWORD(2, 2), &data) != NO_ERROR)
+		if (WSAStartup(MAKEWORD(2, 2), &data) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
 	void PlatformNetwork::Shutdown(void)
 	{
-		if (WSACleanup() != NO_ERROR)
+		if (WSACleanup() == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
@@ -388,25 +388,25 @@ namespace GameFramework::Networking
 
 	void PlatformNetwork::Shutdown(Handle Handle, ShutdownHows How)
 	{
-		if (shutdown(Handle, GetShutdownHow(How)) != NO_ERROR)
+		if (shutdown(Handle, GetShutdownHow(How)) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
 	void PlatformNetwork::Close(Handle Handle)
 	{
-		if (closesocket(Handle) != NO_ERROR)
+		if (closesocket(Handle) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
 	void PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled)
 	{
-		if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) != NO_ERROR)
+		if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
 	void PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value)
 	{
-		if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Value), sizeof(int32_t)) != NO_ERROR)
+		if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Value), sizeof(int32_t)) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
@@ -414,7 +414,7 @@ namespace GameFramework::Networking
 	{
 		DWORD enabled = (Enabled ? 0 : 1);
 
-		if (ioctlsocket(Handle, FIONBIO, &enabled) != NO_ERROR)
+		if (ioctlsocket(Handle, FIONBIO, &enabled) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
@@ -422,13 +422,13 @@ namespace GameFramework::Networking
 	{
 		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
-		if (bind(Handle, address, addressSize) != NO_ERROR)
+		if (bind(Handle, address, addressSize) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
 	void PlatformNetwork::Listen(Handle Handle, uint32_t MaxConnections)
 	{
-		if (listen(Handle, MaxConnections) != NO_ERROR)
+		if (listen(Handle, MaxConnections) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 	}
 
@@ -483,10 +483,14 @@ namespace GameFramework::Networking
 		return true;
 	}
 
-	void PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode)
+	uint32_t PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode)
 	{
-		if (send(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode)) != NO_ERROR)
+		int32_t result = send(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode));
+
+		if (result == SOCKET_ERROR)
 			throw SocketException(GetLastError());
+
+		return result;
 	}
 
 	//void PlatformNetwork::SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
@@ -502,7 +506,7 @@ namespace GameFramework::Networking
 		fd.fd = Handle;
 		fd.events = GetSelectFlags(Mode);
 
-		return (WSAPoll(&fd, 1, Timeout) != SOCKET_ERROR);
+		return (WSAPoll(&fd, 1, Timeout) == SOCKET_ERROR);
 	}
 
 	uint64_t PlatformNetwork::GetAvailableBytes(Handle Handle)

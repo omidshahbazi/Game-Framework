@@ -241,7 +241,7 @@ namespace GameFramework::Networking
 
 		static bool Accept(Handle ListenerHandle, Handle& AcceptedHandle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port);
 
-		static void Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
+		static uint32_t Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
 		//static bool SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
 
 		static bool Poll(Handle Handle, uint32_t Timeout, SelectModes Mode);

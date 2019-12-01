@@ -98,9 +98,9 @@ namespace GameFramework::Networking
 		return true;
 	}
 
-	void SocketUtilities::Send(Socket Socket, const std::byte* Buffer, uint32_t Length)
+	uint32_t SocketUtilities::Send(Socket Socket, const std::byte* Buffer, uint32_t Length)
 	{
-		PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
+		return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
 	}
 
 	uint64_t SocketUtilities::GetAvailableBytes(Socket Socket)

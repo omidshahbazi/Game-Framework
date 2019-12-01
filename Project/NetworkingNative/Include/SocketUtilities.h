@@ -122,7 +122,7 @@ namespace GameFramework::Networking
 
 		static bool Accept(Socket ListenerSocket, Socket& AcceptedSocket, IPEndPoint& EndPoint);
 
-		static void Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
+		static uint32_t Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
 
 		static uint64_t GetAvailableBytes(Socket Socket);
 
