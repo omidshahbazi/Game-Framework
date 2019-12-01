@@ -13,9 +13,9 @@ namespace ServerNetworkingManagedTest
 			server = new TCPServerSocket(24);
 			Console.WriteLine("TCPServerSocket created");
 
-			//server.MultithreadedCallbacks = false;
-			//server.MultithreadedReceive = false;
-			//server.MultithreadedSend = false;
+			server.MultithreadedCallbacks = false;
+			server.MultithreadedReceive = false;
+			server.MultithreadedSend = false;
 
 			//server.MultithreadedCallbacks = true;
 			//server.MultithreadedReceive = false;

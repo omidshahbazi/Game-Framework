@@ -27,7 +27,7 @@ namespace GameFramework::BinarySerializer
 		m_Size = Length;
 		EnsureCapacity(Length);
 
-		memcpy(m_Buffer, reinterpret_cast<void*>(Buffer + Index), m_Size);
+		memcpy(m_Buffer, Buffer + Index, m_Size);
 	}
 
 	BufferStream::BufferStream(const BufferStream& Other) :
@@ -118,9 +118,9 @@ namespace GameFramework::BinarySerializer
 
 	void BufferStream::ReadBytes(byte* Data, uint32_t Index, uint32_t Length)
 	{
-		memcpy(Data, m_Buffer + m_ReadIndex, Length);
+		memcpy(Data + Index, m_Buffer + m_ReadIndex, Length);
 
-		Index += Length;
+		m_ReadIndex += Length;
 	}
 
 	void BufferStream::WriteBool(bool Value)

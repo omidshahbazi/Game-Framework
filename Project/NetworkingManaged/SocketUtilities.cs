@@ -74,7 +74,9 @@ namespace GameFramework.Networking
 
 		public static bool IsReady(Socket Socket)
 		{
-			return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0);
+			return true;
+
+			//return !(Socket.Poll(10, SelectMode.SelectRead) && Socket.Available == 0);
 		}
 
 		public static IPAddress ResolveDomain(string Domain)

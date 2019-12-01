@@ -70,7 +70,13 @@ namespace GameFramework::Networking
 
 	bool SocketUtilities::IsReady(Socket Socket)
 	{
-		return !(PlatformNetwork::Poll(Socket, 10, PlatformNetwork::SelectModes::SelectRead) && GetAvailableBytes(Socket) == 0);
+		return true;
+
+		//return !(PlatformNetwork::Poll(Socket, 10, PlatformNetwork::SelectModes::SelectRead) && GetAvailableBytes(Socket) == 0);
+
+		//byte data[1];
+		//uint32_t size = sizeof(data);
+		//return PlatformNetwork::Receive(Socket, data, size, PlatformNetwork::ReceiveModes::Peek);
 	}
 
 	void SocketUtilities::Bind(Socket Socket, const IPEndPoint& EndPoint)
@@ -125,7 +131,7 @@ namespace GameFramework::Networking
 	IPAddress SocketUtilities::MapIPv4ToIPv6(IPAddress IP)
 	{
 		if (IP.GetAddressFamily() != PlatformNetwork::AddressFamilies::InterNetwork)
-			throw new exception("IP must be v4");
+			throw exception("IP must be v4");
 
 		return ResolveDomain("::ffff:" + IP.GetIP());
 	}

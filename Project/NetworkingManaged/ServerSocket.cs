@@ -277,14 +277,7 @@ namespace GameFramework.Networking
 			{
 				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
-				if (MultithreadedCallbacks)
-				{
-					ProcessReceivedBuffer(Client, buffer);
-				}
-				else
-				{
-					AddEvent(new BufferReceivedvent(Client, buffer));
-				}
+				ProcessReceivedBuffer(Client, buffer);
 			}
 			else if (control == Constants.Control.PING)
 			{
@@ -331,7 +324,7 @@ namespace GameFramework.Networking
 			}
 			else if (ev is BufferReceivedvent)
 			{
-				ProcessReceivedBuffer(ev.Client, ((BufferReceivedvent)ev).Buffer);
+				CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, ev.Client, ((BufferReceivedvent)ev).Buffer);
 			}
 		}
 
@@ -340,7 +333,13 @@ namespace GameFramework.Networking
 		protected void HandleReceivedBuffer(Client Sender, BufferStream Buffer)
 		{
 			if (OnBufferReceived != null)
+			{
 				CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Sender, Buffer);
+			}
+			else
+			{
+				AddEvent(new BufferReceivedvent(Sender, Buffer));
+			}
 		}
 
 		private void HandleClientDisconnection(Client Client)

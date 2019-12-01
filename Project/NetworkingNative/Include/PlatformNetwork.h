@@ -36,17 +36,17 @@ namespace GameFramework::Networking
 
 		enum class SendModes
 		{
-			None,
-			DontRoute,
-			OutOfBand
+			None = 0,
+			DontRoute = 2,
+			OutOfBand = 4
 		};
 
 		enum class ReceiveModes
 		{
-			None,
-			DontRoute,
-			OutOfBand,
-			Peek
+			None = 0,
+			DontRoute = 2,
+			OutOfBand = 4,
+			Peek = 8
 		};
 
 		enum class SelectModes

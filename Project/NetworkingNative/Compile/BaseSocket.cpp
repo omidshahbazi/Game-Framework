@@ -46,6 +46,11 @@ namespace GameFramework::Networking
 		m_MultithreadedSend = true;
 	}
 
+	BaseSocket::~BaseSocket(void)
+	{
+		Shutdown();
+	}
+
 	void BaseSocket::Service(void)
 	{
 		if (!m_MultithreadedReceive && GetIsReady())
@@ -58,10 +63,18 @@ namespace GameFramework::Networking
 		{
 			WAIT_FOR_BOOL(m_EventsLock);
 
-			for (EventBase* ev : m_Events)
+			uint32_t eventCount = m_Events.size();
+			for (uint32_t i = 0; i < eventCount; ++i)
+			{
+				EventBase* ev = m_Events[i];
+
 				ProcessEvent(ev);
 
-			m_Events.clear();
+				delete ev;
+			}
+
+			for (uint32_t i = 0; i < eventCount; ++i)
+				m_Events.removeAt(0);
 		}
 	}
 
@@ -70,10 +83,18 @@ namespace GameFramework::Networking
 		SocketUtilities::CloseSocket(m_Socket);
 
 		if (m_MultithreadedReceive)
+		{
 			m_ReceiveThread->detach();
+			delete m_ReceiveThread;
+		}
 
 		if (m_MultithreadedSend)
+		{
 			m_SendThread->detach();
+			delete m_SendThread;
+		}
+		
+		delete[]m_ReceiveBuffer;
 	}
 
 	void BaseSocket::RunReceiveThread(void)

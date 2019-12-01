@@ -23,6 +23,8 @@ namespace GameFramework::Networking
 			EventBase(void)
 			{
 			}
+
+			virtual ~EventBase(void) = default;
 		};
 
 	private:
@@ -62,6 +64,8 @@ namespace GameFramework::Networking
 
 	public:
 		BaseSocket(PlatformNetwork::IPProtocols Type);
+
+		virtual ~BaseSocket(void);
 
 		virtual void Service(void);
 

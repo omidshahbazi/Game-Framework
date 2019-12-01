@@ -134,12 +134,8 @@ namespace GameFramework::Networking
 
 				if (SocketUtilities::GetAvailableBytes(clientSocket) == 0)
 				{
-					if (!SocketUtilities::IsReady(clientSocket))
-					{
+					if (!client->IsReady())
 						disconnectedClients.push_back(client);
-
-						HandleClientDisconnection(client);
-					}
 
 					continue;
 				}
@@ -172,8 +168,6 @@ namespace GameFramework::Networking
 				{
 					disconnectedClients.push_back(client);
 
-					HandleClientDisconnection(client);
-
 					continue;
 				}
 
@@ -189,7 +183,7 @@ namespace GameFramework::Networking
 		{
 			m_Clients.remove(client);
 
-			delete client;
+			HandleClientDisconnection(client);
 		}
 	}
 
@@ -205,20 +199,13 @@ namespace GameFramework::Networking
 		{
 			BufferStream buffer = Constants::Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
 
-			if (GetMultithreadedCallbacks())
-			{
-				CallbackUtilities::InvokeCallback(OnBufferReceived, reinterpret_cast<const Networking::Client*>(Client), buffer);
-			}
-			else
-			{
-				AddEvent(new BufferReceivedvent(Client, buffer));
-			}
+			ProcessReceivedBuffer(Client, buffer);
 		}
 		else if (control == Constants::Control::PING)
 		{
 			double sendTime = Buffer.ReadFloat64();
 
-			Client->UpdateLatency((time - sendTime) * 1000);
+			Client->UpdateLatency(abs(time - sendTime) * 1000);
 
 			BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
 
@@ -243,7 +230,7 @@ namespace GameFramework::Networking
 
 	void ServerSocket::ProcessEvent(EventBase* Event)
 	{
-		ServerEventBase* ev = reinterpret_cast<ServerEventBase*>(Event);
+		ServerEventBase* ev = dynamic_cast<ServerEventBase*>(Event);
 
 		if (IS_TYPE_OF(ev, ClientConnectedEvent))
 		{
@@ -257,7 +244,7 @@ namespace GameFramework::Networking
 		}
 		else if (IS_TYPE_OF(ev, BufferReceivedvent))
 		{
-			ProcessReceivedBuffer(const_cast<Client*>(ev->GetClient()), reinterpret_cast<BufferReceivedvent*>(Event)->GetBuffer());
+			CallbackUtilities::InvokeCallback(OnBufferReceived, ev->GetClient(), dynamic_cast<BufferReceivedvent*>(Event)->GetBuffer());
 		}
 	}
 
@@ -285,6 +272,8 @@ namespace GameFramework::Networking
 			CallbackUtilities::InvokeCallback(OnClientDisconnected, reinterpret_cast<const Networking::Client*>(Client));
 
 			SocketUtilities::CloseSocket(Client->GetSocket());
+
+			delete Client;
 		}
 		else
 		{

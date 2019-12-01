@@ -130,20 +130,21 @@ namespace GameFramework::Networking
 		return flags;
 	}
 
-	int32_t GetSelectFlags(PlatformNetwork::SelectModes Mode)
+	int32_t GetSelectMode(PlatformNetwork::SelectModes Mode)
 	{
-		int32_t flags = 0;
+		switch (Mode)
+		{
+		case PlatformNetwork::SelectModes::SelectRead:
+			return POLLRDNORM;
 
-		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::SelectModes::SelectRead))
-			flags |= POLLRDNORM;
+		case PlatformNetwork::SelectModes::SelectWrite:
+			return POLLWRNORM;
 
-		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::SelectModes::SelectWrite))
-			flags |= POLLWRNORM;
+		case PlatformNetwork::SelectModes::SelectError:
+			return POLLERR;
+		}
 
-		if (BitwiseHelper::IsEnabled((int32_t)Mode, (int32_t)PlatformNetwork::SelectModes::SelectError))
-			flags |= POLLERR;
-
-		return flags;
+		return 0;
 	}
 
 	PlatformNetwork::Errors GetError(int ErrorCode)
@@ -502,17 +503,36 @@ namespace GameFramework::Networking
 
 	bool PlatformNetwork::Poll(Handle Handle, uint32_t Timeout, SelectModes Mode)
 	{
+		const uint32_t COUNT = 1;
+
+		int32_t mode = GetSelectMode(Mode);
+
 		WSAPOLLFD fd;
 		fd.fd = Handle;
-		fd.events = GetSelectFlags(Mode);
+		fd.events = mode;
 
-		return (WSAPoll(&fd, 1, Timeout) == SOCKET_ERROR);
+		if (WSAPoll(&fd, COUNT, Timeout) != COUNT)
+			return false;
+
+		if (fd.revents & POLLERR)
+			return false;
+
+		if (fd.revents & POLLHUP)
+			return false;
+
+		if (fd.revents & POLLNVAL)
+			return false;
+
+		return fd.revents & mode;
 	}
 
 	uint64_t PlatformNetwork::GetAvailableBytes(Handle Handle)
 	{
 		u_long availableBytes;
-		ioctlsocket(Handle, FIONREAD, &availableBytes);
+		
+		if (ioctlsocket(Handle, FIONREAD, &availableBytes) == SOCKET_ERROR)
+			return 0;
+
 		return availableBytes;
 	}
 
@@ -560,7 +580,7 @@ namespace GameFramework::Networking
 		PADDRINFOA queryResult;
 		int32_t result = getaddrinfo(Domain.c_str(), "", &hintInfo, &queryResult);
 		if (result != 0)
-			throw new std::exception("Invalid Domain");
+			throw std::exception("Invalid Domain");
 
 		for (addrinfo* ptr = queryResult; ptr != NULL; ptr = ptr->ai_next)
 		{

@@ -148,10 +148,12 @@ namespace GameFramework.Networking
 			{
 				lock (events)
 				{
-					for (int i = 0; i < events.Count; ++i)
+					int eventCount = events.Count;
+					for (int i = 0; i < eventCount; ++i)
 						ProcessEvent(events[i]);
 
-					events.Clear();
+					for (int i = 0; i < eventCount; ++i)
+						events.RemoveAt(0);
 				}
 			}
 		}
@@ -201,7 +203,9 @@ namespace GameFramework.Networking
 			}
 			catch (SocketException e)
 			{
-				if (e.SocketErrorCode == SocketError.ConnectionReset)
+				if (e.SocketErrorCode == SocketError.ConnectionReset ||
+					e.SocketErrorCode == SocketError.ConnectionAborted ||
+					e.SocketErrorCode == SocketError.ConnectionRefused)
 				{
 					HandleDisconnection(Target);
 

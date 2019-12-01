@@ -22,6 +22,11 @@ public:
 	{
 		std::vector<T>::erase(find(std::vector<T>::begin(), std::vector<T>::end(), Value));
 	}
+
+	void removeAt(uint32_t Index)
+	{
+		std::vector<T>::erase(std::vector<T>::begin() + Index);
+	}
 };
 
 template<typename T>

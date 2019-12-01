@@ -79,7 +79,7 @@ namespace GameFramework.Networking
 
 		public override void Service()
 		{
-			if (LastTouchTime + Constants.PING_TIME <= Time.CurrentEpochTime)
+			if (isConnected && LastTouchTime + Constants.PING_TIME <= Time.CurrentEpochTime)
 			{
 				LastTouchTime = Time.CurrentEpochTime;
 

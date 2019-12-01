@@ -12,6 +12,6 @@ namespace GameFramework::Common::Timing
 	{
 		time_point now = system_clock::now();
 
-		return now.time_since_epoch().count();
+		return (double)now.time_since_epoch().count() * system_clock::period::num / system_clock::period::den;
 	}
 }
