@@ -75,9 +75,9 @@ namespace GameFramework::Networking
 
 		void Disconnect(void);
 
-		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Length);
+		virtual void Send(byte* const Buffer, uint32_t Length);
 
-		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length);
+		virtual void Send(byte* const Buffer, uint32_t Index, uint32_t Length);
 
 	protected:
 		virtual void SendInternal(const BufferStream& Buffer);
@@ -113,12 +113,22 @@ namespace GameFramework::Networking
 		Event<BufferStream> OnBufferReceived;
 
 	private:
-		bool m_IsBound;
 
-		ClientList m_Clients;
-		atomic_bool m_ClientsLock;
+		private bool isConnected = false;
+		private double lastPingTime = 0;
+		private double timeOffset = 0;
 
-		uint32_t m_MaxConnection;
+			public double LastTouchTime
+		{
+			get;
+			private set;
+		}
+
+			public uint Latency
+		{
+			get;
+			private set;
+		}
 	};
 }
 
