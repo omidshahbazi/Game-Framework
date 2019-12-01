@@ -78,6 +78,11 @@ namespace GameFramework::Networking
 			m_Port = Value;
 		}
 
+		std::string ToString(void) const
+		{
+			return "[" + m_Address.GetIP() + "]:" + std::to_string(m_Port);
+		}
+
 	private:
 		IPAddress m_Address;
 		uint16_t m_Port;

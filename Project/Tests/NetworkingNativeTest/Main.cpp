@@ -7,19 +7,19 @@ TCPServerSocket server(32);
 
 void Server_OnClientConnected(const Client* Client)
 {
-	std::cout << "Server_OnClientConnected [" << Client->GetEndPoint().GetAddress().GetIP() << "]:" << Client->GetEndPoint().GetPort() << std::endl;
+	std::cout << "Server_OnClientConnected " << Client->GetEndPoint().ToString() << std::endl;
 
 	//server.OnClientConnected -= OnClientConnected;
 }
 
 void Server_OnClientDisconnected(const Client* Client)
 {
-	std::cout << "Server_OnClientDisconnected [" << Client->GetEndPoint().GetAddress().GetIP() << "]:" << Client->GetEndPoint().GetPort() << std::endl;
+	std::cout << "Server_OnClientDisconnected " << Client->GetEndPoint().ToString() << std::endl;
 }
 
 void Server_OnBufferReceived(const Client* Client, BufferStream Buffer)
 {
-	std::cout << "Server_OnBufferReceived [" << Client->GetEndPoint().GetAddress().GetIP() << "]:" << Client->GetEndPoint().GetPort() << " " << Buffer.GetSize() << std::endl;
+	std::cout << "Server_OnBufferReceived " << Client->GetEndPoint().ToString() << " " << Buffer.GetSize() << std::endl;
 
 	server.Send(Client, Buffer.GetBuffer(), Buffer.GetSize());
 }
