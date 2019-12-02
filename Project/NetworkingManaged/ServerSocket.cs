@@ -298,7 +298,7 @@ namespace GameFramework.Networking
 
 			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 
-			if (!SocketUtilities.IsReady(sendCommand.Socket))
+			if (!SocketUtilities.GetIsReady(sendCommand.Socket))
 				return false;
 
 			SendInternal(sendCommand.Socket, Command.Buffer);

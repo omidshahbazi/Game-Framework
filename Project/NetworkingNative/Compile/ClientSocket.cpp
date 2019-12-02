@@ -1,5 +1,5 @@
 // Copyright 2019. All Rights Reserved.
-#include "..\Include\ServerSocket.h"
+#include "..\Include\ClientSocket.h"
 #include "..\Include\Constants.h"
 #include "..\Include\CallbackUtilities.h"
 #include <Timing\Time.h>
@@ -10,274 +10,258 @@ using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
-	ServerSocket::ServerSocket(PlatformNetwork::IPProtocols Type, uint32_t MaxConnection) :
+	ClientSocket::ClientSocket(PlatformNetwork::IPProtocols Type) :
 		BaseSocket(Type),
-		m_IsBound(false),
-		m_MaxConnection(MaxConnection)
+		m_IsConnected(false),
+		m_LastPingTime(0),
+		m_TimeOffset(0),
+		m_LastTouchTime(0),
+		m_Latency(0)
 	{
 	}
 
-	void ServerSocket::Bind(const std::string& Host, uint16_t Port)
+	void ClientSocket::Service(void)
 	{
-		Bind(SocketUtilities::ResolveDomain(Host), Port);
+		if (m_IsConnected && m_LastTouchTime + Constants::PING_TIME <= Time::GetCurrentEpochTime())
+		{
+			m_LastTouchTime = Time::GetCurrentEpochTime();
+
+			SendPing();
+		}
+
+		BaseSocket::Service();
 	}
 
-	void ServerSocket::Bind(const IPAddress& IP, uint16_t Port)
+	void ClientSocket::Connect(const std::string& Host, uint16_t Port)
 	{
-		Bind(IPEndPoint(IP, Port));
+		Connect(SocketUtilities::ResolveDomain(Host), Port);
 	}
 
-	void ServerSocket::Bind(const IPEndPoint& EndPoint)
+	void ClientSocket::Connect(const IPAddress& IP, uint16_t Port)
+	{
+		Connect(IPEndPoint(IP, Port));
+	}
+
+	void ClientSocket::Connect(const IPEndPoint& EndPoint)
 	{
 		IPEndPoint endPoint = EndPoint;
 
 		if (endPoint.GetAddress().GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
 			endPoint.SetAddress(SocketUtilities::MapIPv4ToIPv6(endPoint.GetAddress()));
 
-		SocketUtilities::Bind(GetSocket(), endPoint);
-		m_IsBound = true;
+		ConnectInternal(EndPoint);
 	}
 
-	void ServerSocket::ServerSocket::UnBind(void)
+	void ClientSocket::Disconnect(void)
 	{
-		m_Clients.clear();
-
 		Shutdown();
-
-		m_IsBound = false;
 	}
 
-	void ServerSocket::DisconnectClient(Client* const Client)
+	void ClientSocket::Send(byte* const Buffer, uint32_t Length)
 	{
-		WAIT_FOR_BOOL(m_ClientsLock);
-
-		m_Clients.remove(Client);
-
-		HandleClientDisconnection(Client);
+		Send(Buffer, 0, Length);
 	}
 
-	void ServerSocket::Listen()
-	{
-		SocketUtilities::Listen(GetSocket(), m_MaxConnection);
-
-		RunReceiveThread();
-		RunSenndThread();
-	}
-
-	void ServerSocket::Send(const Client* Target, byte* const Buffer, uint32_t Length)
-	{
-		Send(Target, Buffer, 0, Length);
-	}
-
-	void ServerSocket::Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length)
+	void ClientSocket::Send(byte* const Buffer, uint32_t Index, uint32_t Length)
 	{
 		BufferStream buffer = Constants::Packet::CreateOutgoingBufferStream(Length);
 
 		buffer.WriteBytes(Buffer, Index, Length);
 
-		SendInternal(Target, buffer);
+		SendInternal(buffer);
 	}
 
-	void ServerSocket::SendInternal(const Client* Target, const BufferStream& Buffer)
+	void ClientSocket::SendInternal(const BufferStream& Buffer)
 	{
-		AddSendCommand(new ServerSendCommand(Target->GetSocket(), Buffer, GetTimestamp()));
+		AddSendCommand(new SendCommand(Buffer, GetTimestamp()));
 	}
 
-	void ServerSocket::Receive(void)
+	void ClientSocket::Receive(void)
 	{
+		if (!m_IsConnected)
+			return;
+
+		Socket socket = GetSocket();
+
 		try
 		{
-			Socket clientSocket = 0;
-			IPEndPoint endPoint;
-			if (SocketUtilities::Accept(GetSocket(), clientSocket, endPoint))
+			if (SocketUtilities::GetAvailableBytes(socket) == 0)
 			{
-				Client* client = new Client(clientSocket, endPoint);
+				if (!GetIsReady())
+					HandleDisconnection(socket);
 
-				{
-					WAIT_FOR_BOOL(m_ClientsLock);
+				return;
+			}
 
-					m_Clients.push_back(client);
-				}
+			std::byte* receiveBuffer = GetReceiveBuffer();
 
-				if (GetMultithreadedCallbacks())
-				{
-					CallbackUtilities::InvokeCallback(OnClientConnected, reinterpret_cast<const Client*>(client));
-				}
-				else
-				{
-					AddEvent(new ClientConnectedEvent(client));
-				}
+			uint32_t size = Constants::RECEIVE_BUFFER_SIZE;
+			if (!SocketUtilities::Receive(socket, receiveBuffer, size))
+				return;
+
+			AddBandwidthIn(size);
+
+			uint32_t index = 0;
+			while (index != size)
+			{
+				uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
+
+				index += Constants::Packet::PACKET_SIZE_SIZE;
+
+				BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
+
+				HandleIncommingBuffer(buffer);
+
+				index += packetSize;
 			}
 		}
 		catch (PlatformNetwork::SocketException e)
 		{
-			if (e.GetError() != PlatformNetwork::Errors::WouldBlock)
-				throw e;
-		}
-		catch (exception e)
-		{
+			if (e.GetError() == PlatformNetwork::Errors::ConnectionReset)
+			{
+				HandleDisconnection(socket);
+
+				return;
+			}
+
 			throw e;
-		}
-
-		WAIT_FOR_BOOL(m_ClientsLock);
-		ClientList disconnectedClients;
-
-		std::byte* receiveBuffer = GetReceiveBuffer();
-
-		for (auto client : m_Clients)
-		{
-			try
-			{
-				Socket clientSocket = client->GetSocket();
-
-				uint32_t size = 0;
-
-				if (SocketUtilities::GetAvailableBytes(clientSocket) == 0)
-				{
-					if (!client->IsReady())
-						disconnectedClients.push_back(client);
-
-					continue;
-				}
-
-				size = Constants::RECEIVE_BUFFER_SIZE;
-				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
-					continue;
-
-				AddBandwidthIn(size);
-
-				uint32_t index = 0;
-				while (index != size)
-				{
-					uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
-
-					index += Constants::Packet::PACKET_SIZE_SIZE;
-
-					BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
-
-					HandleIncommingBuffer(client, buffer);
-
-					index += packetSize;
-				}
-			}
-			catch (PlatformNetwork::SocketException e)
-			{
-				if (e.GetError() == PlatformNetwork::Errors::WouldBlock)
-					continue;
-				if (e.GetError() == PlatformNetwork::Errors::ConnectionReset)
-				{
-					disconnectedClients.push_back(client);
-
-					continue;
-				}
-
-				throw e;
-			}
-			catch (exception e)
-			{
-				throw e;
-			}
-		}
-
-		for (auto client : disconnectedClients)
-		{
-			m_Clients.remove(client);
-
-			HandleClientDisconnection(client);
 		}
 	}
 
-	void ServerSocket::HandleIncommingBuffer(Client* Client, BufferStream& Buffer)
+	void ClientSocket::HandleIncommingBuffer(BufferStream& Buffer)
 	{
-		byte control = Buffer.ReadByte();
-
 		double time = Time::GetCurrentEpochTime();
 
-		Client->UpdateLastTouchTime(time);
+		m_LastTouchTime = time;
+
+		byte control = Buffer.ReadByte();
 
 		if (control == Constants::Control::BUFFER)
 		{
 			BufferStream buffer = Constants::Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
 
-			ProcessReceivedBuffer(Client, buffer);
+			if (GetMultithreadedCallbacks())
+			{
+				CallbackUtilities::InvokeCallback(OnBufferReceived, buffer);
+			}
+			else
+			{
+				AddEvent(new BufferReceivedvent(buffer));
+			}
 		}
 		else if (control == Constants::Control::PING)
 		{
 			double sendTime = Buffer.ReadFloat64();
 
-			Client->UpdateLatency(abs(time - sendTime) * 1000);
+			m_Latency = (time - sendTime) * 1000;
 
-			BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
+			double t0 = m_LastPingTime;
+			double t1 = sendTime;
+			double t2 = sendTime;
+			double t3 = time;
 
-			BaseSocket::SendInternal(Client->GetSocket(), pingBuffer);
+			m_TimeOffset = ((t1 - t0) + (t2 - t3)) / 2;
 		}
 	}
 
-	bool ServerSocket::HandleSendCommand(SendCommand* Command)
+	bool ClientSocket::HandleSendCommand(SendCommand* Command)
 	{
 		if (GetTimestamp() < Command->GetSendTime() + (GetLatencySimulation() / 1000.0F))
 			return false;
 
-		ServerSendCommand* sendCommand = reinterpret_cast<ServerSendCommand*>(Command);
-
-		if (!SocketUtilities::IsReady(sendCommand->GetSocket()))
+		if (!GetIsReady())
 			return false;
 
-		BaseSocket::SendInternal(sendCommand->GetSocket(), Command->GetBuffer());
+		BaseSocket::SendInternal(GetSocket(), const_cast<BufferStream&>(Command->GetBuffer()));
 
 		return true;
 	}
 
-	void ServerSocket::ProcessEvent(EventBase* Event)
+	void ClientSocket::ProcessEvent(EventBase* Event)
 	{
-		ServerEventBase* ev = dynamic_cast<ServerEventBase*>(Event);
+		ClientEventBase* ev = dynamic_cast<ClientEventBase*>(Event);
 
-		if (IS_TYPE_OF(ev, ClientConnectedEvent))
+		if (IS_TYPE_OF(ev, ConnectedEvent))
 		{
-			CallbackUtilities::InvokeCallback(OnClientConnected, ev->GetClient());
+			CallbackUtilities::InvokeCallback(OnConnected);
 		}
-		else if (IS_TYPE_OF(ev, ClientDisconnectedEvent))
+		else if (IS_TYPE_OF(ev, ConnectionFailedEvent))
 		{
-			CallbackUtilities::InvokeCallback(OnClientDisconnected, ev->GetClient());
-
-			SocketUtilities::CloseSocket(ev->GetClient()->GetSocket());
+			CallbackUtilities::InvokeCallback(OnConnectionFailed);
+		}
+		else if (IS_TYPE_OF(ev, DisconnectedEvent))
+		{
+			CallbackUtilities::InvokeCallback(OnDisconnected);
 		}
 		else if (IS_TYPE_OF(ev, BufferReceivedvent))
 		{
-			CallbackUtilities::InvokeCallback(OnBufferReceived, ev->GetClient(), dynamic_cast<BufferReceivedvent*>(Event)->GetBuffer());
+			CallbackUtilities::InvokeCallback(OnBufferReceived, dynamic_cast<BufferReceivedvent*>(Event)->GetBuffer());
 		}
 	}
 
-	void ServerSocket::HandleReceivedBuffer(Client* Sender, const BufferStream& Buffer)
+	void ClientSocket::HandleDisconnection(Socket Socket)
 	{
+		BaseSocket::HandleDisconnection(Socket);
+
 		if (GetMultithreadedCallbacks())
 		{
-			CallbackUtilities::InvokeCallback(OnBufferReceived, reinterpret_cast<const Client*>(Sender), Buffer);
+			CallbackUtilities::InvokeCallback(OnDisconnected);
 		}
 		else
 		{
-			AddEvent(new BufferReceivedvent(Sender, Buffer));
+			AddEvent(new DisconnectedEvent());
 		}
+
+		m_IsConnected = false;
 	}
 
-	double ServerSocket::GetTimestamp(void)
-	{
-		return Time::GetCurrentEpochTime();
-	}
-
-	void ServerSocket::HandleClientDisconnection(Client* Client)
+	void ClientSocket::HandleReceivedBuffer(const BufferStream& Buffer)
 	{
 		if (GetMultithreadedCallbacks())
 		{
-			CallbackUtilities::InvokeCallback(OnClientDisconnected, reinterpret_cast<const Networking::Client*>(Client));
-
-			SocketUtilities::CloseSocket(Client->GetSocket());
-
-			delete Client;
+			CallbackUtilities::InvokeCallback(OnBufferReceived, Buffer);
 		}
 		else
 		{
-			AddEvent(new ClientDisconnectedEvent(Client));
+			AddEvent(new BufferReceivedvent(Buffer));
 		}
+	}
+
+	double ClientSocket::GetTimestamp(void) const
+	{
+		return Time::GetCurrentEpochTime() + m_TimeOffset;
+	}
+
+	void ClientSocket::RaiseOnConnectedEvent(void)
+	{
+		if (GetMultithreadedCallbacks())
+		{
+			CallbackUtilities::InvokeCallback(OnConnected);
+		}
+		else
+		{
+			AddEvent(new ConnectedEvent());
+		}
+	}
+
+	void ClientSocket::RaiseOnConnectionFailedEvent(void)
+	{
+		if (GetMultithreadedCallbacks())
+		{
+			CallbackUtilities::InvokeCallback(OnConnectionFailed);
+		}
+		else
+		{
+			AddEvent(new ConnectionFailedEvent());
+		}
+	}
+
+	void ClientSocket::SendPing(void)
+	{
+		BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
+
+		m_LastPingTime = Time::GetCurrentEpochTime();
+
+		BaseSocket::SendInternal(GetSocket(), pingBuffer);
 	}
 }

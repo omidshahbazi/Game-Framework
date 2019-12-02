@@ -32,13 +32,13 @@ void main()
 	server.OnClientDisconnected += Server_OnClientDisconnected;
 	server.OnBufferReceived += Server_OnBufferReceived;
 
-	server.Bind("::0", 80);
-	//socket.Bind("fe80::c011:8430:ece7:975f%15", 80);
-	std::cout << "TCPServerSocket bound" << std::endl;
-
 	//server.SetMultithreadedCallbacks(false);
 	//server.SetMultithreadedReceive(false);
 	//server.SetMultithreadedSend(false);
+
+	server.Bind("::0", 80);
+	//socket.Bind("fe80::c011:8430:ece7:975f%15", 80);
+	std::cout << "TCPServerSocket bound" << std::endl;
 
 	server.Listen();
 	std::cout << "TCPServerSocket started listening" << std::endl;
@@ -50,5 +50,5 @@ void main()
 		server.Service();
 	}
 
-	PlatformNetwork::Shutdown();
+	server.UnBind();
 }

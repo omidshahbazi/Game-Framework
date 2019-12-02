@@ -130,17 +130,15 @@ namespace GameFramework::Networking
 			{
 				Socket clientSocket = client->GetSocket();
 
-				uint32_t size = 0;
-
 				if (SocketUtilities::GetAvailableBytes(clientSocket) == 0)
 				{
-					if (!client->IsReady())
+					if (!client->GetIsReady())
 						disconnectedClients.push_back(client);
 
 					continue;
 				}
 
-				size = Constants::RECEIVE_BUFFER_SIZE;
+				uint32_t size = Constants::RECEIVE_BUFFER_SIZE;
 				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
 					continue;
 
@@ -220,7 +218,7 @@ namespace GameFramework::Networking
 
 		ServerSendCommand* sendCommand = reinterpret_cast<ServerSendCommand*>(Command);
 
-		if (!SocketUtilities::IsReady(sendCommand->GetSocket()))
+		if (!SocketUtilities::GetIsReady(sendCommand->GetSocket()))
 			return false;
 
 		BaseSocket::SendInternal(sendCommand->GetSocket(), Command->GetBuffer());
@@ -260,7 +258,7 @@ namespace GameFramework::Networking
 		}
 	}
 
-	double ServerSocket::GetTimestamp(void)
+	double ServerSocket::GetTimestamp(void) const
 	{
 		return Time::GetCurrentEpochTime();
 	}

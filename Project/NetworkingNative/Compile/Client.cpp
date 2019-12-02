@@ -18,8 +18,8 @@ namespace GameFramework::Networking
 		m_LastTouchTime = Time::GetCurrentEpochTime();
 	}
 
-	bool Client::IsReady(void) const
+	bool Client::GetIsReady(void) const
 	{
-		return (SocketUtilities::IsReady(m_Socket) && (Time::GetCurrentEpochTime() - m_LastTouchTime < Constants::PING_TIME * 2));
+		return (SocketUtilities::GetIsReady(m_Socket) && (Time::GetCurrentEpochTime() - m_LastTouchTime < Constants::PING_TIME * 2));
 	}
 }

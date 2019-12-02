@@ -241,10 +241,14 @@ namespace GameFramework::Networking
 
 		static bool Accept(Handle ListenerHandle, Handle& AcceptedHandle, AddressFamilies& AddressFamily, std::string& Address, uint16_t& Port);
 
+		static bool Connect(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port);
+
 		static uint32_t Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
 		//static bool SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
 
 		static bool Poll(Handle Handle, uint32_t Timeout, SelectModes Mode);
+
+		static bool Select(Handle Handle);
 
 		static uint64_t GetAvailableBytes(Handle Handle);
 		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t& Length, ReceiveModes Mode);

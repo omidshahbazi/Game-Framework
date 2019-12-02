@@ -23,7 +23,7 @@ namespace GameFramework::Networking
 			m_Latency = Latency;
 		}
 
-		bool IsReady(void) const;
+		bool GetIsReady(void) const;
 
 		Socket GetSocket(void) const
 		{

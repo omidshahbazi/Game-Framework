@@ -98,7 +98,7 @@ namespace GameFramework::Networking
 		void HandleSendCommands(void);
 
 	protected:
-		Socket& GetSocket(void)
+		Socket GetSocket(void) const
 		{
 			return m_Socket;
 		}
@@ -108,9 +108,9 @@ namespace GameFramework::Networking
 			return m_ReceiveBuffer;
 		}
 
-		virtual bool GetIsReady(void) = 0;
+		virtual bool GetIsReady(void) const = 0;
 
-		virtual double GetTimestamp(void) = 0;
+		virtual double GetTimestamp(void) const = 0;
 
 	protected:
 		void AddBandwidthIn(uint32_t Value)

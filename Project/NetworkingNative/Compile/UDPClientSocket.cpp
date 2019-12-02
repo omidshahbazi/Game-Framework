@@ -8,6 +8,10 @@ namespace GameFramework::Networking
 	{
 	}
 
+	void UDPClientSocket::ConnectInternal(const IPEndPoint& EndPoint)
+	{
+	}
+
 	void UDPClientSocket::ProcessReceivedBuffer(const BufferStream& Buffer)
 	{
 	}

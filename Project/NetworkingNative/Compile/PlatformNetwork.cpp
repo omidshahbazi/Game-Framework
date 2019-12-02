@@ -484,6 +484,16 @@ namespace GameFramework::Networking
 		return true;
 	}
 
+	bool PlatformNetwork::Connect(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port)
+	{
+		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
+
+		if (connect(Handle, address, addressSize) == SOCKET_ERROR)
+			throw SocketException(GetLastError());
+		
+		return true;
+	}
+
 	uint32_t PlatformNetwork::Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode)
 	{
 		int32_t result = send(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode));
@@ -524,6 +534,12 @@ namespace GameFramework::Networking
 			return false;
 
 		return fd.revents & mode;
+	}
+
+	bool PlatformNetwork::Select(Handle Handle)
+	{
+		fd_set  
+		select()
 	}
 
 	uint64_t PlatformNetwork::GetAvailableBytes(Handle Handle)

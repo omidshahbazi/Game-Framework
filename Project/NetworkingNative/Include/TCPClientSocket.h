@@ -13,8 +13,12 @@ namespace GameFramework::Networking
 	public:
 		TCPClientSocket(void);
 
+		virtual void Service(void) override;
+
 	protected:
-		void ProcessReceivedBuffer(const BufferStream &Buffer) override;
+		void ConnectInternal(const IPEndPoint& EndPoint) override;
+
+		void ProcessReceivedBuffer(const BufferStream& Buffer) override;
 	};
 }
 

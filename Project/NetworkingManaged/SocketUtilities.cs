@@ -72,7 +72,7 @@ namespace GameFramework.Networking
 			Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, !Value);
 		}
 
-		public static bool IsReady(Socket Socket)
+		public static bool GetIsReady(Socket Socket)
 		{
 			return true;
 

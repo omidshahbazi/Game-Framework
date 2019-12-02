@@ -25,6 +25,18 @@ namespace GameFramework::Networking
 				throw e;
 			}
 		}
+
+		static void InvokeCallback(SimpleEvent& Callback)
+		{
+			try
+			{
+				Callback();
+			}
+			catch (std::exception e)
+			{
+				throw e;
+			}
+		}
 	};
 }
 

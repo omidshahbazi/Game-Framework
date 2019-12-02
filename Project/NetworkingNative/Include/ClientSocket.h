@@ -71,15 +71,17 @@ namespace GameFramework::Networking
 
 		void Connect(const IPAddress& IP, uint16_t Port);
 
-		void Connect(const IPEndPoint& EndPoint);
+		virtual void Connect(const IPEndPoint& EndPoint);
 
-		void Disconnect(void);
+		virtual void Disconnect(void);
 
 		virtual void Send(byte* const Buffer, uint32_t Length);
 
 		virtual void Send(byte* const Buffer, uint32_t Index, uint32_t Length);
 
 	protected:
+		virtual void ConnectInternal(const IPEndPoint& EndPoint) = 0;
+
 		virtual void SendInternal(const BufferStream& Buffer);
 
 		virtual void Receive(void) override;
@@ -96,12 +98,40 @@ namespace GameFramework::Networking
 
 		void HandleReceivedBuffer(const BufferStream& Buffer);
 
-		virtual bool GetIsReady(void) override
+	public:
+		bool GetIsConnected(void) const
 		{
-			return m_IsBound;
+			return m_IsConnected;
 		}
 
-		virtual double GetTimestamp(void)  override;
+	protected:
+		void SetIsConnected(bool Value)
+		{
+			m_IsConnected = Value;
+		}
+
+	public:
+		double GetLastTouchTime(void) const
+		{
+			return m_LastTouchTime;
+		}
+
+		uint32_t GetLatency(void) const
+		{
+			return m_Latency;
+		}
+
+		virtual bool GetIsReady(void) const override
+		{
+			return SocketUtilities::GetIsReady(GetSocket());
+		}
+
+		virtual double GetTimestamp(void) const override;
+
+	protected:
+		void RaiseOnConnectedEvent(void);
+
+		void RaiseOnConnectionFailedEvent(void);
 
 	private:
 		void SendPing(void);
@@ -113,22 +143,11 @@ namespace GameFramework::Networking
 		Event<BufferStream> OnBufferReceived;
 
 	private:
-
-		private bool isConnected = false;
-		private double lastPingTime = 0;
-		private double timeOffset = 0;
-
-			public double LastTouchTime
-		{
-			get;
-			private set;
-		}
-
-			public uint Latency
-		{
-			get;
-			private set;
-		}
+		bool m_IsConnected;
+		double m_LastPingTime;
+		double m_TimeOffset;
+		double m_LastTouchTime;
+		uint32_t m_Latency;
 	};
 }
 

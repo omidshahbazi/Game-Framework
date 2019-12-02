@@ -68,7 +68,7 @@ namespace GameFramework::Networking
 		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::TCP, PlatformNetwork::Options::NoDelay, !Value);
 	}
 
-	bool SocketUtilities::IsReady(Socket Socket)
+	bool SocketUtilities::GetIsReady(Socket Socket)
 	{
 		return true;
 
@@ -91,7 +91,7 @@ namespace GameFramework::Networking
 
 	bool SocketUtilities::Accept(Socket ListenerSocket, Socket& AcceptedSocket, IPEndPoint& EndPoint)
 	{
-		PlatformNetwork::AddressFamilies family = PlatformNetwork::AddressFamilies::InterNetworkV6;
+		PlatformNetwork::AddressFamilies family = EndPoint.GetAddress().GetAddressFamily();
 		std::string ip;
 		uint16_t port;
 
@@ -102,6 +102,21 @@ namespace GameFramework::Networking
 		EndPoint.SetPort(port);
 
 		return true;
+	}
+
+	bool SocketUtilities::Connect(Socket Socket, const IPEndPoint& EndPoint)
+	{
+		try
+		{
+			return PlatformNetwork::Connect(Socket, EndPoint.GetAddress().GetAddressFamily(), EndPoint.GetAddress().GetIP(), EndPoint.GetPort());
+		}
+		catch (PlatformNetwork::SocketException e)
+		{
+			if (e.GetError() == PlatformNetwork::Errors::WouldBlock)
+				return true;
+
+			throw e;
+		}
 	}
 
 	uint32_t SocketUtilities::Send(Socket Socket, const std::byte* Buffer, uint32_t Length)

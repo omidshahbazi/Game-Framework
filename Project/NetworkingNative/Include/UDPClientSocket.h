@@ -14,6 +14,8 @@ namespace GameFramework::Networking
 		UDPClientSocket(void);
 
 	protected:
+		void ConnectInternal(const IPEndPoint& EndPoint) override;
+
 		void ProcessReceivedBuffer(const BufferStream &Buffer) override;
 	};
 }

@@ -43,7 +43,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerNetworkingManagedTest
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkingNative", "NetworkingNative\NetworkingNative.vcxproj", "{23C473B9-B09B-4AAA-BF69-C041D6942837}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkingNativeTest", "Tests\NetworkingNativeTest\NetworkingNativeTest.vcxproj", "{8A2EB620-C47B-4B96-AD51-41253607FD97}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClientNetworkingNativeTest", "Tests\ClientNetworkingNativeTest\ClientNetworkingNativeTest.vcxproj", "{8A2EB620-C47B-4B96-AD51-41253607FD97}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerNetworkingNativeTest", "Tests\ServerNetworkingNativeTest\ServerNetworkingNativeTest.vcxproj", "{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -281,6 +283,16 @@ Global
 		{8A2EB620-C47B-4B96-AD51-41253607FD97}.Release|x64.Build.0 = Release|x64
 		{8A2EB620-C47B-4B96-AD51-41253607FD97}.Release|x86.ActiveCfg = Release|Win32
 		{8A2EB620-C47B-4B96-AD51-41253607FD97}.Release|x86.Build.0 = Release|Win32
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Debug|x64.ActiveCfg = Debug|x64
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Debug|x64.Build.0 = Debug|x64
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Debug|x86.ActiveCfg = Debug|Win32
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Debug|x86.Build.0 = Debug|Win32
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|Any CPU.ActiveCfg = Release|Win32
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|x64.ActiveCfg = Release|x64
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|x64.Build.0 = Release|x64
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|x86.ActiveCfg = Release|Win32
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -293,6 +305,7 @@ Global
 		{AF475368-B0A5-4517-8033-6C0937293786} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
 		{836429D0-C515-4B28-B18D-A946ADD2227D} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
 		{8A2EB620-C47B-4B96-AD51-41253607FD97} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
+		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {387CE56F-DF30-4C5E-8D43-82CFB09C9921}

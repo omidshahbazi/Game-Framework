@@ -42,13 +42,18 @@ namespace GameFramework.Networking
 		public delegate void ConnectionEventHandler();
 		public delegate void BufferReceivedEventHandler(BufferStream Buffer);
 
-		private bool isConnected = false;
 		private double lastPingTime = 0;
 		private double timeOffset = 0;
 
+		public bool IsConnected
+		{
+			get;
+			protected set;
+		}
+
 		public override bool IsReady
 		{
-			get { return SocketUtilities.IsReady(Socket); }
+			get { return SocketUtilities.GetIsReady(Socket); }
 		}
 
 		public override double Timestamp
@@ -79,7 +84,7 @@ namespace GameFramework.Networking
 
 		public override void Service()
 		{
-			if (isConnected && LastTouchTime + Constants.PING_TIME <= Time.CurrentEpochTime)
+			if (IsConnected && LastTouchTime + Constants.PING_TIME <= Time.CurrentEpochTime)
 			{
 				LastTouchTime = Time.CurrentEpochTime;
 
@@ -104,7 +109,7 @@ namespace GameFramework.Networking
 			if (EndPoint.AddressFamily == AddressFamily.InterNetwork)
 				EndPoint.Address = SocketUtilities.MapIPv4ToIPv6(EndPoint.Address);
 
-			Socket.BeginConnect(EndPoint, OnConnectedCallback, null);
+			ConnectInternal(EndPoint);
 		}
 
 		public void Disconnect()
@@ -131,6 +136,8 @@ namespace GameFramework.Networking
 			SendInternal(buffer);
 		}
 
+		protected abstract void ConnectInternal(IPEndPoint EndPoint);
+
 		protected virtual void SendInternal(BufferStream Buffer)
 		{
 			AddSendCommand(new SendCommand(Buffer, Timestamp));
@@ -138,7 +145,7 @@ namespace GameFramework.Networking
 
 		protected override void Receive()
 		{
-			if (!isConnected)
+			if (!IsConnected)
 				return;
 
 			try
@@ -227,7 +234,7 @@ namespace GameFramework.Networking
 			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
 				return false;
 
-			if (!SocketUtilities.IsReady(Socket))
+			if (!SocketUtilities.GetIsReady(Socket))
 				return false;
 
 			SendInternal(Socket, Command.Buffer);
@@ -270,7 +277,7 @@ namespace GameFramework.Networking
 				AddEvent(new DisconnectedEvent());
 			}
 
-			isConnected = false;
+			IsConnected = false;
 		}
 
 		protected abstract void ProcessReceivedBuffer(BufferStream Buffer);
@@ -288,43 +295,29 @@ namespace GameFramework.Networking
 			}
 		}
 
-		private void OnConnectedCallback(IAsyncResult Result)
+		protected void RaiseOnConnectedEvent()
 		{
-			if (Socket.Connected)
+			if (MultithreadedCallbacks)
 			{
-				lock (Socket)
-				{
-					Socket.EndConnect(Result);
-				}
-
-				RunReceiveThread();
-				RunSenndThread();
-
-				if (MultithreadedCallbacks)
-				{
-					if (OnConnected != null)
-						CallbackUtilities.InvokeCallback(OnConnected.Invoke);
-				}
-				else
-				{
-					AddEvent(new ConnectedEvent());
-				}
-
-				isConnected = true;
+				if (OnConnected != null)
+					CallbackUtilities.InvokeCallback(OnConnected.Invoke);
 			}
 			else
 			{
-				if (MultithreadedCallbacks)
-				{
-					if (OnConnectionFailed != null)
-						CallbackUtilities.InvokeCallback(OnConnectionFailed.Invoke);
-				}
-				else
-				{
-					AddEvent(new ConnectionFailedEvent());
-				}
+				AddEvent(new ConnectedEvent());
+			}
+		}
 
-				isConnected = false;
+		protected void RaiseOnConnectionFailedEvent()
+		{
+			if (MultithreadedCallbacks)
+			{
+				if (OnConnectionFailed != null)
+					CallbackUtilities.InvokeCallback(OnConnectionFailed.Invoke);
+			}
+			else
+			{
+				AddEvent(new ConnectionFailedEvent());
 			}
 		}
 

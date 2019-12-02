@@ -9,7 +9,7 @@ namespace GameFramework.Networking
 	{
 		public bool IsReady
 		{
-			get { return SocketUtilities.IsReady(Socket) && (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2); }
+			get { return SocketUtilities.GetIsReady(Socket) && (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2); }
 		}
 
 		public Socket Socket

@@ -8,6 +8,16 @@ namespace GameFramework::Networking
 	{
 	}
 
+	void TCPClientSocket::Service(void)
+	{
+		if (SocketUtilities::poll)
+	}
+
+	void TCPClientSocket::ConnectInternal(const IPEndPoint& EndPoint)
+	{
+		SocketUtilities::Connect(GetSocket(), EndPoint);
+	}
+
 	void TCPClientSocket::ProcessReceivedBuffer(const BufferStream& Buffer)
 	{
 		HandleReceivedBuffer(Buffer);

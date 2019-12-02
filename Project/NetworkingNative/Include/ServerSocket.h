@@ -117,12 +117,12 @@ namespace GameFramework::Networking
 
 		void HandleReceivedBuffer(Client* Sender, const BufferStream& Buffer);
 
-		virtual bool GetIsReady(void) override
+		virtual bool GetIsReady(void) const override
 		{
 			return m_IsBound;
 		}
 
-		virtual double GetTimestamp(void)  override;
+		virtual double GetTimestamp(void) const override;
 
 	private:
 		void HandleClientDisconnection(Client* Client);
