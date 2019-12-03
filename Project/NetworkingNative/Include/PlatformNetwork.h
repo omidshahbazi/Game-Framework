@@ -248,7 +248,7 @@ namespace GameFramework::Networking
 
 		static bool Poll(Handle Handle, uint32_t Timeout, SelectModes Mode);
 
-		static bool Select(Handle Handle);
+		static bool Select(Handle Handle, SelectModes Mode, uint32_t Timeout);
 
 		static uint64_t GetAvailableBytes(Handle Handle);
 		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t& Length, ReceiveModes Mode);

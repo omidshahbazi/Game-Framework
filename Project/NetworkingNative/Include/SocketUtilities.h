@@ -131,6 +131,8 @@ namespace GameFramework::Networking
 
 		static uint32_t Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
 
+		static bool Select(Socket Socket, PlatformNetwork::SelectModes Mode, uint32_t Timeout);
+
 		static uint64_t GetAvailableBytes(Socket Socket);
 
 		static bool Receive(Socket Socket, std::byte* Buffer, uint32_t& Length);

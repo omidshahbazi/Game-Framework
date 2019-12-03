@@ -124,6 +124,11 @@ namespace GameFramework::Networking
 		return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
 	}
 
+	bool SocketUtilities::Select(Socket Socket, PlatformNetwork::SelectModes Mode, uint32_t Timeout)
+	{
+		return PlatformNetwork::Select(Socket, Mode, Timeout);
+	}
+
 	uint64_t SocketUtilities::GetAvailableBytes(Socket Socket)
 	{
 		return PlatformNetwork::GetAvailableBytes(Socket);

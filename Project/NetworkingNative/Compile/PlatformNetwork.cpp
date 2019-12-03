@@ -490,7 +490,7 @@ namespace GameFramework::Networking
 
 		if (connect(Handle, address, addressSize) == SOCKET_ERROR)
 			throw SocketException(GetLastError());
-		
+
 		return true;
 	}
 
@@ -536,16 +536,36 @@ namespace GameFramework::Networking
 		return fd.revents & mode;
 	}
 
-	bool PlatformNetwork::Select(Handle Handle)
+	bool PlatformNetwork::Select(Handle Handle, SelectModes Mode, uint32_t Timeout)
 	{
-		fd_set  
-		select()
+		fd_set set;
+		FD_ZERO(&set);
+		FD_SET(Handle, &set);
+
+		timeval tv;
+		tv.tv_sec = Timeout / 1000;
+
+		int32_t result = 0;
+		if (Mode == SelectModes::SelectRead)
+			result = select(Handle + 1, &set, nullptr, nullptr, &tv);
+		else if (Mode == SelectModes::SelectWrite)
+			result = select(Handle + 1, nullptr, &set, nullptr, &tv);
+		else if (Mode == SelectModes::SelectError)
+			result = select(Handle + 1, nullptr, nullptr, &set, &tv);
+
+		if (result == 0)
+			throw SocketException(PlatformNetwork::Errors::Timeout);
+		
+		if (result == SOCKET_ERROR)
+			throw SocketException(GetLastError());
+
+		return true;
 	}
 
 	uint64_t PlatformNetwork::GetAvailableBytes(Handle Handle)
 	{
 		u_long availableBytes;
-		
+
 		if (ioctlsocket(Handle, FIONREAD, &availableBytes) == SOCKET_ERROR)
 			return 0;
 

@@ -15,10 +15,18 @@ namespace GameFramework::Networking
 
 		virtual void Service(void) override;
 
+		virtual void Disconnect(void) override;
+
 	protected:
 		void ConnectInternal(const IPEndPoint& EndPoint) override;
 
 		void ProcessReceivedBuffer(const BufferStream& Buffer) override;
+
+	private:
+		void CheckConnectionStatus(void);
+
+	private:
+		bool m_IsConnecting;
 	};
 }
 

@@ -30,12 +30,12 @@ namespace GameFramework.Networking
 					Socket.EndConnect(Result);
 				}
 
+				IsConnected = true;
+
 				RunReceiveThread();
 				RunSenndThread();
 
 				RaiseOnConnectedEvent();
-
-				IsConnected = true;
 			}
 			else
 			{
