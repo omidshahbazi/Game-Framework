@@ -26,7 +26,7 @@ void Server_OnBufferReceived(const Client* Client, BufferStream Buffer)
 
 void main()
 {
-	std::cout << "TCPServerSocket created" << std::endl;
+	std::cout << "Server created" << std::endl;
 
 	server.OnClientConnected += Server_OnClientConnected;
 	server.OnClientDisconnected += Server_OnClientDisconnected;
@@ -38,10 +38,10 @@ void main()
 
 	server.Bind("::0", 80);
 	//socket.Bind("fe80::c011:8430:ece7:975f%15", 80);
-	std::cout << "TCPServerSocket bound" << std::endl;
+	std::cout << "Server bound" << std::endl;
 
 	server.Listen();
-	std::cout << "TCPServerSocket started listening" << std::endl;
+	std::cout << "Server started listening" << std::endl;
 
 	while (true)
 	{

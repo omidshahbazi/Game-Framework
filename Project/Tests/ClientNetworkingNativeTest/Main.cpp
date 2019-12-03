@@ -8,6 +8,9 @@ TCPClientSocket client;
 void Server_OnConnected(void)
 {
 	std::cout << "Server_OnConnected " << std::endl;
+
+	byte data[3] = { (byte)10, (byte)22, (byte)16 };
+	client.Send(data, 3);
 }
 
 void Server_OnConnectionFailed(void)
@@ -29,7 +32,7 @@ void Client_OnBufferReceived(BufferStream Buffer)
 
 void main()
 {
-	std::cout << "TCPClientSocket created" << std::endl;
+	std::cout << "Client created" << std::endl;
 
 	client.OnConnected += Server_OnConnected;
 	client.OnConnectionFailed += Server_OnConnectionFailed;
@@ -42,7 +45,7 @@ void main()
 
 	client.Connect("::1", 80);
 	//socket.Connect("fe80::c011:8430:ece7:975f%15", 80);
-	std::cout << "TCPClientSocket started connecting" << std::endl;
+	std::cout << "Client started connecting" << std::endl;
 
 	while (true)
 	{

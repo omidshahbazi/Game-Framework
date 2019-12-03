@@ -127,7 +127,9 @@ namespace GameFramework.Networking
 			SocketUtilities.SetTimeToLive(Socket, Constants.TIME_TO_LIVE);
 			SocketUtilities.SetIPv6OnlyEnabled(Socket, false);
 			//SocketUtilities.SetChecksumEnabled(Socket, false);
-			SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);
+
+			if (Type == Protocols.TCP)
+				SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);
 
 			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 

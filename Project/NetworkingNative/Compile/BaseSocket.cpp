@@ -37,7 +37,9 @@ namespace GameFramework::Networking
 		SocketUtilities::SetTimeToLive(m_Socket, Constants::TIME_TO_LIVE);
 		SocketUtilities::SetIPv6OnlyEnabled(m_Socket, false);
 		//SocketUtilities::SetChecksumEnabled(m_Socket, false);
-		SocketUtilities::SetNagleAlgorithmEnabled(m_Socket, false);
+
+		if (Type == PlatformNetwork::IPProtocols::TCP)
+			SocketUtilities::SetNagleAlgorithmEnabled(m_Socket, false);
 
 		m_ReceiveBuffer = new std::byte[Constants::RECEIVE_BUFFER_SIZE];
 
@@ -93,7 +95,7 @@ namespace GameFramework::Networking
 			m_SendThread->detach();
 			delete m_SendThread;
 		}
-		
+
 		delete[]m_ReceiveBuffer;
 	}
 

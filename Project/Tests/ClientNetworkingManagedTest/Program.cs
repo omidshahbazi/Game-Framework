@@ -6,12 +6,12 @@ namespace ClientNetworkingManagedTest
 {
 	class Program
 	{
-		private static TCPClientSocket client = null;
+		private static UDPClientSocket client = null;
 
 		static void Main(string[] args)
 		{
-			client = new TCPClientSocket();
-			Console.WriteLine("TCPClientSocket created");
+			client = new UDPClientSocket();
+			Console.WriteLine("Client created");
 
 			client.MultithreadedCallbacks = false;
 			client.MultithreadedReceive = false;
@@ -51,7 +51,7 @@ namespace ClientNetworkingManagedTest
 			client.OnBufferReceived += Client_OnBufferReceived;
 
 			client.Connect("::1", 80);
-			Console.WriteLine("TCPClientSocket started connecting");
+			Console.WriteLine("Client started connecting");
 
 			while (true)
 			{

@@ -6,12 +6,13 @@ namespace ServerNetworkingManagedTest
 {
 	class Program
 	{
-		private static TCPServerSocket server = null;
+		//private static TCPServerSocket server = null;
+		private static UDPServerSocket server = null;
 
 		static void Main(string[] args)
 		{
-			server = new TCPServerSocket(24);
-			Console.WriteLine("TCPServerSocket created");
+			server = new UDPServerSocket(24);
+			Console.WriteLine("Server created");
 
 			server.MultithreadedCallbacks = false;
 			server.MultithreadedReceive = false;
@@ -50,10 +51,10 @@ namespace ServerNetworkingManagedTest
 			server.OnBufferReceived += Server_OnBufferReceived;
 
 			server.Bind("::1", 80);
-			Console.WriteLine("TCPServerSocket bound");
+			Console.WriteLine("Server bound");
 
 			server.Listen();
-			Console.WriteLine("TCPServerSocket started listening");
+			Console.WriteLine("Server started listening");
 
 			while (true)
 			{
