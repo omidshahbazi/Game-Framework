@@ -23,6 +23,8 @@ namespace GameFramework.Networking
 			//IsConnected = true;
 
 			//RaiseOnConnectedEvent();
+
+			SocketUtilities.FindOptimumMTU(IPAddress.Parse("8.8.8.8"), 2000);
 		}
 
 		protected override void ProcessReceivedBuffer(BufferStream Buffer)

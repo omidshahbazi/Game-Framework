@@ -1,6 +1,8 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
 namespace GameFramework.Networking
@@ -110,6 +112,35 @@ namespace GameFramework.Networking
 				throw new ArgumentException("IP must be v4");
 
 			return IPAddress.Parse("::ffff:" + IP.ToString());
+		}
+
+		public static int FindOptimumMTU(IPAddress Address, uint MaxMTU)
+		{
+			Ping ping = new Ping();
+
+			PingOptions options = new PingOptions();
+			options.DontFragment = true;
+
+			List<byte> bytesList = new List<byte>((int)MaxMTU + 1);
+			for (uint i = 0; i < bytesList.Capacity; ++i)
+				bytesList.Add((byte)(i % 255));
+
+			PingReply reply = null;
+			do
+			{
+				bytesList.RemoveAt(0);
+
+				reply = ping.Send(Address, 1000, bytesList.ToArray(), options);
+
+				if (reply == null)
+					return -1;
+
+				if (reply.Status == IPStatus.Success && reply.Options.DontFragment)
+					break;
+
+			} while (true);
+
+			return bytesList.Count;
 		}
 	}
 }
