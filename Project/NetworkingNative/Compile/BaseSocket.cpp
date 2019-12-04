@@ -115,7 +115,7 @@ namespace GameFramework::Networking
 		m_SendThread = new thread(GlobalSendWorker, this);
 	}
 
-	void BaseSocket::SendInternal(Socket Target, const BufferStream& Buffer)
+	void BaseSocket::SendOverSocket(Socket Target, const BufferStream& Buffer)
 	{
 		try
 		{

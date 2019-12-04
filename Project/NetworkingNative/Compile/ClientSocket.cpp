@@ -172,7 +172,7 @@ namespace GameFramework::Networking
 		if (!GetIsReady())
 			return false;
 
-		BaseSocket::SendInternal(GetSocket(), const_cast<BufferStream&>(Command->GetBuffer()));
+		BaseSocket::SendOverSocket(GetSocket(), const_cast<BufferStream&>(Command->GetBuffer()));
 
 		return true;
 	}
@@ -262,6 +262,6 @@ namespace GameFramework::Networking
 
 		m_LastPingTime = Time::GetCurrentEpochTime();
 
-		BaseSocket::SendInternal(GetSocket(), pingBuffer);
+		BaseSocket::SendOverSocket(GetSocket(), pingBuffer);
 	}
 }

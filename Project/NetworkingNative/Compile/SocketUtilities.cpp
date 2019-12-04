@@ -5,6 +5,9 @@ using namespace std;
 
 namespace GameFramework::Networking
 {
+	const IPAddress IPAddress::Any(PlatformNetwork::AddressFamilies::InterNetwork, "0.0.0.0");
+	const IPAddress IPAddress::AnyV6(PlatformNetwork::AddressFamilies::InterNetworkV6, "::0");
+
 	Socket SocketUtilities::CreateSocket(PlatformNetwork::IPProtocols Protocol)
 	{
 		PlatformNetwork::Initialize();

@@ -36,7 +36,7 @@ void main()
 	//server.SetMultithreadedReceive(false);
 	//server.SetMultithreadedSend(false);
 
-	server.Bind("::0", 80);
+	server.Bind("::1", 80);
 	//socket.Bind("fe80::c011:8430:ece7:975f%15", 80);
 	std::cout << "Server bound" << std::endl;
 
