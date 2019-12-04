@@ -6,11 +6,11 @@ namespace ClientNetworkingManagedTest
 {
 	class Program
 	{
-		private static UDPClientSocket client = null;
+		private static ClientSocket client = null;
 
 		static void Main(string[] args)
 		{
-			client = new UDPClientSocket();
+			client = new TCPClientSocket();
 			Console.WriteLine("Client created");
 
 			client.MultithreadedCallbacks = false;
@@ -50,8 +50,8 @@ namespace ClientNetworkingManagedTest
 			client.OnDisconnected += Client_OnDisconnected;
 			client.OnBufferReceived += Client_OnBufferReceived;
 
-			client.Connect("::1", 80);
 			Console.WriteLine("Client started connecting");
+			client.Connect("127.0.0.1", 80);
 
 			while (true)
 			{

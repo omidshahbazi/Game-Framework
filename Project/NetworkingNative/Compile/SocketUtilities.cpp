@@ -54,7 +54,7 @@ namespace GameFramework::Networking
 
 	void SocketUtilities::SetIPv6OnlyEnabled(Socket Socket, bool Value)
 	{
-		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::IPv6Only, (int32_t)Value);
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::IPv6Only, Value);
 	}
 
 	void SocketUtilities::SetChecksumEnabled(Socket Socket, bool Value)

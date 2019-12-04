@@ -401,8 +401,10 @@ namespace GameFramework::Networking
 
 	void PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, bool Enabled)
 	{
-		if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) == SOCKET_ERROR)
-			throw SocketException(GetLastError());
+		//if (setsockopt(Handle, GetOptionLevel(Level), GetOption(Option), reinterpret_cast<char*>(&Enabled), sizeof(bool)) == SOCKET_ERROR)
+		//	throw SocketException(GetLastError());
+
+		SetSocketOption(Handle, Level, Option, (Enabled ? 1 : 0));
 	}
 
 	void PlatformNetwork::SetSocketOption(Handle Handle, OptionLevels Level, Options Option, int32_t Value)
