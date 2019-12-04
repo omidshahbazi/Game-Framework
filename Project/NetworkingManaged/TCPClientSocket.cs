@@ -16,6 +16,14 @@ namespace GameFramework.Networking
 			Socket.BeginConnect(EndPoint, OnConnectedCallback, null);
 		}
 
+		protected override void Receive()
+		{
+			if (!IsConnected)
+				return;
+
+			base.Receive();
+		}
+
 		protected override void ProcessReceivedBuffer(BufferStream Buffer)
 		{
 			HandleReceivedBuffer(Buffer);

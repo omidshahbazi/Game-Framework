@@ -165,7 +165,7 @@ namespace GameFramework.Networking
 			BandwidthIn += Size;
 
 			uint index = 0;
-			while (index != Size)
+			while (index < Size)
 			{
 				uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
@@ -191,6 +191,12 @@ namespace GameFramework.Networking
 
 				ProcessReceivedBuffer(Client, buffer);
 			}
+			else if (control == Constants.Control.CONNECTION)
+			{
+				BufferStream buffer = Constants.Packet.CreateConnectionBufferStream();
+
+				AddSendCommand(Client, buffer);
+			}
 			else if (control == Constants.Control.PING)
 			{
 				double sendTime = Buffer.ReadFloat64();
@@ -199,7 +205,7 @@ namespace GameFramework.Networking
 
 				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
 
-				SendOverSocket(Client, pingBuffer);
+				AddSendCommand(Client, pingBuffer);
 			}
 		}
 

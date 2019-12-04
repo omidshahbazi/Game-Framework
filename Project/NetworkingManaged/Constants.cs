@@ -12,7 +12,8 @@ namespace GameFramework.Networking
 			public const int SIZE = sizeof(byte);
 
 			public const byte BUFFER = 1;
-			public const byte PING = 2;
+			public const byte CONNECTION = 2;
+			public const byte PING = 3;
 		}
 
 		public static class Packet
@@ -35,6 +36,18 @@ namespace GameFramework.Networking
 			public static BufferStream CreateIncommingBufferStream(byte[] Buffer)
 			{
 				return new BufferStream(Buffer, HEADER_SIZE, (uint)(Buffer.Length - HEADER_SIZE));
+			}
+
+			public static BufferStream CreateConnectionBufferStream()
+			{
+				uint length = HEADER_SIZE;
+
+				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
+				buffer.ResetWrite();
+				buffer.WriteUInt32(length);
+				buffer.WriteBytes(Control.CONNECTION);
+
+				return buffer;
 			}
 
 			public static BufferStream CreatePingBufferStream()

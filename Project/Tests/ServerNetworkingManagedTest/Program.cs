@@ -6,7 +6,6 @@ namespace ServerNetworkingManagedTest
 {
 	class Program
 	{
-		//private static TCPServerSocket server = null;
 		private static ServerSocket server = null;
 
 		static void Main(string[] args)
@@ -50,7 +49,7 @@ namespace ServerNetworkingManagedTest
 			server.OnClientDisconnected += Server_OnClientDisconnected;
 			server.OnBufferReceived += Server_OnBufferReceived;
 
-			server.Bind("::1", 80);
+			server.Bind("::0", 80);
 			Console.WriteLine("Server bound");
 
 			server.Listen();

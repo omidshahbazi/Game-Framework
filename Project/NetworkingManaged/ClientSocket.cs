@@ -145,9 +145,6 @@ namespace GameFramework.Networking
 
 		protected override void Receive()
 		{
-			if (!IsConnected)
-				return;
-
 			try
 			{
 				int size = 0;
@@ -168,7 +165,7 @@ namespace GameFramework.Networking
 				BandwidthIn += (uint)size;
 
 				uint index = 0;
-				while (index != size)
+				while (index < size)
 				{
 					uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
@@ -204,15 +201,13 @@ namespace GameFramework.Networking
 			{
 				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
-				if (MultithreadedCallbacks)
-				{
-					if (OnBufferReceived != null)
-						CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, buffer);
-				}
-				else
-				{
-					AddEvent(new BufferReceivedvent(buffer));
-				}
+				ProcessReceivedBuffer(buffer);
+			}
+			else if (control == Constants.Control.CONNECTION)
+			{
+				IsConnected = true;
+
+				RaiseOnConnectedEvent();
 			}
 			else if (control == Constants.Control.PING)
 			{
@@ -231,9 +226,6 @@ namespace GameFramework.Networking
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
-			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
-				return false;
-
 			if (!SocketUtilities.GetIsReady(Socket))
 				return false;
 

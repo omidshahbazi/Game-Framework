@@ -14,13 +14,20 @@ namespace GameFramework.Networking
 		{
 			Socket.Connect(EndPoint);
 
-			IsConnected = true;
+			BufferStream buffer = Constants.Packet.CreateConnectionBufferStream();
+			AddSendCommand(new SendCommand(buffer, Timestamp));
 
-			RaiseOnConnectedEvent();
+			RunReceiveThread();
+			RunSenndThread();
+
+			//IsConnected = true;
+
+			//RaiseOnConnectedEvent();
 		}
 
 		protected override void ProcessReceivedBuffer(BufferStream Buffer)
 		{
+			HandleReceivedBuffer(Buffer);
 		}
 	}
 }

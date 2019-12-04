@@ -10,7 +10,7 @@ namespace ClientNetworkingManagedTest
 
 		static void Main(string[] args)
 		{
-			client = new TCPClientSocket();
+			client = new UDPClientSocket();
 			Console.WriteLine("Client created");
 
 			client.MultithreadedCallbacks = false;

@@ -58,21 +58,27 @@ namespace GameFramework.Networking
 
 		protected override void ReadFromClients()
 		{
+			IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+
 			try
 			{
 				int size = 0;
-				EndPoint endPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+				EndPoint endPoint = ipEndPoint;
 
 				lock (Socket)
 				{
 					if (Socket.Available == 0)
 						return;
 
-
 					size = Socket.ReceiveFrom(ReceiveBuffer, ref endPoint);
+
+					ipEndPoint = (IPEndPoint)endPoint;
 				}
 
-				UDPClient client = GetOrAddClient((IPEndPoint)endPoint);
+				UDPClient client = GetOrAddClient(ipEndPoint);
+
+				lock (clients)
+					clients.Add(client);
 
 				ProcessReceivedBuffer(client, (uint)size);
 			}
@@ -80,6 +86,22 @@ namespace GameFramework.Networking
 			{
 				if (e.SocketErrorCode == SocketError.WouldBlock)
 					return;
+				else if (e.SocketErrorCode == SocketError.ConnectionReset)
+				{
+					int hash = GetIPEndPointHash(ipEndPoint);
+
+					lock (clients)
+					{
+						UDPClient client = GetOrAddClient(ipEndPoint);
+
+						clients.Remove(client);
+						clientsMap.Remove(hash);
+
+						HandleClientDisconnection(client);
+					}
+
+					return;
+				}
 
 				throw e;
 			}
@@ -91,16 +113,25 @@ namespace GameFramework.Networking
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
-			return false;
+			ServerSendCommand sendCommand = (ServerSendCommand)Command;
+			UDPClient client = (UDPClient)sendCommand.Client;
+
+			if (!client.IsReady)
+				return false;
+
+			SendOverSocket(client.EndPoint, Command.Buffer);
+
+			return true;
 		}
 
 		protected override void ProcessReceivedBuffer(Client Sender, BufferStream Buffer)
 		{
+			HandleReceivedBuffer(Sender, Buffer);
 		}
 
 		private UDPClient GetOrAddClient(IPEndPoint EndPoint)
 		{
-			int hash = EndPoint.GetHashCode();
+			int hash = GetIPEndPointHash(EndPoint);
 
 			if (clientsMap.ContainsKey(hash))
 				return clientsMap[hash];
@@ -110,6 +141,11 @@ namespace GameFramework.Networking
 			clientsMap[hash] = client;
 
 			return client;
+		}
+
+		private static int GetIPEndPointHash(IPEndPoint EndPoint)
+		{
+			return EndPoint.GetHashCode();
 		}
 	}
 }

@@ -166,9 +166,6 @@ namespace GameFramework::Networking
 
 	bool ClientSocket::HandleSendCommand(SendCommand* Command)
 	{
-		if (GetTimestamp() < Command->GetSendTime() + (GetLatencySimulation() / 1000.0F))
-			return false;
-
 		if (!GetIsReady())
 			return false;
 

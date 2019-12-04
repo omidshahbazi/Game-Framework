@@ -168,13 +168,10 @@ namespace GameFramework.Networking
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
-			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
-				return false;
-
 			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 			TCPClient client = (TCPClient)sendCommand.Client;
 
-			if (!SocketUtilities.GetIsReady(client.Socket))
+			if (!client.IsReady)
 				return false;
 
 			SendOverSocket(client.Socket, Command.Buffer);

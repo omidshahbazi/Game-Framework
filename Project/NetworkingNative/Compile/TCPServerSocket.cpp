@@ -138,13 +138,10 @@ namespace GameFramework::Networking
 
 	bool TCPServerSocket::HandleSendCommand(SendCommand* Command)
 	{
-		if (GetTimestamp() < Command->GetSendTime() + (GetLatencySimulation() / 1000.0F))
-			return false;
-
 		ServerSendCommand* sendCommand = reinterpret_cast<ServerSendCommand*>(Command);
 		TCPClient* client = reinterpret_cast<TCPClient*>(sendCommand->GetClient());
 
-		if (!SocketUtilities::GetIsReady(client->GetSocket()))
+		if (!client->GetIsReady())
 			return false;
 
 		BaseSocket::SendOverSocket(client->GetSocket(), Command->GetBuffer());
