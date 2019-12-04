@@ -84,7 +84,7 @@ namespace GameFramework::Networking
 		};
 
 	public:
-		ServerSocket(PlatformNetwork::IPProtocols Type, uint32_t MaxConnection);
+		ServerSocket(PlatformNetwork::IPProtocols Type);
 
 		void Bind(const std::string& Host, uint16_t Port);
 
@@ -96,7 +96,7 @@ namespace GameFramework::Networking
 
 		void DisconnectClient(Client* const Client);
 
-		void Listen(void);
+		void virtual Listen(void);
 
 		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Length);
 
@@ -137,8 +137,6 @@ namespace GameFramework::Networking
 
 		ClientList m_Clients;
 		atomic_bool m_ClientsLock;
-
-		uint32_t m_MaxConnection;
 	};
 }
 

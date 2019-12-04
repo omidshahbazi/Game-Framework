@@ -11,7 +11,7 @@ namespace GameFramework::Networking
 	class NETWORKING_API UDPServerSocket : public ServerSocket
 	{
 	public:
-		UDPServerSocket(uint32_t MaxConnection);
+		UDPServerSocket(void);
 
 	protected:
 		void ProcessReceivedBuffer(Client *Sender, const BufferStream &Buffer) override;

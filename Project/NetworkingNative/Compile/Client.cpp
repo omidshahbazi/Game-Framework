@@ -9,9 +9,7 @@ using namespace GameFramework::Common::Timing;
 
 namespace GameFramework::Networking
 {
-	Client::Client(Socket Socket, const IPEndPoint& EndPoint) :
-		m_Socket(Socket),
-		m_EndPoint(EndPoint),
+	Client::Client(void) :
 		m_LastTouchTime(0),
 		m_Latency(0)
 	{
@@ -20,6 +18,6 @@ namespace GameFramework::Networking
 
 	bool Client::GetIsReady(void) const
 	{
-		return (SocketUtilities::GetIsReady(m_Socket) && (Time::GetCurrentEpochTime() - m_LastTouchTime < Constants::PING_TIME * 2));
+		return (Time::GetCurrentEpochTime() - m_LastTouchTime < Constants::PING_TIME * 2);
 	}
 }

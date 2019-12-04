@@ -51,22 +51,20 @@ namespace GameFramework.Networking
 
 		protected class ServerSendCommand : SendCommand
 		{
-			public Socket Socket
+			public Client Client
 			{
 				get;
 				private set;
 			}
 
-			public ServerSendCommand(Socket Socket, BufferStream Buffer, double SendTime) : base(Buffer, SendTime)
+			public ServerSendCommand(Client Client, BufferStream Buffer, double SendTime) : base(Buffer, SendTime)
 			{
-				this.Socket = Socket;
+				this.Client = Client;
 			}
 		}
 
 		public delegate void ConnectionEventHandler(Client Client);
 		public delegate void BufferReceivedEventHandler(Client Sender, BufferStream Buffer);
-
-		private ClientList clients = null;
 
 		public override bool IsReady
 		{
@@ -78,30 +76,17 @@ namespace GameFramework.Networking
 			get { return Time.CurrentEpochTime; }
 		}
 
-		public uint MaxConnection
+		public abstract Client[] Clients
 		{
 			get;
-			set;
-		}
-
-		public Client[] Clients
-		{
-			get
-			{
-				lock (clients)
-					return clients.ToArray();
-			}
 		}
 
 		public event ConnectionEventHandler OnClientConnected = null;
 		public event ConnectionEventHandler OnClientDisconnected = null;
 		public event BufferReceivedEventHandler OnBufferReceived = null;
 
-		public ServerSocket(Protocols Type, uint MaxConnection) : base(Type)
+		public ServerSocket(Protocols Type) : base(Type)
 		{
-			clients = new ClientList();
-
-			this.MaxConnection = MaxConnection;
 		}
 
 		public void Bind(string Host, ushort Port)
@@ -122,25 +107,18 @@ namespace GameFramework.Networking
 			Socket.Bind(EndPoint);
 		}
 
-		public void UnBind()
+		public virtual void UnBind()
 		{
-			clients.Clear();
-
 			Shutdown();
 		}
 
-		public void DisconnectClient(Client Client)
+		public virtual void DisconnectClient(Client Client)
 		{
-			lock (clients)
-				clients.Remove(Client);
-
 			HandleClientDisconnection(Client);
 		}
 
-		public void Listen()
+		public virtual void Listen()
 		{
-			Socket.Listen((int)MaxConnection);
-
 			RunReceiveThread();
 			RunSenndThread();
 		}
@@ -161,107 +139,41 @@ namespace GameFramework.Networking
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
-			SendInternal(Target, buffer);
+			AddSendCommand(Target, buffer);
 		}
 
-		protected virtual void SendInternal(Client Target, BufferStream Buffer)
+		protected virtual void AddSendCommand(Client Client, BufferStream Buffer)
 		{
-			AddSendCommand(new ServerSendCommand(Target.Socket, Buffer, Timestamp));
+			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
 		}
+
+		protected abstract void SendOverSocket(Client Client, BufferStream Buffer);
 
 		protected override void Receive()
 		{
-			try
+			AcceptClients();
+
+			ReadFromClients();
+		}
+
+		protected abstract void AcceptClients();
+
+		protected abstract void ReadFromClients();
+
+		protected void ProcessReceivedBuffer(Client Client, uint Size)
+		{
+			BandwidthIn += Size;
+
+			uint index = 0;
+			while (index != Size)
 			{
-				Socket clientSocket = Socket.Accept();
+				uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
-				Client client = new Client(clientSocket);
+				index += Constants.Packet.PACKET_SIZE_SIZE;
 
-				lock (clients)
-					clients.Add(client);
+				HandleIncommingBuffer(Client, new BufferStream(ReceiveBuffer, index, packetSize));
 
-				if (MultithreadedCallbacks)
-				{
-					if (OnClientConnected != null)
-						CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, client);
-				}
-				else
-				{
-					AddEvent(new ClientConnectedEvent(client));
-				}
-			}
-			catch (SocketException e)
-			{
-				if (e.SocketErrorCode != SocketError.WouldBlock)
-					throw e;
-			}
-
-			lock (clients)
-			{
-				ClientList disconnectedClients = new ClientList();
-
-				for (int i = 0; i < clients.Count; ++i)
-				{
-					Client client = clients[i];
-
-					try
-					{
-						int size = 0;
-
-						lock (Socket)
-						{
-							if (client.Socket.Available == 0)
-							{
-								if (!client.IsReady)
-								{
-									disconnectedClients.Add(client);
-
-									HandleClientDisconnection(client);
-								}
-
-								continue;
-							}
-
-							size = client.Socket.Receive(ReceiveBuffer);
-						}
-
-						BandwidthIn += (uint)size;
-
-						uint index = 0;
-						while (index != size)
-						{
-							uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
-
-							index += Constants.Packet.PACKET_SIZE_SIZE;
-
-							HandleIncommingBuffer(client, new BufferStream(ReceiveBuffer, index, packetSize));
-
-							index += packetSize;
-						}
-					}
-					catch (SocketException e)
-					{
-						if (e.SocketErrorCode == SocketError.WouldBlock)
-							continue;
-						else if (e.SocketErrorCode == SocketError.ConnectionReset)
-						{
-							disconnectedClients.Add(client);
-
-							HandleClientDisconnection(client);
-
-							continue;
-						}
-
-						throw e;
-					}
-					catch (Exception e)
-					{
-						throw e;
-					}
-				}
-
-				for (int i = 0; i < disconnectedClients.Count; ++i)
-					clients.Remove(disconnectedClients[i]);
+				index += packetSize;
 			}
 		}
 
@@ -287,23 +199,8 @@ namespace GameFramework.Networking
 
 				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
 
-				SendInternal(Client.Socket, pingBuffer);
+				SendOverSocket(Client, pingBuffer);
 			}
-		}
-
-		protected override bool HandleSendCommand(SendCommand Command)
-		{
-			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
-				return false;
-
-			ServerSendCommand sendCommand = (ServerSendCommand)Command;
-
-			if (!SocketUtilities.GetIsReady(sendCommand.Socket))
-				return false;
-
-			SendInternal(sendCommand.Socket, Command.Buffer);
-
-			return true;
 		}
 
 		protected override void ProcessEvent(EventBase Event)
@@ -320,7 +217,7 @@ namespace GameFramework.Networking
 				if (OnClientDisconnected != null)
 					CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, ev.Client);
 
-				SocketUtilities.CloseSocket(ev.Client.Socket);
+				CloseClientConnection(ev.Client);
 			}
 			else if (ev is BufferReceivedvent)
 			{
@@ -342,18 +239,36 @@ namespace GameFramework.Networking
 			}
 		}
 
-		private void HandleClientDisconnection(Client Client)
+		protected virtual void CloseClientConnection(Client Client)
+		{
+
+		}
+
+		protected void HandleClientDisconnection(Client Client)
 		{
 			if (MultithreadedCallbacks)
 			{
 				if (OnClientDisconnected != null)
 					CallbackUtilities.InvokeCallback(OnClientDisconnected.Invoke, Client);
 
-				SocketUtilities.CloseSocket(Client.Socket);
+				CloseClientConnection(Client);
 			}
 			else
 			{
 				AddEvent(new ClientDisconnectedEvent(Client));
+			}
+		}
+
+		protected void RaiseOnClientConnected(Client Client)
+		{
+			if (MultithreadedCallbacks)
+			{
+				if (OnClientConnected != null)
+					CallbackUtilities.InvokeCallback(OnClientConnected.Invoke, Client);
+			}
+			else
+			{
+				AddEvent(new ClientConnectedEvent(Client));
 			}
 		}
 	}

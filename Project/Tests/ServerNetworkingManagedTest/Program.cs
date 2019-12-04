@@ -11,7 +11,7 @@ namespace ServerNetworkingManagedTest
 
 		static void Main(string[] args)
 		{
-			server = new UDPServerSocket(24);
+			server = new UDPServerSocket();
 			Console.WriteLine("Server created");
 
 			server.MultithreadedCallbacks = false;
@@ -66,17 +66,17 @@ namespace ServerNetworkingManagedTest
 
 		private static void Server_OnClientConnected(Client Client)
 		{
-			Console.WriteLine("Server_OnClientConnected " + Client.Socket.RemoteEndPoint);
+			Console.WriteLine("Server_OnClientConnected " + Client.EndPoint);
 		}
 
 		private static void Server_OnClientDisconnected(Client Client)
 		{
-			Console.WriteLine("Server_OnClientDisconnected " + Client.Socket.RemoteEndPoint);
+			Console.WriteLine("Server_OnClientDisconnected " + Client.EndPoint);
 		}
 
 		private static void Server_OnBufferReceived(Client Sender, BufferStream Buffer)
 		{
-			Console.WriteLine("Server_OnBufferReceived " + Sender.Socket.RemoteEndPoint + " " + Buffer.Size);
+			Console.WriteLine("Server_OnBufferReceived " + Sender.EndPoint + " " + Buffer.Size);
 
 			server.Send(Sender, Buffer.Buffer);
 		}

@@ -3,8 +3,8 @@
 
 namespace GameFramework::Networking
 {
-	UDPServerSocket::UDPServerSocket(uint32_t MaxConnection) :
-		ServerSocket(PlatformNetwork::IPProtocols::UDP, MaxConnection)
+	UDPServerSocket::UDPServerSocket(void) :
+		ServerSocket(PlatformNetwork::IPProtocols::UDP)
 	{
 	}
 

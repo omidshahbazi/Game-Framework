@@ -237,7 +237,7 @@ namespace GameFramework.Networking
 			if (!SocketUtilities.GetIsReady(Socket))
 				return false;
 
-			SendInternal(Socket, Command.Buffer);
+			SendOverSocket(Socket, Command.Buffer);
 
 			return true;
 		}
@@ -327,7 +327,7 @@ namespace GameFramework.Networking
 
 			lastPingTime = Time.CurrentEpochTime;
 
-			SendInternal(Socket, pingBuffer);
+			SendOverSocket(Socket, pingBuffer);
 		}
 	}
 }

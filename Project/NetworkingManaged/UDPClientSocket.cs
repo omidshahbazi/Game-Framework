@@ -12,12 +12,15 @@ namespace GameFramework.Networking
 
 		protected override void ConnectInternal(IPEndPoint EndPoint)
 		{
-			throw new System.NotImplementedException();
+			Socket.Connect(EndPoint);
+
+			IsConnected = true;
+
+			RaiseOnConnectedEvent();
 		}
 
 		protected override void ProcessReceivedBuffer(BufferStream Buffer)
 		{
-			throw new System.NotImplementedException();
 		}
 	}
 }

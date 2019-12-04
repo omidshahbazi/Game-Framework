@@ -10,10 +10,9 @@ using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
-	ServerSocket::ServerSocket(PlatformNetwork::IPProtocols Type, uint32_t MaxConnection) :
+	ServerSocket::ServerSocket(PlatformNetwork::IPProtocols Type) :
 		BaseSocket(Type),
-		m_IsBound(false),
-		m_MaxConnection(MaxConnection)
+		m_IsBound(false)
 	{
 	}
 
@@ -56,10 +55,8 @@ namespace GameFramework::Networking
 		HandleClientDisconnection(Client);
 	}
 
-	void ServerSocket::Listen()
+	void ServerSocket::Listen(void)
 	{
-		SocketUtilities::Listen(GetSocket(), m_MaxConnection);
-
 		RunReceiveThread();
 		RunSenndThread();
 	}

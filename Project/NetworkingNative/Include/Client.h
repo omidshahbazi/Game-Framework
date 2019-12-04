@@ -11,7 +11,7 @@ namespace GameFramework::Networking
 	class NETWORKING_API Client
 	{
 	public:
-		Client(Socket Socket, const IPEndPoint &EndPoint);
+		Client(void);
 
 		void UpdateLastTouchTime(double Time)
 		{
@@ -23,17 +23,7 @@ namespace GameFramework::Networking
 			m_Latency = Latency;
 		}
 
-		bool GetIsReady(void) const;
-
-		Socket GetSocket(void) const
-		{
-			return m_Socket;
-		}
-
-		const IPEndPoint &GetEndPoint(void) const
-		{
-			return m_EndPoint;
-		}
+		virtual bool GetIsReady(void) const;
 
 		double GetLastTouchTime(void) const
 		{
@@ -46,8 +36,6 @@ namespace GameFramework::Networking
 		}
 
 	private:
-		Socket m_Socket;
-		IPEndPoint m_EndPoint;
 		double m_LastTouchTime;
 		uint32_t m_Latency;
 	};

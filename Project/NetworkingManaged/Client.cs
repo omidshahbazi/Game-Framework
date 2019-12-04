@@ -1,21 +1,15 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.Common.Timing;
 using System.Collections.Generic;
-using System.Net.Sockets;
+using System.Net;
 
 namespace GameFramework.Networking
 {
-	public class Client
+	public abstract class Client
 	{
-		public bool IsReady
+		public virtual bool IsReady
 		{
-			get { return SocketUtilities.GetIsReady(Socket) && (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2); }
-		}
-
-		public Socket Socket
-		{
-			get;
-			private set;
+			get { return (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2); }
 		}
 
 		public double LastTouchTime
@@ -30,10 +24,13 @@ namespace GameFramework.Networking
 			private set;
 		}
 
-		public Client(Socket Socket)
+		public abstract IPEndPoint EndPoint
 		{
-			this.Socket = Socket;
+			get;
+		}
 
+		public Client()
+		{
 			LastTouchTime = Time.CurrentEpochTime;
 		}
 
