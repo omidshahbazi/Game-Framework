@@ -27,7 +27,11 @@ namespace GameFramework.Networking
 		private class UDPClientList : List<UDPClient>
 		{ }
 
+		private class ClientMap : Dictionary<int, UDPClient>
+		{ }
+
 		private UDPClientList clients = null;
+		private ClientMap clientsMap = null;
 
 		public override Client[] Clients
 		{
@@ -41,6 +45,7 @@ namespace GameFramework.Networking
 		public UDPServerSocket() : base(Protocols.UDP)
 		{
 			clients = new UDPClientList();
+			clientsMap = new ClientMap();
 		}
 
 		protected override void SendOverSocket(Client Client, BufferStream Buffer)
@@ -63,11 +68,13 @@ namespace GameFramework.Networking
 					if (Socket.Available == 0)
 						return;
 
-					
+
 					size = Socket.ReceiveFrom(ReceiveBuffer, ref endPoint);
 				}
 
-				//ProcessReceivedBuffer(client, (uint)size);
+				UDPClient client = GetOrAddClient((IPEndPoint)endPoint);
+
+				ProcessReceivedBuffer(client, (uint)size);
 			}
 			catch (SocketException e)
 			{
@@ -89,6 +96,20 @@ namespace GameFramework.Networking
 
 		protected override void ProcessReceivedBuffer(Client Sender, BufferStream Buffer)
 		{
+		}
+
+		private UDPClient GetOrAddClient(IPEndPoint EndPoint)
+		{
+			int hash = EndPoint.GetHashCode();
+
+			if (clientsMap.ContainsKey(hash))
+				return clientsMap[hash];
+
+			UDPClient client = new UDPClient(EndPoint);
+
+			clientsMap[hash] = client;
+
+			return client;
 		}
 	}
 }
