@@ -6,7 +6,7 @@ namespace ServerNetworkingManagedTest
 {
 	class Program
 	{
-		private static ServerSocket server = null;
+		private static UDPServerSocket server = null;
 
 		static void Main(string[] args)
 		{

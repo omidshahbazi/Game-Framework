@@ -123,32 +123,6 @@ namespace GameFramework.Networking
 			RunSenndThread();
 		}
 
-		public virtual void Send(Client Target, byte[] Buffer)
-		{
-			Send(Target, Buffer, 0, (uint)Buffer.Length);
-		}
-
-		public virtual void Send(Client Target, byte[] Buffer, uint Length)
-		{
-			Send(Target, Buffer, 0, Length);
-		}
-
-		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length)
-		{
-			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
-
-			buffer.WriteBytes(Buffer, Index, Length);
-
-			AddSendCommand(Target, buffer);
-		}
-
-		protected virtual void AddSendCommand(Client Client, BufferStream Buffer)
-		{
-			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
-		}
-
-		protected abstract void SendOverSocket(Client Client, BufferStream Buffer);
-
 		protected override void Receive()
 		{
 			AcceptClients();
@@ -177,37 +151,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		protected virtual void HandleIncommingBuffer(Client Client, BufferStream Buffer)
-		{
-			byte control = Buffer.ReadByte();
-
-			double time = Time.CurrentEpochTime;
-
-			Client.UpdateLastTouchTime(time);
-
-			if (control == Constants.Control.BUFFER)
-			{
-				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
-
-				ProcessReceivedBuffer(Client, buffer);
-			}
-			else if (control == Constants.Control.CONNECTION)
-			{
-				BufferStream buffer = Constants.Packet.CreateConnectionBufferStream();
-
-				AddSendCommand(Client, buffer);
-			}
-			else if (control == Constants.Control.PING)
-			{
-				double sendTime = Buffer.ReadFloat64();
-
-				Client.UpdateLatency((uint)((time - sendTime) * 1000));
-
-				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
-
-				AddSendCommand(Client, pingBuffer);
-			}
-		}
+		protected abstract void HandleIncommingBuffer(Client Client, BufferStream Buffer);
 
 		protected override void ProcessEvent(EventBase Event)
 		{

@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
+using GameFramework.Common.Timing;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -82,9 +83,28 @@ namespace GameFramework.Networking
 			base.Listen();
 		}
 
-		protected override void SendOverSocket(Client Client, BufferStream Buffer)
+		public virtual void Send(Client Target, byte[] Buffer)
 		{
-			SendOverSocket(((TCPClient)Client).Socket, Buffer);
+			Send(Target, Buffer, 0, (uint)Buffer.Length);
+		}
+
+		public virtual void Send(Client Target, byte[] Buffer, uint Length)
+		{
+			Send(Target, Buffer, 0, Length);
+		}
+
+		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length)
+		{
+			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+
+			buffer.WriteBytes(Buffer, Index, Length);
+
+			AddSendCommand(Target, buffer);
+		}
+
+		protected virtual void AddSendCommand(Client Client, BufferStream Buffer)
+		{
+			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
 		}
 
 		protected override void AcceptClients()
@@ -163,6 +183,32 @@ namespace GameFramework.Networking
 
 				for (int i = 0; i < disconnectedClients.Count; ++i)
 					clients.Remove(disconnectedClients[i]);
+			}
+		}
+
+		protected override void HandleIncommingBuffer(Client Client, BufferStream Buffer)
+		{
+			byte control = Buffer.ReadByte();
+
+			double time = Time.CurrentEpochTime;
+
+			Client.UpdateLastTouchTime(time);
+
+			if (control == Constants.Control.BUFFER)
+			{
+				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
+
+				ProcessReceivedBuffer(Client, buffer);
+			}
+			else if (control == Constants.Control.PING)
+			{
+				double sendTime = Buffer.ReadFloat64();
+
+				Client.UpdateLatency((uint)((time - sendTime) * 1000));
+
+				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
+
+				AddSendCommand(Client, pingBuffer);
 			}
 		}
 

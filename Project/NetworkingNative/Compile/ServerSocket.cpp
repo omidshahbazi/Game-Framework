@@ -55,56 +55,11 @@ namespace GameFramework::Networking
 		RunSenndThread();
 	}
 
-	void ServerSocket::Send(const Client* Target, byte* const Buffer, uint32_t Length)
-	{
-		Send(Target, Buffer, 0, Length);
-	}
-
-	void ServerSocket::Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length)
-	{
-		BufferStream buffer = Constants::Packet::CreateOutgoingBufferStream(Length);
-
-		buffer.WriteBytes(Buffer, Index, Length);
-
-		AddSendCommand(const_cast<Client*>(Target), buffer);
-	}
-
-	void ServerSocket::AddSendCommand(Client* Target, const BufferStream& Buffer)
-	{
-		BaseSocket::AddSendCommand(new ServerSendCommand(Target, Buffer, GetTimestamp()));
-	}
-
 	void ServerSocket::Receive(void)
 	{
 		AcceptClients();
 
 		ReadFromClients();
-	}
-
-	void ServerSocket::HandleIncommingBuffer(Client* Client, BufferStream& Buffer)
-	{
-		byte control = Buffer.ReadByte();
-
-		double time = Time::GetCurrentEpochTime();
-
-		Client->UpdateLastTouchTime(time);
-
-		if (control == Constants::Control::BUFFER)
-		{
-			BufferStream buffer = Constants::Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
-
-			ProcessReceivedBuffer(Client, buffer);
-		}
-		else if (control == Constants::Control::PING)
-		{
-			double sendTime = Buffer.ReadFloat64();
-
-			Client->UpdateLatency(abs(time - sendTime) * 1000);
-
-			BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
-
-			SendOverSocket(Client, pingBuffer);
-		}
 	}
 
 	void ServerSocket::ProcessEvent(EventBase* Event)

@@ -1,6 +1,9 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\TCPServerSocket.h"
 #include "..\Include\Constants.h"
+#include <Timing\Time.h>
+
+using namespace GameFramework::Common::Timing;
 
 namespace GameFramework::Networking
 {
@@ -26,16 +29,30 @@ namespace GameFramework::Networking
 		ServerSocket::DisconnectClient(Client);
 	}
 
-	void TCPServerSocket::SendOverSocket(Client* Client, const BufferStream& Buffer)
-	{
-		BaseSocket::SendOverSocket(reinterpret_cast<TCPClient*>(Client)->GetSocket(), Buffer);
-	}
-
 	void TCPServerSocket::Listen(void)
 	{
 		SocketUtilities::Listen(GetSocket(), m_MaxConnection);
 
 		ServerSocket::Listen();
+	}
+
+	void TCPServerSocket::Send(const Client* Target, byte* const Buffer, uint32_t Length)
+	{
+		Send(Target, Buffer, 0, Length);
+	}
+
+	void TCPServerSocket::Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length)
+	{
+		BufferStream buffer = Constants::Packet::CreateOutgoingBufferStream(Length);
+
+		buffer.WriteBytes(Buffer, Index, Length);
+
+		AddSendCommand(const_cast<Client*>(Target), buffer);
+	}
+
+	void TCPServerSocket::AddSendCommand(Client* Target, const BufferStream& Buffer)
+	{
+		BaseSocket::AddSendCommand(new ServerSendCommand(Target, Buffer, GetTimestamp()));
 	}
 
 	void TCPServerSocket::AcceptClients(void)
@@ -133,6 +150,32 @@ namespace GameFramework::Networking
 			m_Clients.remove(client);
 
 			HandleClientDisconnection(client);
+		}
+	}
+
+	void TCPServerSocket::HandleIncommingBuffer(Client* Client, BufferStream& Buffer)
+	{
+		byte control = Buffer.ReadByte();
+
+		double time = Time::GetCurrentEpochTime();
+
+		Client->UpdateLastTouchTime(time);
+
+		if (control == Constants::Control::BUFFER)
+		{
+			BufferStream buffer = Constants::Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
+
+			ProcessReceivedBuffer(Client, buffer);
+		}
+		else if (control == Constants::Control::PING)
+		{
+			double sendTime = Buffer.ReadFloat64();
+
+			Client->UpdateLatency(abs(time - sendTime) * 1000);
+
+			BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
+
+			AddSendCommand(Client, pingBuffer);
 		}
 	}
 

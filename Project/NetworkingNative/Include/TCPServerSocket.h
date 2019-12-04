@@ -52,12 +52,18 @@ namespace GameFramework::Networking
 
 		virtual void Listen(void) override;
 
+		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Length);
+
+		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length);
+
 	protected:
-		void SendOverSocket(Client* Client, const BufferStream& Buffer) override;
+		virtual void AddSendCommand(Client* Target, const BufferStream& Buffer);
 
 		virtual void AcceptClients(void);
 
 		virtual void ReadFromClients(void);
+
+		void HandleIncommingBuffer(Client* Client, BufferStream& Buffer);
 
 		bool HandleSendCommand(SendCommand* Command) override;
 
