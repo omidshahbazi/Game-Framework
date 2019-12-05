@@ -83,9 +83,9 @@ namespace GameFramework.Networking
 
 		public static IPAddress ResolveDomain(string Domain)
 		{
-			IPAddress ip;
-			if (IPAddress.TryParse(Domain, out ip))
-				return ip;
+			//IPAddress ip;
+			//if (IPAddress.TryParse(Domain, out ip))
+			//	return ip;
 
 			try
 			{
@@ -114,33 +114,40 @@ namespace GameFramework.Networking
 			return IPAddress.Parse("::ffff:" + IP.ToString());
 		}
 
-		public static int FindOptimumMTU(IPAddress Address, uint MaxMTU)
+		public static uint FindOptimumMTU(IPAddress IP, uint MaxMTU)
 		{
+			IP = ResolveDomain(IP.ToString());
+
 			Ping ping = new Ping();
 
 			PingOptions options = new PingOptions();
 			options.DontFragment = true;
 
-			List<byte> bytesList = new List<byte>((int)MaxMTU + 1);
+			List<byte> bytesList = new List<byte>((int)MaxMTU);
 			for (uint i = 0; i < bytesList.Capacity; ++i)
 				bytesList.Add((byte)(i % 255));
 
 			PingReply reply = null;
 			do
 			{
-				bytesList.RemoveAt(0);
-
-				reply = ping.Send(Address, 1000, bytesList.ToArray(), options);
+				reply = ping.Send(IP, 1000, bytesList.ToArray(), options);
 
 				if (reply == null)
-					return -1;
+					throw new PingException("Finding optimum MTU failed");
 
-				if (reply.Status == IPStatus.Success && reply.Options.DontFragment)
+				if (reply.Status == IPStatus.Success)
 					break;
 
-			} while (true);
+				bytesList.RemoveAt(0);
 
-			return bytesList.Count;
+				if (reply.Status == IPStatus.PacketTooBig)
+					continue;
+
+				throw new PingException("Finding optimum MTU failed with error " + reply.Status.ToString());
+
+			} while (bytesList.Count != 0);
+
+			return (uint)bytesList.Count;
 		}
 	}
 }

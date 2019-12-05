@@ -64,7 +64,7 @@ namespace GameFramework.Networking
 		public double LastTouchTime
 		{
 			get;
-			private set;
+			protected set;
 		}
 
 		public uint Latency
@@ -117,31 +117,7 @@ namespace GameFramework.Networking
 			Shutdown();
 		}
 
-		public virtual void Send(byte[] Buffer)
-		{
-			Send(Buffer, 0, (uint)Buffer.Length);
-		}
-
-		public virtual void Send(byte[] Buffer, uint Length)
-		{
-			Send(Buffer, 0, Length);
-		}
-
-		public virtual void Send(byte[] Buffer, uint Index, uint Length)
-		{
-			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
-
-			buffer.WriteBytes(Buffer, Index, Length);
-
-			SendInternal(buffer);
-		}
-
 		protected abstract void ConnectInternal(IPEndPoint EndPoint);
-
-		protected virtual void SendInternal(BufferStream Buffer)
-		{
-			AddSendCommand(new SendCommand(Buffer, Timestamp));
-		}
 
 		protected override void Receive()
 		{
@@ -189,40 +165,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		protected virtual void HandleIncommingBuffer(BufferStream Buffer)
-		{
-			double time = Time.CurrentEpochTime;
-
-			LastTouchTime = time;
-
-			byte control = Buffer.ReadByte();
-
-			if (control == Constants.Control.BUFFER)
-			{
-				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
-
-				ProcessReceivedBuffer(buffer);
-			}
-			else if (control == Constants.Control.CONNECTION)
-			{
-				IsConnected = true;
-
-				RaiseOnConnectedEvent();
-			}
-			else if (control == Constants.Control.PING)
-			{
-				double sendTime = Buffer.ReadFloat64();
-
-				Latency = (uint)((time - sendTime) * 1000);
-
-				double t0 = lastPingTime;
-				double t1 = sendTime;
-				double t2 = sendTime;
-				double t3 = time;
-
-				timeOffset = ((t1 - t0) + (t2 - t3)) / 2;
-			}
-		}
+		protected abstract void HandleIncommingBuffer(BufferStream Buffer);
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
@@ -311,6 +254,22 @@ namespace GameFramework.Networking
 			{
 				AddEvent(new ConnectionFailedEvent());
 			}
+		}
+
+		protected void HandlePingPacket(BufferStream Buffer)
+		{
+			double time = Time.CurrentEpochTime;
+
+			double sendTime = Buffer.ReadFloat64();
+
+			Latency = (uint)((time - sendTime) * 1000);
+
+			double t0 = lastPingTime;
+			double t1 = sendTime;
+			double t2 = sendTime;
+			double t3 = time;
+
+			timeOffset = ((t1 - t0) + (t2 - t3)) / 2;
 		}
 
 		private void SendPing()

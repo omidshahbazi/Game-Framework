@@ -618,7 +618,7 @@ namespace GameFramework::Networking
 		PADDRINFOA queryResult;
 		int32_t result = getaddrinfo(Domain.c_str(), "", &hintInfo, &queryResult);
 		if (result != 0)
-			throw std::exception("Invalid Domain");
+			throw SocketException("Invalid Domain");
 
 		for (addrinfo* ptr = queryResult; ptr != NULL; ptr = ptr->ai_next)
 		{

@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using GameFramework.BinarySerializer;
+using GameFramework.Common.Timing;
 
 namespace GameFramework.Networking
 {
@@ -9,6 +10,30 @@ namespace GameFramework.Networking
 	{
 		public TCPClientSocket() : base(Protocols.TCP)
 		{
+		}
+
+		public virtual void Send(byte[] Buffer)
+		{
+			Send(Buffer, 0, (uint)Buffer.Length);
+		}
+
+		public virtual void Send(byte[] Buffer, uint Length)
+		{
+			Send(Buffer, 0, Length);
+		}
+
+		public virtual void Send(byte[] Buffer, uint Index, uint Length)
+		{
+			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+
+			buffer.WriteBytes(Buffer, Index, Length);
+
+			SendInternal(buffer);
+		}
+
+		protected virtual void SendInternal(BufferStream Buffer)
+		{
+			AddSendCommand(new SendCommand(Buffer, Timestamp));
 		}
 
 		protected override void ConnectInternal(IPEndPoint EndPoint)
@@ -22,6 +47,26 @@ namespace GameFramework.Networking
 				return;
 
 			base.Receive();
+		}
+
+		protected override void HandleIncommingBuffer(BufferStream Buffer)
+		{
+			double time = Time.CurrentEpochTime;
+
+			LastTouchTime = time;
+
+			byte control = Buffer.ReadByte();
+
+			if (control == Constants.Control.BUFFER)
+			{
+				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
+
+				ProcessReceivedBuffer(buffer);
+			}
+			else if (control == Constants.Control.PING)
+			{
+				HandlePingPacket(Buffer);
+			}
 		}
 
 		protected override void ProcessReceivedBuffer(BufferStream Buffer)

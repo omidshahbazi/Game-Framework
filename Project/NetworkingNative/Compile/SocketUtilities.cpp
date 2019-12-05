@@ -154,7 +154,7 @@ namespace GameFramework::Networking
 	IPAddress SocketUtilities::MapIPv4ToIPv6(IPAddress IP)
 	{
 		if (IP.GetAddressFamily() != PlatformNetwork::AddressFamilies::InterNetwork)
-			throw exception("IP must be v4");
+			throw PlatformNetwork::SocketException("IP must be v4");
 
 		return ResolveDomain("::ffff:" + IP.GetIP());
 	}

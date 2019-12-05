@@ -6,7 +6,7 @@ namespace ClientNetworkingManagedTest
 {
 	class Program
 	{
-		private static ClientSocket client = null;
+		private static UDPClientSocket client = null;
 
 		static void Main(string[] args)
 		{
@@ -65,7 +65,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			//client.Send(new byte[] { 10, 22, 16 });
+			client.Send(new byte[] { 10, 22, 16 });
 		}
 
 		private static void Client_OnConnectionFailed()

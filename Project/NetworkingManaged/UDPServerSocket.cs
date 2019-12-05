@@ -19,9 +19,47 @@ namespace GameFramework.Networking
 				get { return endPoint; }
 			}
 
+			public bool IsConnected
+			{
+				get;
+				private set;
+			}
+
+			public uint MTU
+			{
+				get;
+				private set;
+			}
+
+			public uint BandwidthInFromLastSecond
+			{
+				get;
+				private set;
+			}
+
 			public UDPClient(IPEndPoint EndPoint)
 			{
 				endPoint = EndPoint;
+			}
+
+			public void SetIsConnected(bool Value)
+			{
+				IsConnected = Value;
+			}
+
+			public void UpdateMTU(uint MTU)
+			{
+				this.MTU = MTU;
+			}
+
+			public void AddBandwidthInFromLastSecond(uint Count)
+			{
+				BandwidthInFromLastSecond += Count;
+			}
+
+			public void ResetBandwidthInFromLastSecond()
+			{
+				BandwidthInFromLastSecond = 0;
 			}
 		}
 
@@ -31,8 +69,24 @@ namespace GameFramework.Networking
 		private class ClientMap : Dictionary<int, UDPClient>
 		{ }
 
+		protected class UDPServerSendCommand : ServerSendCommand
+		{
+			public bool Reliable
+			{
+				get;
+				private set;
+			}
+
+			public UDPServerSendCommand(Client Client, BufferStream Buffer, double SendTime, bool Reliable) : base(Client, Buffer, SendTime)
+			{
+				this.Reliable = Reliable;
+			}
+		}
+
 		private UDPClientList clients = null;
 		private ClientMap clientsMap = null;
+
+		private long lastBandwidthInCheck = 0;
 
 		public override Client[] Clients
 		{
@@ -43,10 +97,20 @@ namespace GameFramework.Networking
 			}
 		}
 
+		public uint PacketRate
+		{
+			get;
+			set;
+		}
+
 		public UDPServerSocket() : base(Protocols.UDP)
 		{
 			clients = new UDPClientList();
 			clientsMap = new ClientMap();
+
+			PacketRate = Constants.DEFAULT_PACKET_RATE;
+
+			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
 		}
 
 		public virtual void Send(Client Target, byte[] Buffer, bool Reliable = true)
@@ -70,7 +134,7 @@ namespace GameFramework.Networking
 
 		protected virtual void AddSendCommand(Client Client, BufferStream Buffer, bool Reliable)
 		{
-			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
+			AddSendCommand(new UDPServerSendCommand(Client, Buffer, Timestamp, Reliable));
 		}
 
 		protected override void AcceptClients()
@@ -98,8 +162,7 @@ namespace GameFramework.Networking
 
 				UDPClient client = GetOrAddClient(ipEndPoint);
 
-				lock (clients)
-					clients.Add(client);
+				client.AddBandwidthInFromLastSecond((uint)size);
 
 				ProcessReceivedBuffer(client, (uint)size);
 			}
@@ -130,6 +193,34 @@ namespace GameFramework.Networking
 			{
 				throw e;
 			}
+
+			if (Time.CurrentEpochTime - lastBandwidthInCheck >= 1)
+			{
+				lock (clients)
+					for (int i = 0; i < clients.Count; ++i)
+					{
+						UDPClient client = clients[i];
+
+						if (!client.IsConnected)
+							continue;
+
+						if (client.BandwidthInFromLastSecond <= PacketRate)
+						{
+							client.ResetBandwidthInFromLastSecond();
+
+							continue;
+						}
+
+						int hash = GetIPEndPointHash(client.EndPoint);
+
+						clients.Remove(client);
+						clientsMap.Remove(hash);
+
+						HandleClientDisconnection(client);
+					}
+
+				lastBandwidthInCheck = (long)Time.CurrentEpochTime;
+			}
 		}
 
 		protected override void HandleIncommingBuffer(Client Client, BufferStream Buffer)
@@ -140,20 +231,36 @@ namespace GameFramework.Networking
 
 			Client.UpdateLastTouchTime(time);
 
+			UDPClient client = (UDPClient)Client;
+
 			if (control == Constants.Control.BUFFER)
 			{
+				if (!client.IsConnected)
+					return;
+
 				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(Client, buffer);
 			}
-			else if (control == Constants.Control.CONNECTION)
+			else if (control == Constants.Control.HANDSHAKE)
 			{
-				BufferStream buffer = Constants.Packet.CreateConnectionBufferStream();
+				client.SetIsConnected(true);
+
+				uint mtu = Buffer.ReadUInt32();
+				client.UpdateMTU(mtu);
+
+				lock (clients)
+					clients.Add(client);
+
+				BufferStream buffer = Constants.Packet.CreateHandshakeBackBufferStream(PacketRate);
 
 				AddSendCommand(Client, buffer, false);
 			}
 			else if (control == Constants.Control.PING)
 			{
+				if (!client.IsConnected)
+					return;
+
 				double sendTime = Buffer.ReadFloat64();
 
 				Client.UpdateLatency((uint)((time - sendTime) * 1000));
@@ -166,13 +273,14 @@ namespace GameFramework.Networking
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
-			ServerSendCommand sendCommand = (ServerSendCommand)Command;
+			UDPServerSendCommand sendCommand = (UDPServerSendCommand)Command;
 			UDPClient client = (UDPClient)sendCommand.Client;
 
 			if (!client.IsReady)
 				return false;
 
-			SendOverSocket(client.EndPoint, Command.Buffer);
+			//if (sendCommand.Reliable)
+				SendOverSocket(client.EndPoint, Command.Buffer);
 
 			return true;
 		}

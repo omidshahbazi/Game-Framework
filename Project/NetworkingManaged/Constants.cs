@@ -12,7 +12,8 @@ namespace GameFramework.Networking
 			public const int SIZE = sizeof(byte);
 
 			public const byte BUFFER = 1;
-			public const byte CONNECTION = 2;
+			public const byte HANDSHAKE = 2;
+			public const byte HANDSHAKE_BACK = 2;
 			public const byte PING = 3;
 		}
 
@@ -38,14 +39,28 @@ namespace GameFramework.Networking
 				return new BufferStream(Buffer, HEADER_SIZE, (uint)(Buffer.Length - HEADER_SIZE));
 			}
 
-			public static BufferStream CreateConnectionBufferStream()
+			public static BufferStream CreateHandshakeBufferStream(uint MTU)
 			{
-				uint length = HEADER_SIZE;
+				uint length = HEADER_SIZE + sizeof(uint);
 
 				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
 				buffer.ResetWrite();
 				buffer.WriteUInt32(length);
-				buffer.WriteBytes(Control.CONNECTION);
+				buffer.WriteBytes(Control.HANDSHAKE);
+				buffer.WriteUInt32(MTU);
+
+				return buffer;
+			}
+
+			public static BufferStream CreateHandshakeBackBufferStream(uint PacketRate)
+			{
+				uint length = HEADER_SIZE + sizeof(uint);
+
+				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
+				buffer.ResetWrite();
+				buffer.WriteUInt32(length);
+				buffer.WriteBytes(Control.HANDSHAKE_BACK);
+				buffer.WriteUInt32(PacketRate);
 
 				return buffer;
 			}
@@ -72,6 +87,10 @@ namespace GameFramework.Networking
 		// https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.ttl?view=netframework-4.8#System_Net_Sockets_Socket_Ttl
 		public const ushort TIME_TO_LIVE = 64;
 		public const float PING_TIME = 5;
+
+		public const uint UDP_MAX_MTU = 1500;
+
+		public const uint DEFAULT_PACKET_RATE = 1024;
 
 		public static readonly Random Random = new Random();
 	}
