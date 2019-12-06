@@ -65,7 +65,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			client.Send(new byte[] { 10, 22, 16, 10, 22, 16, 10, 22, 16, 10 });
+			client.Send(new byte[] { 10, 22, 16, 10, 22, 16, 10 });
 		}
 
 		private static void Client_OnConnectionFailed()

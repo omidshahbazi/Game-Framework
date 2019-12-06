@@ -279,7 +279,6 @@ namespace GameFramework.Networking
 			if (!client.IsReady)
 				return false;
 
-			//if (sendCommand.Reliable)
 			SendOverSocket(client.EndPoint, Command.Buffer);
 
 			return true;
@@ -287,7 +286,14 @@ namespace GameFramework.Networking
 
 		protected override void ProcessReceivedBuffer(Client Sender, BufferStream Buffer)
 		{
-			HandleReceivedBuffer(Sender, Buffer);
+			bool isReliable = Buffer.ReadBool();
+			ulong id = Buffer.ReadUInt64();
+			ushort count = Buffer.ReadUInt16();
+			ushort index = Buffer.ReadUInt16();
+
+			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
+
+			HandleReceivedBuffer(Sender, buffer);
 		}
 
 		private UDPClient GetOrAddClient(IPEndPoint EndPoint)

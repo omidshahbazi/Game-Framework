@@ -15,6 +15,11 @@ namespace GameFramework.Networking
 			public const byte PING = 3;
 		}
 
+		public static class UDP
+		{
+			public const uint PACKET_HEADER_SIZE = sizeof(bool) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort);
+		}
+
 		public const uint RECEIVE_TIMEOUT = 1;
 		public const uint SEND_TIMEOUT = 1;
 		public const uint RECEIVE_BUFFER_SIZE = 8 * 1024;

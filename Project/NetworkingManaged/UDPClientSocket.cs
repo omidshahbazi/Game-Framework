@@ -1,4 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using System;
 using System.Net;
 using GameFramework.BinarySerializer;
 using GameFramework.Common.Timing;
@@ -7,19 +8,7 @@ namespace GameFramework.Networking
 {
 	public class UDPClientSocket : ClientSocket
 	{
-		private class UDPSendCommand : SendCommand
-		{
-			public bool Reliable
-			{
-				get;
-				private set;
-			}
-
-			public UDPSendCommand(BufferStream Buffer, double SendTimme, bool Reliable) : base(Buffer, SendTimme)
-			{
-				this.Reliable = Reliable;
-			}
-		}
+		private ulong lastPacketID;
 
 		public uint MTU
 		{
@@ -49,16 +38,17 @@ namespace GameFramework.Networking
 
 		public virtual void Send(byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			BufferStream buffer = Packet.CreateOutgoingBufferStream(Length);
+			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(lastPacketID, Buffer, Index, Length, MTU, Reliable);
 
-			buffer.WriteBytes(Buffer, Index, Length);
+			for (ushort i = 0; i < packet.Buffers.Length; ++i)
+				SendInternal(packet.Buffers[i]);
 
-			SendInternal(buffer, Reliable);
+			++lastPacketID;
 		}
 
-		protected virtual void SendInternal(BufferStream Buffer, bool Reliable)
+		protected virtual void SendInternal(BufferStream Buffer)
 		{
-			AddSendCommand(new UDPSendCommand(Buffer, Timestamp, Reliable));
+			AddSendCommand(new SendCommand(Buffer, Timestamp));
 		}
 
 		protected override void ConnectInternal(IPEndPoint EndPoint)
@@ -66,10 +56,10 @@ namespace GameFramework.Networking
 			Socket.Connect(EndPoint);
 
 			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, Constants.UDP_MAX_MTU);
-			MTU = 5;  //TODO: it's just a hack to test
+			MTU = 17;  //TODO: it's just a hack to test
 
 			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
-			AddSendCommand(new UDPSendCommand(buffer, Timestamp, false));
+			AddSendCommand(new SendCommand(buffer, Timestamp));
 
 			RunReceiveThread();
 			RunSenndThread();
@@ -103,25 +93,6 @@ namespace GameFramework.Networking
 			{
 				HandlePingPacket(Buffer);
 			}
-		}
-
-		protected override bool HandleSendCommand(SendCommand Command)
-		{
-			if (!SocketUtilities.GetIsReady(Socket))
-				return false;
-
-			UDPSendCommand sendCommand = (UDPSendCommand)Command;
-
-
-
-			if (sendCommand.Reliable)
-			{
-
-			}
-
-			SendOverSocket(Socket, sendCommand.Buffer);
-
-			return true;
 		}
 
 		protected override void ProcessReceivedBuffer(BufferStream Buffer)

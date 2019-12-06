@@ -1,10 +1,11 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
 using GameFramework.Common.Timing;
+using System;
 
 namespace GameFramework.Networking
 {
-	public static class Packet
+	static class Packet
 	{
 		public const uint PACKET_SIZE_SIZE = sizeof(uint);
 		public const uint HEADER_SIZE = Constants.Control.SIZE;
@@ -66,7 +67,7 @@ namespace GameFramework.Networking
 		}
 	}
 
-	public class RUDPPacket
+	class IncommingRUDPPacket
 	{
 		public ulong ID
 		{
@@ -92,7 +93,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		public RUDPPacket(ulong ID, uint Count)
+		public IncommingRUDPPacket(ulong ID, uint Count)
 		{
 			this.ID = ID;
 
@@ -115,6 +116,73 @@ namespace GameFramework.Networking
 				buffer.WriteBytes(Buffers[i].Buffer);
 
 			return buffer;
+		}
+	}
+
+	class OutgoingRUDPPacket
+	{
+		public ulong ID
+		{
+			get;
+			private set;
+		}
+
+		public BufferStream[] Buffers
+		{
+			get;
+			private set;
+		}
+
+		public bool IsCompleted
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public OutgoingRUDPPacket(ulong ID, ushort Count)
+		{
+			this.ID = ID;
+
+			Buffers = new BufferStream[Count];
+		}
+
+		public void SetBuffer(ushort Index, BufferStream Buffer)
+		{
+			if (Buffers[Index] != null)
+				return;
+
+			Buffers[Index] = Buffer;
+		}
+
+		public static OutgoingRUDPPacket Create(ulong ID, byte[] Buffer, uint Index, uint Length, uint MTU, bool Reliable)
+		{
+			if (Constants.UDP.PACKET_HEADER_SIZE >= MTU)
+				throw new Exception("PACKET_HEADER_SIZE [" + Constants.UDP.PACKET_HEADER_SIZE + "] is greater than or equal to MTU [" + MTU + "]");
+
+			uint mtu = MTU - Constants.UDP.PACKET_HEADER_SIZE;
+
+			ushort sliceCount = (ushort)Math.Ceiling(Length / (float)mtu);
+
+			OutgoingRUDPPacket pakcet = new OutgoingRUDPPacket(ID, sliceCount);
+
+			for (ushort i = 0; i < sliceCount; ++i)
+			{
+				uint index = Index + (i * mtu);
+				uint length = (uint)Math.Min(MTU, Length - (i * mtu));
+
+				BufferStream buffer = Packet.CreateOutgoingBufferStream(Constants.UDP.PACKET_HEADER_SIZE + length);
+				buffer.WriteBool(Reliable);
+				buffer.WriteUInt64(ID);
+				buffer.WriteUInt16(sliceCount);
+				buffer.WriteUInt16(i);
+				buffer.WriteBytes(Buffer, index, length);
+
+				pakcet.SetBuffer(i, buffer);
+			}
+
+			return pakcet;
 		}
 	}
 }
