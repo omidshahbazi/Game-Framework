@@ -125,7 +125,7 @@ namespace GameFramework.Networking
 
 		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+			BufferStream buffer = Packet.CreateOutgoingBufferStream(Length);
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
@@ -238,7 +238,7 @@ namespace GameFramework.Networking
 				if (!client.IsConnected)
 					return;
 
-				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(Client, buffer);
 			}
@@ -252,7 +252,7 @@ namespace GameFramework.Networking
 				lock (clients)
 					clients.Add(client);
 
-				BufferStream buffer = Constants.Packet.CreateHandshakeBackBufferStream(PacketRate);
+				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(PacketRate);
 
 				AddSendCommand(Client, buffer, false);
 			}
@@ -265,7 +265,7 @@ namespace GameFramework.Networking
 
 				Client.UpdateLatency((uint)((time - sendTime) * 1000));
 
-				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
+				BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
 				AddSendCommand(Client, pingBuffer, false);
 			}
@@ -280,7 +280,7 @@ namespace GameFramework.Networking
 				return false;
 
 			//if (sendCommand.Reliable)
-				SendOverSocket(client.EndPoint, Command.Buffer);
+			SendOverSocket(client.EndPoint, Command.Buffer);
 
 			return true;
 		}

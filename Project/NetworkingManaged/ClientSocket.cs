@@ -145,7 +145,7 @@ namespace GameFramework.Networking
 				{
 					uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
-					index += Constants.Packet.PACKET_SIZE_SIZE;
+					index += Packet.PACKET_SIZE_SIZE;
 
 					HandleIncommingBuffer(new BufferStream(ReceiveBuffer, index, packetSize));
 
@@ -274,7 +274,7 @@ namespace GameFramework.Networking
 
 		private void SendPing()
 		{
-			BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
+			BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
 			lastPingTime = Time.CurrentEpochTime;
 

@@ -1,5 +1,6 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\TCPServerSocket.h"
+#include "..\Include\Packet.h"
 #include "..\Include\Constants.h"
 #include <Timing\Time.h>
 
@@ -43,7 +44,7 @@ namespace GameFramework::Networking
 
 	void TCPServerSocket::Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length)
 	{
-		BufferStream buffer = Constants::Packet::CreateOutgoingBufferStream(Length);
+		BufferStream buffer = Packet::CreateOutgoingBufferStream(Length);
 
 		buffer.WriteBytes(Buffer, Index, Length);
 
@@ -117,7 +118,7 @@ namespace GameFramework::Networking
 				{
 					uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
 
-					index += Constants::Packet::PACKET_SIZE_SIZE;
+					index += Packet::PACKET_SIZE_SIZE;
 
 					BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
 
@@ -163,7 +164,7 @@ namespace GameFramework::Networking
 
 		if (control == Constants::Control::BUFFER)
 		{
-			BufferStream buffer = Constants::Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
+			BufferStream buffer = Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
 
 			ProcessReceivedBuffer(Client, buffer);
 		}
@@ -173,7 +174,7 @@ namespace GameFramework::Networking
 
 			Client->UpdateLatency(abs(time - sendTime) * 1000);
 
-			BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
+			BufferStream pingBuffer = Packet::CreatePingBufferStream();
 
 			AddSendCommand(Client, pingBuffer);
 		}

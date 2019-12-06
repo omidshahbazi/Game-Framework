@@ -143,7 +143,7 @@ namespace GameFramework.Networking
 			{
 				uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
-				index += Constants.Packet.PACKET_SIZE_SIZE;
+				index += Packet.PACKET_SIZE_SIZE;
 
 				HandleIncommingBuffer(Client, new BufferStream(ReceiveBuffer, index, packetSize));
 

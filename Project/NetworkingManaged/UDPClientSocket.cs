@@ -49,7 +49,7 @@ namespace GameFramework.Networking
 
 		public virtual void Send(byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+			BufferStream buffer = Packet.CreateOutgoingBufferStream(Length);
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
@@ -66,8 +66,9 @@ namespace GameFramework.Networking
 			Socket.Connect(EndPoint);
 
 			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, Constants.UDP_MAX_MTU);
+			MTU = 5;  //TODO: it's just a hack to test
 
-			BufferStream buffer = Constants.Packet.CreateHandshakeBufferStream(MTU);
+			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
 			AddSendCommand(new UDPSendCommand(buffer, Timestamp, false));
 
 			RunReceiveThread();
@@ -86,7 +87,7 @@ namespace GameFramework.Networking
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(buffer);
 			}
@@ -110,6 +111,8 @@ namespace GameFramework.Networking
 				return false;
 
 			UDPSendCommand sendCommand = (UDPSendCommand)Command;
+
+
 
 			if (sendCommand.Reliable)
 			{

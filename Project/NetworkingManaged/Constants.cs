@@ -1,6 +1,4 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using GameFramework.BinarySerializer;
-using GameFramework.Common.Timing;
 using GameFramework.Common.Utilities;
 
 namespace GameFramework.Networking
@@ -15,68 +13,6 @@ namespace GameFramework.Networking
 			public const byte HANDSHAKE = 2;
 			public const byte HANDSHAKE_BACK = 2;
 			public const byte PING = 3;
-		}
-
-		public static class Packet
-		{
-			public const uint PACKET_SIZE_SIZE = sizeof(uint);
-			public const uint HEADER_SIZE = Control.SIZE;
-
-			public static BufferStream CreateOutgoingBufferStream(uint Length)
-			{
-				uint length = HEADER_SIZE + Length;
-
-				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.ResetWrite();
-				buffer.WriteUInt32(length);
-				buffer.WriteBytes(Control.BUFFER);
-
-				return buffer;
-			}
-
-			public static BufferStream CreateIncommingBufferStream(byte[] Buffer)
-			{
-				return new BufferStream(Buffer, HEADER_SIZE, (uint)(Buffer.Length - HEADER_SIZE));
-			}
-
-			public static BufferStream CreateHandshakeBufferStream(uint MTU)
-			{
-				uint length = HEADER_SIZE + sizeof(uint);
-
-				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.ResetWrite();
-				buffer.WriteUInt32(length);
-				buffer.WriteBytes(Control.HANDSHAKE);
-				buffer.WriteUInt32(MTU);
-
-				return buffer;
-			}
-
-			public static BufferStream CreateHandshakeBackBufferStream(uint PacketRate)
-			{
-				uint length = HEADER_SIZE + sizeof(uint);
-
-				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.ResetWrite();
-				buffer.WriteUInt32(length);
-				buffer.WriteBytes(Control.HANDSHAKE_BACK);
-				buffer.WriteUInt32(PacketRate);
-
-				return buffer;
-			}
-
-			public static BufferStream CreatePingBufferStream()
-			{
-				uint length = HEADER_SIZE + sizeof(double);
-
-				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.ResetWrite();
-				buffer.WriteUInt32(length);
-				buffer.WriteBytes(Control.PING);
-				buffer.WriteFloat64(Time.CurrentEpochTime);
-
-				return buffer;
-			}
 		}
 
 		public const uint RECEIVE_TIMEOUT = 1;

@@ -51,6 +51,9 @@
     <ClInclude Include="Include\UDPServerSocket.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Packet.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Constants.cpp">
@@ -84,6 +87,9 @@
       <Filter>Compile</Filter>
     </ClCompile>
     <ClCompile Include="Compile\UDPServerSocket.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\Packet.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>

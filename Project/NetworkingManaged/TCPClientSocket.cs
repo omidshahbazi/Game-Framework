@@ -24,7 +24,7 @@ namespace GameFramework.Networking
 
 		public virtual void Send(byte[] Buffer, uint Index, uint Length)
 		{
-			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+			BufferStream buffer = Packet.CreateOutgoingBufferStream(Length);
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
@@ -59,7 +59,7 @@ namespace GameFramework.Networking
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(buffer);
 			}

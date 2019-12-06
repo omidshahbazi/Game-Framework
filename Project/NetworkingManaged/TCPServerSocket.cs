@@ -95,7 +95,7 @@ namespace GameFramework.Networking
 
 		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length)
 		{
-			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
+			BufferStream buffer = Packet.CreateOutgoingBufferStream(Length);
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
@@ -196,7 +196,7 @@ namespace GameFramework.Networking
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(Client, buffer);
 			}
@@ -206,7 +206,7 @@ namespace GameFramework.Networking
 
 				Client.UpdateLatency((uint)((time - sendTime) * 1000));
 
-				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
+				BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
 				AddSendCommand(Client, pingBuffer);
 			}
