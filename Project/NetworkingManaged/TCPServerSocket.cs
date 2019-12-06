@@ -99,10 +99,10 @@ namespace GameFramework.Networking
 
 			buffer.WriteBytes(Buffer, Index, Length);
 
-			AddSendCommand(Target, buffer);
+			SendInternal(Target, buffer);
 		}
 
-		protected virtual void AddSendCommand(Client Client, BufferStream Buffer)
+		protected virtual void SendInternal(Client Client, BufferStream Buffer)
 		{
 			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
 		}
@@ -208,7 +208,7 @@ namespace GameFramework.Networking
 
 				BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
-				AddSendCommand(Client, pingBuffer);
+				SendInternal(Client, pingBuffer);
 			}
 		}
 

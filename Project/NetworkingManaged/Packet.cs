@@ -170,7 +170,7 @@ namespace GameFramework.Networking
 			for (ushort i = 0; i < sliceCount; ++i)
 			{
 				uint index = Index + (i * mtu);
-				uint length = (uint)Math.Min(MTU, Length - (i * mtu));
+				uint length = (uint)Math.Min(mtu, Length - (i * mtu));
 
 				BufferStream buffer = Packet.CreateOutgoingBufferStream(Constants.UDP.PACKET_HEADER_SIZE + length);
 				buffer.WriteBool(Reliable);

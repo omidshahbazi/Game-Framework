@@ -25,6 +25,12 @@ namespace GameFramework.Networking
 				private set;
 			}
 
+			public ulong LastPacketID
+			{
+				get;
+				private set;
+			}
+
 			public uint MTU
 			{
 				get;
@@ -45,6 +51,11 @@ namespace GameFramework.Networking
 			public void SetIsConnected(bool Value)
 			{
 				IsConnected = Value;
+			}
+
+			public void IncreaseLastPacketID()
+			{
+				++LastPacketID;
 			}
 
 			public void UpdateMTU(uint MTU)
@@ -68,20 +79,6 @@ namespace GameFramework.Networking
 
 		private class ClientMap : Dictionary<int, UDPClient>
 		{ }
-
-		protected class UDPServerSendCommand : ServerSendCommand
-		{
-			public bool Reliable
-			{
-				get;
-				private set;
-			}
-
-			public UDPServerSendCommand(Client Client, BufferStream Buffer, double SendTime, bool Reliable) : base(Client, Buffer, SendTime)
-			{
-				this.Reliable = Reliable;
-			}
-		}
 
 		private UDPClientList clients = null;
 		private ClientMap clientsMap = null;
@@ -125,16 +122,19 @@ namespace GameFramework.Networking
 
 		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			BufferStream buffer = Packet.CreateOutgoingBufferStream(Length);
+			UDPClient client = (UDPClient)Target;
 
-			buffer.WriteBytes(Buffer, Index, Length);
+			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(client.LastPacketID, Buffer, Index, Length, client.MTU, Reliable);
 
-			AddSendCommand(Target, buffer, Reliable);
+			for (ushort i = 0; i < packet.Buffers.Length; ++i)
+				SendInternal(Target, packet.Buffers[i]);
+
+			client.IncreaseLastPacketID();
 		}
 
-		protected virtual void AddSendCommand(Client Client, BufferStream Buffer, bool Reliable)
+		protected virtual void SendInternal(Client Client, BufferStream Buffer)
 		{
-			AddSendCommand(new UDPServerSendCommand(Client, Buffer, Timestamp, Reliable));
+			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
 		}
 
 		protected override void AcceptClients()
@@ -254,7 +254,7 @@ namespace GameFramework.Networking
 
 				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(PacketRate);
 
-				AddSendCommand(Client, buffer, false);
+				SendInternal(Client, buffer);
 			}
 			else if (control == Constants.Control.PING)
 			{
@@ -267,13 +267,13 @@ namespace GameFramework.Networking
 
 				BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
-				AddSendCommand(Client, pingBuffer, false);
+				SendInternal(Client, pingBuffer);
 			}
 		}
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
-			UDPServerSendCommand sendCommand = (UDPServerSendCommand)Command;
+			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 			UDPClient client = (UDPClient)sendCommand.Client;
 
 			if (!client.IsReady)

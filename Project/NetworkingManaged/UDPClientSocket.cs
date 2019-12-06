@@ -1,8 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using System;
-using System.Net;
 using GameFramework.BinarySerializer;
 using GameFramework.Common.Timing;
+using System.Net;
 
 namespace GameFramework.Networking
 {
@@ -59,7 +58,7 @@ namespace GameFramework.Networking
 			MTU = 17;  //TODO: it's just a hack to test
 
 			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
-			AddSendCommand(new SendCommand(buffer, Timestamp));
+			SendInternal(buffer);
 
 			RunReceiveThread();
 			RunSenndThread();
