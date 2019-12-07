@@ -25,7 +25,19 @@ namespace GameFramework.Networking
 				private set;
 			}
 
-			public ulong LastPacketID
+			//public ulong LastIncommmingPacketID
+			//{
+			//	get;
+			//	private set;
+			//}
+
+			public IncommingPacketMap IncommingPacketsMap
+			{
+				get;
+				private set;
+			}
+
+			public ulong LastOutgoingPacketID
 			{
 				get;
 				private set;
@@ -46,6 +58,8 @@ namespace GameFramework.Networking
 			public UDPClient(IPEndPoint EndPoint)
 			{
 				endPoint = EndPoint;
+
+				IncommingPacketsMap = new IncommingPacketMap();
 			}
 
 			public void SetIsConnected(bool Value)
@@ -53,9 +67,27 @@ namespace GameFramework.Networking
 				IsConnected = Value;
 			}
 
-			public void IncreaseLastPacketID()
+			//public void SetLastIncommingPacketID(ulong ID)
+			//{
+			//	LastIncommmingPacketID = ID;
+			//}
+
+			public IncommingRUDPPacket GetIncommingPacket(ulong ID)
 			{
-				++LastPacketID;
+				if (IncommingPacketsMap.ContainsKey(ID))
+					return IncommingPacketsMap[ID];
+
+				return null;
+			}
+
+			public void AddIncommingPacket(IncommingRUDPPacket Packet)
+			{
+				IncommingPacketsMap[Packet.ID] = Packet;
+			}
+
+			public void IncreaseLastOutgoingPacketID()
+			{
+				++LastOutgoingPacketID;
 			}
 
 			public void UpdateMTU(uint MTU)
@@ -124,12 +156,12 @@ namespace GameFramework.Networking
 		{
 			UDPClient client = (UDPClient)Target;
 
-			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(client.LastPacketID, Buffer, Index, Length, client.MTU, Reliable);
+			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(client.LastOutgoingPacketID, Buffer, Index, Length, client.MTU, Reliable);
 
-			for (ushort i = 0; i < packet.Buffers.Length; ++i)
-				SendInternal(Target, packet.Buffers[i]);
+			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
+				SendInternal(Target, packet.SliceBuffers[i]);
 
-			client.IncreaseLastPacketID();
+			client.IncreaseLastOutgoingPacketID();
 		}
 
 		protected virtual void SendInternal(Client Client, BufferStream Buffer)
@@ -288,12 +320,30 @@ namespace GameFramework.Networking
 		{
 			bool isReliable = Buffer.ReadBool();
 			ulong id = Buffer.ReadUInt64();
-			ushort count = Buffer.ReadUInt16();
-			ushort index = Buffer.ReadUInt16();
+			ushort sliceCount = Buffer.ReadUInt16();
+			ushort sliceIndex = Buffer.ReadUInt16();
 
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
 
-			HandleReceivedBuffer(Sender, buffer);
+			if (!isReliable && sliceCount == 1)
+			{
+				HandleReceivedBuffer(Sender, buffer);
+				return;
+			}
+
+			UDPClient client = (UDPClient)Sender;
+
+			IncommingRUDPPacket packet = client.GetIncommingPacket(id);
+			if (packet == null)
+			{
+				packet = new IncommingRUDPPacket(id, sliceCount, isReliable);
+				client.AddIncommingPacket(packet);
+			}
+
+			packet.SetSliceBuffer(sliceIndex, buffer);
+
+			if (packet.IsCompleted)
+				HandleReceivedBuffer(Sender, packet.Combine());
 		}
 
 		private UDPClient GetOrAddClient(IPEndPoint EndPoint)

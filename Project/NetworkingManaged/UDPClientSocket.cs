@@ -7,7 +7,8 @@ namespace GameFramework.Networking
 {
 	public class UDPClientSocket : ClientSocket
 	{
-		private ulong lastPacketID;
+		private IncommingPacketMap incommingPacketsMap;
+		private ulong lastOutgoingPacketID;
 
 		public uint MTU
 		{
@@ -23,6 +24,7 @@ namespace GameFramework.Networking
 
 		public UDPClientSocket() : base(Protocols.UDP)
 		{
+			incommingPacketsMap = new IncommingPacketMap();
 		}
 
 		public virtual void Send(byte[] Buffer, bool Reliable = true)
@@ -37,12 +39,12 @@ namespace GameFramework.Networking
 
 		public virtual void Send(byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(lastPacketID, Buffer, Index, Length, MTU, Reliable);
+			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(lastOutgoingPacketID, Buffer, Index, Length, MTU, Reliable);
 
-			for (ushort i = 0; i < packet.Buffers.Length; ++i)
-				SendInternal(packet.Buffers[i]);
+			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
+				SendInternal(packet.SliceBuffers[i]);
 
-			++lastPacketID;
+			++lastOutgoingPacketID;
 		}
 
 		protected virtual void SendInternal(BufferStream Buffer)
@@ -96,7 +98,43 @@ namespace GameFramework.Networking
 
 		protected override void ProcessReceivedBuffer(BufferStream Buffer)
 		{
-			HandleReceivedBuffer(Buffer);
+			bool isReliable = Buffer.ReadBool();
+			ulong id = Buffer.ReadUInt64();
+			ushort sliceCount = Buffer.ReadUInt16();
+			ushort sliceIndex = Buffer.ReadUInt16();
+
+			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
+
+			if (!isReliable && sliceCount == 1)
+			{
+				HandleReceivedBuffer(buffer);
+				return;
+			}
+
+			IncommingRUDPPacket packet = GetIncommingPacket(id);
+			if (packet == null)
+			{
+				packet = new IncommingRUDPPacket(id, sliceCount, isReliable);
+				AddIncommingPacket(packet);
+			}
+
+			packet.SetSliceBuffer(sliceIndex, buffer);
+
+			if (packet.IsCompleted)
+				HandleReceivedBuffer(packet.Combine());
+		}
+
+		private IncommingRUDPPacket GetIncommingPacket(ulong ID)
+		{
+			if (incommingPacketsMap.ContainsKey(ID))
+				return incommingPacketsMap[ID];
+
+			return null;
+		}
+
+		private void AddIncommingPacket(IncommingRUDPPacket Packet)
+		{
+			incommingPacketsMap[Packet.ID] = Packet;
 		}
 	}
 }
