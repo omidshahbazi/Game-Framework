@@ -115,7 +115,7 @@ namespace GameFramework.Networking
 			if (packet == null)
 			{
 				packet = new IncommingRUDPPacket(id, sliceCount, isReliable);
-				AddIncommingPacket(packet);
+				incommingPacketsMap[packet.ID] = packet;
 			}
 
 			packet.SetSliceBuffer(sliceIndex, buffer);
@@ -130,11 +130,6 @@ namespace GameFramework.Networking
 				return incommingPacketsMap[ID];
 
 			return null;
-		}
-
-		private void AddIncommingPacket(IncommingRUDPPacket Packet)
-		{
-			incommingPacketsMap[Packet.ID] = Packet;
 		}
 	}
 }

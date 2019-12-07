@@ -60,6 +60,7 @@ namespace GameFramework.Networking
 				endPoint = EndPoint;
 
 				IncommingPacketsMap = new IncommingPacketMap();
+				LastOutgoingPacketID = 1;
 			}
 
 			public void SetIsConnected(bool Value)
@@ -270,7 +271,16 @@ namespace GameFramework.Networking
 			packet.SetSliceBuffer(sliceIndex, buffer);
 
 			if (packet.IsCompleted)
-				HandleReceivedBuffer(Sender, packet.Combine());
+			{
+				ulong prevID = 0;
+
+				var it = client.IncommingPacketsMap.GetEnumerator();
+				while (it.MoveNext())
+				{
+					//if (it.Current.Key)
+					HandleReceivedBuffer(Sender, packet.Combine());
+				}
+			}
 		}
 
 		private void ReadFromSocket()

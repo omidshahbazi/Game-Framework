@@ -160,7 +160,7 @@ namespace GameFramework.Networking
 		}
 	}
 
-	class IncommingPacketMap : Dictionary<ulong, IncommingRUDPPacket>
+	class IncommingPacketMap : SortedDictionary<ulong, IncommingRUDPPacket>
 	{ }
 
 	class OutgoingRUDPPacket : RUDPPacket
