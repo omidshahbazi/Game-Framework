@@ -57,7 +57,7 @@ namespace GameFramework.Networking
 			Socket.Connect(EndPoint);
 
 			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, Constants.UDP_MAX_MTU);
-			MTU = 17;  //TODO: it's just a hack to test
+			//MTU = 17;  //TODO: it's just a hack to test
 
 			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
 			SendInternal(buffer);

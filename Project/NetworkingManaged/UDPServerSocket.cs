@@ -175,84 +175,11 @@ namespace GameFramework.Networking
 
 		protected override void ReadFromClients()
 		{
-			IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+			ReadFromSocket();
 
-			try
-			{
-				int size = 0;
-				EndPoint endPoint = ipEndPoint;
+			CheckClientsFlow();
 
-				lock (Socket)
-				{
-					if (Socket.Available == 0)
-						return;
-
-					size = Socket.ReceiveFrom(ReceiveBuffer, ref endPoint);
-
-					ipEndPoint = (IPEndPoint)endPoint;
-				}
-
-				UDPClient client = GetOrAddClient(ipEndPoint);
-
-				client.AddBandwidthInFromLastSecond((uint)size);
-
-				ProcessReceivedBuffer(client, (uint)size);
-			}
-			catch (SocketException e)
-			{
-				if (e.SocketErrorCode == SocketError.WouldBlock)
-					return;
-				else if (e.SocketErrorCode == SocketError.ConnectionReset)
-				{
-					int hash = GetIPEndPointHash(ipEndPoint);
-
-					lock (clients)
-					{
-						UDPClient client = GetOrAddClient(ipEndPoint);
-
-						clients.Remove(client);
-						clientsMap.Remove(hash);
-
-						HandleClientDisconnection(client);
-					}
-
-					return;
-				}
-
-				throw e;
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
-
-			if (Time.CurrentEpochTime - lastBandwidthInCheck >= 1)
-			{
-				lock (clients)
-					for (int i = 0; i < clients.Count; ++i)
-					{
-						UDPClient client = clients[i];
-
-						if (!client.IsConnected)
-							continue;
-
-						if (client.BandwidthInFromLastSecond <= PacketRate)
-						{
-							client.ResetBandwidthInFromLastSecond();
-
-							continue;
-						}
-
-						int hash = GetIPEndPointHash(client.EndPoint);
-
-						clients.Remove(client);
-						clientsMap.Remove(hash);
-
-						HandleClientDisconnection(client);
-					}
-
-				lastBandwidthInCheck = (long)Time.CurrentEpochTime;
-			}
+			CheckClientsConnection();
 		}
 
 		protected override void HandleIncommingBuffer(Client Client, BufferStream Buffer)
@@ -344,6 +271,112 @@ namespace GameFramework.Networking
 
 			if (packet.IsCompleted)
 				HandleReceivedBuffer(Sender, packet.Combine());
+		}
+
+		private void ReadFromSocket()
+		{
+			IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+
+			try
+			{
+				int size = 0;
+				EndPoint endPoint = ipEndPoint;
+
+				lock (Socket)
+				{
+					if (Socket.Available == 0)
+						return;
+
+					size = Socket.ReceiveFrom(ReceiveBuffer, ref endPoint);
+
+					ipEndPoint = (IPEndPoint)endPoint;
+				}
+
+				UDPClient client = GetOrAddClient(ipEndPoint);
+
+				client.AddBandwidthInFromLastSecond((uint)size);
+
+				ProcessReceivedBuffer(client, (uint)size);
+			}
+			catch (SocketException e)
+			{
+				if (e.SocketErrorCode == SocketError.WouldBlock)
+					return;
+				else if (e.SocketErrorCode == SocketError.ConnectionReset)
+				{
+					if (ipEndPoint.Address == IPAddress.IPv6Any)
+						return;
+
+					int hash = GetIPEndPointHash(ipEndPoint);
+
+					lock (clients)
+					{
+						UDPClient client = GetOrAddClient(ipEndPoint);
+
+						clients.Remove(client);
+						clientsMap.Remove(hash);
+
+						HandleClientDisconnection(client);
+					}
+
+					return;
+				}
+
+				throw e;
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+		}
+
+		private void CheckClientsFlow()
+		{
+			if (Time.CurrentEpochTime - lastBandwidthInCheck < 1)
+				return;
+
+			lock (clients)
+				for (int i = 0; i < clients.Count; ++i)
+				{
+					UDPClient client = clients[i];
+
+					if (!client.IsConnected)
+						continue;
+
+					if (client.BandwidthInFromLastSecond <= PacketRate)
+					{
+						client.ResetBandwidthInFromLastSecond();
+
+						continue;
+					}
+
+					int hash = GetIPEndPointHash(client.EndPoint);
+
+					clients.Remove(client);
+					clientsMap.Remove(hash);
+
+					HandleClientDisconnection(client);
+				}
+
+			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
+		}
+
+		private void CheckClientsConnection()
+		{
+			for (int i = 0; i < clients.Count; ++i)
+			{
+				UDPClient client = clients[i];
+
+				if (client.IsReady)
+					continue;
+
+				int hash = GetIPEndPointHash(client.EndPoint);
+
+				clients.Remove(client);
+				clientsMap.Remove(hash);
+
+				HandleClientDisconnection(client);
+			}
 		}
 
 		private UDPClient GetOrAddClient(IPEndPoint EndPoint)
