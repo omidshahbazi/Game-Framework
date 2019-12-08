@@ -7,8 +7,8 @@ namespace GameFramework.Networking
 {
 	public class UDPClientSocket : ClientSocket
 	{
-		private IncommingPacketMap incommingPacketsMap;
-		private ulong lastOutgoingPacketID;
+		private IncomingUDPPacketsHolder incommingPacketHolder = null;
+		private OutgoingUDPPacketsHolder outgoingPacketHolder = null;
 
 		public uint MTU
 		{
@@ -24,7 +24,8 @@ namespace GameFramework.Networking
 
 		public UDPClientSocket() : base(Protocols.UDP)
 		{
-			incommingPacketsMap = new IncommingPacketMap();
+			incommingPacketHolder = new IncomingUDPPacketsHolder();
+			outgoingPacketHolder = new OutgoingUDPPacketsHolder();
 		}
 
 		public virtual void Send(byte[] Buffer, bool Reliable = true)
@@ -39,12 +40,12 @@ namespace GameFramework.Networking
 
 		public virtual void Send(byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(lastOutgoingPacketID, Buffer, Index, Length, MTU, Reliable);
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingPacketHolder.LastID, Buffer, Index, Length, MTU, Reliable);
 
 			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
 				SendInternal(packet.SliceBuffers[i]);
 
-			++lastOutgoingPacketID;
+			outgoingPacketHolder.IncreaseLastID();
 		}
 
 		protected virtual void SendInternal(BufferStream Buffer)
@@ -111,25 +112,17 @@ namespace GameFramework.Networking
 				return;
 			}
 
-			IncommingRUDPPacket packet = GetIncommingPacket(id);
+			IncomingUDPPacket packet = incommingPacketHolder.GetPacket(id);
 			if (packet == null)
 			{
-				packet = new IncommingRUDPPacket(id, sliceCount, isReliable);
-				incommingPacketsMap[packet.ID] = packet;
+				packet = new IncomingUDPPacket(id, sliceCount, isReliable);
+				incommingPacketHolder.AddPacket(packet);
 			}
 
 			packet.SetSliceBuffer(sliceIndex, buffer);
 
 			if (packet.IsCompleted)
 				HandleReceivedBuffer(packet.Combine());
-		}
-
-		private IncommingRUDPPacket GetIncommingPacket(ulong ID)
-		{
-			if (incommingPacketsMap.ContainsKey(ID))
-				return incommingPacketsMap[ID];
-
-			return null;
 		}
 	}
 }

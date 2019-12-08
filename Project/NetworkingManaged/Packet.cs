@@ -68,7 +68,7 @@ namespace GameFramework.Networking
 		}
 	}
 
-	abstract class RUDPPacket
+	abstract class UDPPacket
 	{
 		public ulong ID
 		{
@@ -113,7 +113,7 @@ namespace GameFramework.Networking
 			get;
 		}
 
-		public RUDPPacket(ulong ID, uint SliceCount, bool IsReliable)
+		public UDPPacket(ulong ID, uint SliceCount, bool IsReliable)
 		{
 			this.ID = ID;
 
@@ -131,7 +131,7 @@ namespace GameFramework.Networking
 		}
 	}
 
-	class IncommingRUDPPacket : RUDPPacket
+	class IncomingUDPPacket : UDPPacket
 	{
 		public override bool IsCompleted
 		{
@@ -145,7 +145,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		public IncommingRUDPPacket(ulong ID, uint SliceCount, bool IsReliable) : base(ID, SliceCount, IsReliable)
+		public IncomingUDPPacket(ulong ID, uint SliceCount, bool IsReliable) : base(ID, SliceCount, IsReliable)
 		{
 		}
 
@@ -160,17 +160,14 @@ namespace GameFramework.Networking
 		}
 	}
 
-	class IncommingPacketMap : SortedDictionary<ulong, IncommingRUDPPacket>
-	{ }
-
-	class OutgoingRUDPPacket : RUDPPacket
+	class OutgoingUDPPacket : UDPPacket
 	{
 		public override bool IsCompleted
 		{
 			get { return false; }
 		}
 
-		public OutgoingRUDPPacket(ulong ID, ushort SliceCount, bool IsReliable) : base(ID, SliceCount, IsReliable)
+		public OutgoingUDPPacket(ulong ID, ushort SliceCount, bool IsReliable) : base(ID, SliceCount, IsReliable)
 		{
 		}
 
@@ -182,7 +179,7 @@ namespace GameFramework.Networking
 			SliceBuffers[Index] = Buffer;
 		}
 
-		public static OutgoingRUDPPacket Create(ulong ID, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
+		public static OutgoingUDPPacket Create(ulong ID, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
 		{
 			if (Constants.UDP.PACKET_HEADER_SIZE >= MTU)
 				throw new Exception("PACKET_HEADER_SIZE [" + Constants.UDP.PACKET_HEADER_SIZE + "] is greater than or equal to MTU [" + MTU + "]");
@@ -191,7 +188,7 @@ namespace GameFramework.Networking
 
 			ushort sliceCount = (ushort)Math.Ceiling(Length / (float)mtu);
 
-			OutgoingRUDPPacket pakcet = new OutgoingRUDPPacket(ID, sliceCount, IsReliable);
+			OutgoingUDPPacket pakcet = new OutgoingUDPPacket(ID, sliceCount, IsReliable);
 
 			for (ushort i = 0; i < sliceCount; ++i)
 			{
@@ -211,4 +208,57 @@ namespace GameFramework.Networking
 			return pakcet;
 		}
 	}
+
+	class UDPPacketsHolder<T> where T : UDPPacket
+	{
+		public class PacketMap : SortedDictionary<ulong, T>
+		{ }
+
+		public PacketMap PacketsMap
+		{
+			get;
+			private set;
+		}
+
+		public ulong LastID
+		{
+			get;
+			private set;
+		}
+
+		public UDPPacketsHolder()
+		{
+			PacketsMap = new PacketMap();
+			LastID = 1;
+		}
+
+		public T GetPacket(ulong ID)
+		{
+			if (PacketsMap.ContainsKey(ID))
+				return PacketsMap[ID];
+
+			return null;
+		}
+
+		public void AddPacket(T Packet)
+		{
+			PacketsMap[Packet.ID] = Packet;
+		}
+
+		public void SetLastID(ulong ID)
+		{
+			LastID = ID;
+		}
+
+		public void IncreaseLastID()
+		{
+			++LastID;
+		}
+	}
+
+	class IncomingUDPPacketsHolder : UDPPacketsHolder<IncomingUDPPacket>
+	{ }
+
+	class OutgoingUDPPacketsHolder : UDPPacketsHolder<OutgoingUDPPacket>
+	{ }
 }

@@ -25,19 +25,13 @@ namespace GameFramework.Networking
 				private set;
 			}
 
-			//public ulong LastIncommmingPacketID
-			//{
-			//	get;
-			//	private set;
-			//}
-
-			public IncommingPacketMap IncommingPacketsMap
+			public IncomingUDPPacketsHolder IncommingPacketHolder
 			{
 				get;
 				private set;
 			}
 
-			public ulong LastOutgoingPacketID
+			public OutgoingUDPPacketsHolder OutgoingPacketHolder
 			{
 				get;
 				private set;
@@ -59,36 +53,13 @@ namespace GameFramework.Networking
 			{
 				endPoint = EndPoint;
 
-				IncommingPacketsMap = new IncommingPacketMap();
-				LastOutgoingPacketID = 1;
+				IncommingPacketHolder = new IncomingUDPPacketsHolder();
+				OutgoingPacketHolder = new OutgoingUDPPacketsHolder();
 			}
 
 			public void SetIsConnected(bool Value)
 			{
 				IsConnected = Value;
-			}
-
-			//public void SetLastIncommingPacketID(ulong ID)
-			//{
-			//	LastIncommmingPacketID = ID;
-			//}
-
-			public IncommingRUDPPacket GetIncommingPacket(ulong ID)
-			{
-				if (IncommingPacketsMap.ContainsKey(ID))
-					return IncommingPacketsMap[ID];
-
-				return null;
-			}
-
-			public void AddIncommingPacket(IncommingRUDPPacket Packet)
-			{
-				IncommingPacketsMap[Packet.ID] = Packet;
-			}
-
-			public void IncreaseLastOutgoingPacketID()
-			{
-				++LastOutgoingPacketID;
 			}
 
 			public void UpdateMTU(uint MTU)
@@ -157,12 +128,12 @@ namespace GameFramework.Networking
 		{
 			UDPClient client = (UDPClient)Target;
 
-			OutgoingRUDPPacket packet = OutgoingRUDPPacket.Create(client.LastOutgoingPacketID, Buffer, Index, Length, client.MTU, Reliable);
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(client.OutgoingPacketHolder.LastID, Buffer, Index, Length, client.MTU, Reliable);
 
 			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
 				SendInternal(Target, packet.SliceBuffers[i]);
 
-			client.IncreaseLastOutgoingPacketID();
+			client.OutgoingPacketHolder.IncreaseLastID();
 		}
 
 		protected virtual void SendInternal(Client Client, BufferStream Buffer)
@@ -261,11 +232,11 @@ namespace GameFramework.Networking
 
 			UDPClient client = (UDPClient)Sender;
 
-			IncommingRUDPPacket packet = client.GetIncommingPacket(id);
+			IncomingUDPPacket packet = client.IncommingPacketHolder.GetPacket(id);
 			if (packet == null)
 			{
-				packet = new IncommingRUDPPacket(id, sliceCount, isReliable);
-				client.AddIncommingPacket(packet);
+				packet = new IncomingUDPPacket(id, sliceCount, isReliable);
+				client.IncommingPacketHolder.AddPacket(packet);
 			}
 
 			packet.SetSliceBuffer(sliceIndex, buffer);
@@ -274,7 +245,7 @@ namespace GameFramework.Networking
 			{
 				ulong prevID = 0;
 
-				var it = client.IncommingPacketsMap.GetEnumerator();
+				var it = client.IncommingPacketHolder.PacketsMap.GetEnumerator();
 				while (it.MoveNext())
 				{
 					//if (it.Current.Key)
