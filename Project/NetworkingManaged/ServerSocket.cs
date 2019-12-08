@@ -63,6 +63,8 @@ namespace GameFramework.Networking
 			}
 		}
 
+		private long lastBandwidthInCheck = 0;
+
 		public delegate void ConnectionEventHandler(Client Client);
 		public delegate void BufferReceivedEventHandler(Client Sender, BufferStream Buffer);
 
@@ -81,12 +83,21 @@ namespace GameFramework.Networking
 			get;
 		}
 
+		public uint PacketRate
+		{
+			get;
+			set;
+		}
+
 		public event ConnectionEventHandler OnClientConnected = null;
 		public event ConnectionEventHandler OnClientDisconnected = null;
 		public event BufferReceivedEventHandler OnBufferReceived = null;
 
 		public ServerSocket(Protocols Type) : base(Type)
 		{
+			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
+
+			PacketRate = Constants.DEFAULT_PACKET_RATE;
 		}
 
 		public void Bind(string Host, ushort Port)
@@ -128,6 +139,8 @@ namespace GameFramework.Networking
 			AcceptClients();
 
 			ReadFromClients();
+
+			CheckClientsFlow();
 		}
 
 		protected abstract void AcceptClients();
@@ -220,6 +233,35 @@ namespace GameFramework.Networking
 			{
 				AddEvent(new ClientConnectedEvent(Client));
 			}
+		}
+
+		private void CheckClientsFlow()
+		{
+			if (Time.CurrentEpochTime - lastBandwidthInCheck < 1)
+				return;
+
+			Client[] clients = Clients;
+
+			for (int i = 0; i < clients.Length; ++i)
+			{
+				Client client = clients[i];
+
+				if (client.BandwidthInFromLastSecond <= PacketRate)
+				{
+					client.ResetBandwidthInFromLastSecond();
+
+					continue;
+				}
+
+				//int hash = GetIPEndPointHash(client.EndPoint);
+
+				//clients.Remove(client);
+				//clientsMap.Remove(hash);
+
+				//HandleClientDisconnection(client);
+			}
+
+			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
 		}
 	}
 }

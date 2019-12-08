@@ -29,6 +29,12 @@ namespace GameFramework.Networking
 			get;
 		}
 
+		public uint BandwidthInFromLastSecond
+		{
+			get;
+			private set;
+		}
+
 		public Client()
 		{
 			LastTouchTime = Time.CurrentEpochTime;
@@ -42,6 +48,16 @@ namespace GameFramework.Networking
 		public void UpdateLatency(uint Latency)
 		{
 			this.Latency = Latency;
+		}
+
+		public void AddBandwidthInFromLastSecond(uint Count)
+		{
+			BandwidthInFromLastSecond += Count;
+		}
+
+		public void ResetBandwidthInFromLastSecond()
+		{
+			BandwidthInFromLastSecond = 0;
 		}
 	}
 

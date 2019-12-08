@@ -25,7 +25,19 @@ namespace GameFramework.Networking
 				private set;
 			}
 
+			public IncomingUDPPacketsHolder IncommingReliablePacketHolder
+			{
+				get;
+				private set;
+			}
+
 			public IncomingUDPPacketsHolder IncommingPacketHolder
+			{
+				get;
+				private set;
+			}
+
+			public OutgoingUDPPacketsHolder OutgoingReliablePacketHolder
 			{
 				get;
 				private set;
@@ -43,17 +55,13 @@ namespace GameFramework.Networking
 				private set;
 			}
 
-			public uint BandwidthInFromLastSecond
-			{
-				get;
-				private set;
-			}
-
 			public UDPClient(IPEndPoint EndPoint)
 			{
 				endPoint = EndPoint;
 
+				IncommingReliablePacketHolder = new IncomingUDPPacketsHolder();
 				IncommingPacketHolder = new IncomingUDPPacketsHolder();
+				OutgoingReliablePacketHolder = new OutgoingUDPPacketsHolder();
 				OutgoingPacketHolder = new OutgoingUDPPacketsHolder();
 			}
 
@@ -66,16 +74,6 @@ namespace GameFramework.Networking
 			{
 				this.MTU = MTU;
 			}
-
-			public void AddBandwidthInFromLastSecond(uint Count)
-			{
-				BandwidthInFromLastSecond += Count;
-			}
-
-			public void ResetBandwidthInFromLastSecond()
-			{
-				BandwidthInFromLastSecond = 0;
-			}
 		}
 
 		private class UDPClientList : List<UDPClient>
@@ -87,8 +85,6 @@ namespace GameFramework.Networking
 		private UDPClientList clients = null;
 		private ClientMap clientsMap = null;
 
-		private long lastBandwidthInCheck = 0;
-
 		public override Client[] Clients
 		{
 			get
@@ -98,20 +94,10 @@ namespace GameFramework.Networking
 			}
 		}
 
-		public uint PacketRate
-		{
-			get;
-			set;
-		}
-
 		public UDPServerSocket() : base(Protocols.UDP)
 		{
 			clients = new UDPClientList();
 			clientsMap = new ClientMap();
-
-			PacketRate = Constants.DEFAULT_PACKET_RATE;
-
-			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
 		}
 
 		public virtual void Send(Client Target, byte[] Buffer, bool Reliable = true)
@@ -128,12 +114,14 @@ namespace GameFramework.Networking
 		{
 			UDPClient client = (UDPClient)Target;
 
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(client.OutgoingPacketHolder.LastID, Buffer, Index, Length, client.MTU, Reliable);
+			OutgoingUDPPacketsHolder holder = (Reliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
+
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(holder.LastID, Buffer, Index, Length, client.MTU, Reliable);
 
 			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
 				SendInternal(Target, packet.SliceBuffers[i]);
 
-			client.OutgoingPacketHolder.IncreaseLastID();
+			holder.IncreaseLastID();
 		}
 
 		protected virtual void SendInternal(Client Client, BufferStream Buffer)
@@ -148,8 +136,6 @@ namespace GameFramework.Networking
 		protected override void ReadFromClients()
 		{
 			ReadFromSocket();
-
-			CheckClientsFlow();
 
 			CheckClientsConnection();
 		}
@@ -232,25 +218,32 @@ namespace GameFramework.Networking
 
 			UDPClient client = (UDPClient)Sender;
 
-			IncomingUDPPacket packet = client.IncommingPacketHolder.GetPacket(id);
+			IncomingUDPPacketsHolder holder = (isReliable ? client.IncommingReliablePacketHolder : client.IncommingPacketHolder);
+
+			IncomingUDPPacket packet = holder.GetPacket(id);
 			if (packet == null)
 			{
 				packet = new IncomingUDPPacket(id, sliceCount, isReliable);
-				client.IncommingPacketHolder.AddPacket(packet);
+				holder.AddPacket(packet);
 			}
 
 			packet.SetSliceBuffer(sliceIndex, buffer);
 
 			if (packet.IsCompleted)
 			{
-				ulong prevID = 0;
-
-				var it = client.IncommingPacketHolder.PacketsMap.GetEnumerator();
-				while (it.MoveNext())
+				if (isReliable)
 				{
-					//if (it.Current.Key)
-					HandleReceivedBuffer(Sender, packet.Combine());
+					ulong prevID = 0;
+
+					var it = holder.PacketsMap.GetEnumerator();
+					while (it.MoveNext())
+					{
+						//if (it.Current.Key)
+						HandleReceivedBuffer(Sender, packet.Combine());
+					}
 				}
+				else
+					HandleReceivedBuffer(Sender, packet.Combine());
 			}
 		}
 
@@ -309,37 +302,6 @@ namespace GameFramework.Networking
 			{
 				throw e;
 			}
-		}
-
-		private void CheckClientsFlow()
-		{
-			if (Time.CurrentEpochTime - lastBandwidthInCheck < 1)
-				return;
-
-			lock (clients)
-				for (int i = 0; i < clients.Count; ++i)
-				{
-					UDPClient client = clients[i];
-
-					if (!client.IsConnected)
-						continue;
-
-					if (client.BandwidthInFromLastSecond <= PacketRate)
-					{
-						client.ResetBandwidthInFromLastSecond();
-
-						continue;
-					}
-
-					int hash = GetIPEndPointHash(client.EndPoint);
-
-					clients.Remove(client);
-					clientsMap.Remove(hash);
-
-					HandleClientDisconnection(client);
-				}
-
-			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
 		}
 
 		private void CheckClientsConnection()

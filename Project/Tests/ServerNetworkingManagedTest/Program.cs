@@ -12,38 +12,11 @@ namespace ServerNetworkingManagedTest
 		{
 			server = new UDPServerSocket();
 			Console.WriteLine("Server created");
+			server.PacketRate = 10000;
 
-			server.MultithreadedCallbacks = false;
-			server.MultithreadedReceive = false;
-			server.MultithreadedSend = false;
-
-			//server.MultithreadedCallbacks = true;
-			//server.MultithreadedReceive = false;
-			//server.MultithreadedSend = false;
-
-			//server.MultithreadedCallbacks = false;
-			//server.MultithreadedReceive = true;
-			//server.MultithreadedSend = false;
-
-			//server.MultithreadedCallbacks = false;
-			//server.MultithreadedReceive = false;
-			//server.MultithreadedSend = true;
-
-			//server.MultithreadedCallbacks = true;
-			//server.MultithreadedReceive = true;
-			//server.MultithreadedSend = false;
-
-			//server.MultithreadedCallbacks = true;
-			//server.MultithreadedReceive = false;
-			//server.MultithreadedSend = true;
-
-			//server.MultithreadedCallbacks = false;
-			//server.MultithreadedReceive = true;
-			//server.MultithreadedSend = true;
-
-			//server.MultithreadedCallbacks = true;
-			//server.MultithreadedReceive = true;
-			//server.MultithreadedSend = true;
+			server.MultithreadedCallbacks = true;
+			server.MultithreadedReceive = true;
+			server.MultithreadedSend = true;
 
 			server.OnClientConnected += Server_OnClientConnected;
 			server.OnClientDisconnected += Server_OnClientDisconnected;

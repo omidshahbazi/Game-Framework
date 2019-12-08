@@ -7,7 +7,10 @@ namespace GameFramework.Networking
 {
 	public class UDPClientSocket : ClientSocket
 	{
+		private IncomingUDPPacketsHolder incommingReliablePacketHolder = null;
 		private IncomingUDPPacketsHolder incommingPacketHolder = null;
+
+		private OutgoingUDPPacketsHolder outgoingReliablePacketHolder = null;
 		private OutgoingUDPPacketsHolder outgoingPacketHolder = null;
 
 		public uint MTU
@@ -24,7 +27,9 @@ namespace GameFramework.Networking
 
 		public UDPClientSocket() : base(Protocols.UDP)
 		{
+			incommingReliablePacketHolder = new IncomingUDPPacketsHolder();
 			incommingPacketHolder = new IncomingUDPPacketsHolder();
+			outgoingReliablePacketHolder = new OutgoingUDPPacketsHolder();
 			outgoingPacketHolder = new OutgoingUDPPacketsHolder();
 		}
 
@@ -40,12 +45,14 @@ namespace GameFramework.Networking
 
 		public virtual void Send(byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingPacketHolder.LastID, Buffer, Index, Length, MTU, Reliable);
+			OutgoingUDPPacketsHolder holder = (Reliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
+
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(holder.LastID, Buffer, Index, Length, MTU, Reliable);
 
 			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
 				SendInternal(packet.SliceBuffers[i]);
 
-			outgoingPacketHolder.IncreaseLastID();
+			holder.IncreaseLastID();
 		}
 
 		protected virtual void SendInternal(BufferStream Buffer)
@@ -112,17 +119,25 @@ namespace GameFramework.Networking
 				return;
 			}
 
-			IncomingUDPPacket packet = incommingPacketHolder.GetPacket(id);
+			IncomingUDPPacketsHolder holder = (isReliable ? incommingReliablePacketHolder : incommingPacketHolder);
+
+			IncomingUDPPacket packet = holder.GetPacket(id);
 			if (packet == null)
 			{
 				packet = new IncomingUDPPacket(id, sliceCount, isReliable);
-				incommingPacketHolder.AddPacket(packet);
+				holder.AddPacket(packet);
 			}
 
 			packet.SetSliceBuffer(sliceIndex, buffer);
 
 			if (packet.IsCompleted)
-				HandleReceivedBuffer(packet.Combine());
+			{
+				if (isReliable)
+				{
+				}
+				else
+					HandleReceivedBuffer(packet.Combine());
+			}
 		}
 	}
 }
