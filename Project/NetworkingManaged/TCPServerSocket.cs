@@ -158,6 +158,8 @@ namespace GameFramework.Networking
 							size = client.Socket.Receive(ReceiveBuffer);
 						}
 
+						client.AddBandwidthInFromLastSecond((uint)size);
+
 						ProcessReceivedBuffer(client, (uint)size);
 					}
 					catch (SocketException e)
