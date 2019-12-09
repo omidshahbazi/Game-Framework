@@ -7,6 +7,8 @@ namespace GameFramework.DatabaseManaged
 {
 	public abstract class Database
 	{
+		public abstract void Close();
+
 		public abstract void Execute(string Query, params object[] Parameters);
 
 		public abstract int ExecuteInsert(string Query, params object[] Parameters);

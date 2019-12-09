@@ -32,25 +32,49 @@ namespace GameFramework.DatabaseManaged
 			connectionString = conStr.GetConnectionString(true);
 		}
 
+		public override void Close()
+		{
+
+		}
+
 		public override void Execute(string Query, params object[] Parameters)
 		{
-			MySqlCommand command = CreateCommand(CreateConnection(), Query, Parameters);
+			MySqlConnection connection = CreateConnection();
+
+			MySqlCommand command = CreateCommand(connection, Query, Parameters);
 			command.ExecuteNonQuery();
 			command.Dispose();
+
+			connection.Close();
+			connection.Dispose();
 		}
 
 		public override int ExecuteInsert(string Query, params object[] Parameters)
 		{
-			MySqlCommand command = CreateCommand(CreateConnection(), Query, Parameters);
+			MySqlConnection connection = CreateConnection();
+
+			MySqlCommand command = CreateCommand(connection, Query, Parameters);
 			command.ExecuteNonQuery();
 			command.Dispose();
 
-			return GetLastInsertID(command.Connection);
+			int id = GetLastInsertID(command.Connection);
+
+			connection.Close();
+			connection.Dispose();
+
+			return id;
 		}
 
 		public override DataTable ExecuteWithReturnDataTable(string Query, params object[] Parameters)
 		{
-			return ExecuteWithReturnDataTable(CreateConnection(), Query, Parameters);
+			MySqlConnection connection = CreateConnection();
+
+			DataTable table = ExecuteWithReturnDataTable(connection, Query, Parameters);
+
+			connection.Close();
+			connection.Dispose();
+
+			return table;
 		}
 
 		private DataTable ExecuteWithReturnDataTable(MySqlConnection Connection, string Query, params object[] Parameters)
