@@ -25,13 +25,13 @@ namespace GameFramework.Networking
 				private set;
 			}
 
-			public IncomingUDPPacketsHolder IncommingReliablePacketHolder
+			public IncomingUDPPacketsHolder IncomingReliablePacketHolder
 			{
 				get;
 				private set;
 			}
 
-			public IncomingUDPPacketsHolder IncommingPacketHolder
+			public IncomingUDPPacketsHolder IncomingPacketHolder
 			{
 				get;
 				private set;
@@ -59,8 +59,8 @@ namespace GameFramework.Networking
 			{
 				endPoint = EndPoint;
 
-				IncommingReliablePacketHolder = new IncomingUDPPacketsHolder();
-				IncommingPacketHolder = new IncomingUDPPacketsHolder();
+				IncomingReliablePacketHolder = new IncomingUDPPacketsHolder();
+				IncomingPacketHolder = new IncomingUDPPacketsHolder();
 				OutgoingReliablePacketHolder = new OutgoingUDPPacketsHolder();
 				OutgoingPacketHolder = new OutgoingUDPPacketsHolder();
 			}
@@ -114,14 +114,15 @@ namespace GameFramework.Networking
 		{
 			UDPClient client = (UDPClient)Target;
 
-			OutgoingUDPPacketsHolder holder = (Reliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
+			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
+			IncomingUDPPacketsHolder incomingHolder = (Reliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
 
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(holder.LastID, Buffer, Index, Length, client.MTU, Reliable);
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, client.MTU, Reliable);
 
 			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
 				SendInternal(Target, packet.SliceBuffers[i]);
 
-			holder.IncreaseLastID();
+			outgoingHolder.IncreaseLastID();
 		}
 
 		protected virtual void SendInternal(Client Client, BufferStream Buffer)
@@ -203,39 +204,47 @@ namespace GameFramework.Networking
 
 		protected override void ProcessReceivedBuffer(Client Sender, BufferStream Buffer)
 		{
+			ulong lastAckID = Buffer.ReadUInt64();
 			bool isReliable = Buffer.ReadBool();
-			ulong id = Buffer.ReadUInt64();
+			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();
 			ushort sliceIndex = Buffer.ReadUInt16();
 
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
 
+			UDPClient client = (UDPClient)Sender;
+
+			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
+
 			if (!isReliable && sliceCount == 1)
 			{
+				outgoingHolder.SetLastID(lastAckID);
+
 				HandleReceivedBuffer(Sender, buffer);
+
 				return;
 			}
 
-			UDPClient client = (UDPClient)Sender;
+			IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
 
-			IncomingUDPPacketsHolder holder = (isReliable ? client.IncommingReliablePacketHolder : client.IncommingPacketHolder);
-
-			IncomingUDPPacket packet = holder.GetPacket(id);
+			IncomingUDPPacket packet = incomingHolder.GetPacket(packetID);
 			if (packet == null)
 			{
-				packet = new IncomingUDPPacket(id, sliceCount, isReliable);
-				holder.AddPacket(packet);
+				packet = new IncomingUDPPacket(packetID, sliceCount, isReliable);
+				incomingHolder.AddPacket(packet);
 			}
 
 			packet.SetSliceBuffer(sliceIndex, buffer);
 
 			if (packet.IsCompleted)
 			{
+				outgoingHolder.SetLastID(lastAckID);
+
 				if (isReliable)
 				{
 					ulong prevID = 0;
 
-					var it = holder.PacketsMap.GetEnumerator();
+					var it = incomingHolder.PacketsMap.GetEnumerator();
 					while (it.MoveNext())
 					{
 						//if (it.Current.Key)

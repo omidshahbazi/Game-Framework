@@ -272,6 +272,8 @@ namespace GameFramework.Networking
 			timeOffset = ((t1 - t0) + (t2 - t3)) / 2;
 		}
 
+		protected abstract BufferStream GetPingPacket();
+
 		private void SendPing()
 		{
 			BufferStream pingBuffer = Packet.CreatePingBufferStream();

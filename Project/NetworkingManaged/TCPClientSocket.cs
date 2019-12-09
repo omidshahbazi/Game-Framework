@@ -74,6 +74,11 @@ namespace GameFramework.Networking
 			HandleReceivedBuffer(Buffer);
 		}
 
+		protected override BufferStream GetPingPacket()
+		{
+			return Packet.CreatePingBufferStream();
+		}
+
 		private void OnConnectedCallback(IAsyncResult Result)
 		{
 			if (Socket.Connected)

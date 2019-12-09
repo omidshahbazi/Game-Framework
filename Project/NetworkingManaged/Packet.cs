@@ -54,11 +54,11 @@ namespace GameFramework.Networking
 			return buffer;
 		}
 
-		public static BufferStream CreatePingBufferStream()
+		public static BufferStream CreatePingBufferStream(uint PayloadSize = 0)
 		{
 			uint length = HEADER_SIZE + sizeof(double);
 
-			BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
+			BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length + PayloadSize]);
 			buffer.ResetWrite();
 			buffer.WriteUInt32(length);
 			buffer.WriteBytes(Constants.Control.PING);
@@ -179,7 +179,7 @@ namespace GameFramework.Networking
 			SliceBuffers[Index] = Buffer;
 		}
 
-		public static OutgoingUDPPacket Create(ulong ID, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
+		public static OutgoingUDPPacket Create(ulong ID, IncomingUDPPacketsHolder IncomingHolder, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
 		{
 			if (Constants.UDP.PACKET_HEADER_SIZE >= MTU)
 				throw new Exception("PACKET_HEADER_SIZE [" + Constants.UDP.PACKET_HEADER_SIZE + "] is greater than or equal to MTU [" + MTU + "]");
@@ -196,6 +196,7 @@ namespace GameFramework.Networking
 				uint length = (uint)Math.Min(mtu, Length - (i * mtu));
 
 				BufferStream buffer = Packet.CreateOutgoingBufferStream(Constants.UDP.PACKET_HEADER_SIZE + length);
+				buffer.WriteUInt64(IncomingHolder.LastID);
 				buffer.WriteBool(IsReliable);
 				buffer.WriteUInt64(ID);
 				buffer.WriteUInt16(sliceCount);
