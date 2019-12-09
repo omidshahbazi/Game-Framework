@@ -204,7 +204,7 @@ namespace GameFramework.Networking
 
 		protected override void ProcessReceivedBuffer(Client Sender, BufferStream Buffer)
 		{
-			ulong lastAckID = Buffer.ReadUInt64();
+			ulong lastAckID = Buffer.ReadUInt64();///???
 			bool isReliable = Buffer.ReadBool();
 			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();
@@ -214,18 +214,16 @@ namespace GameFramework.Networking
 
 			UDPClient client = (UDPClient)Sender;
 
-			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
+			IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
 
 			if (!isReliable && sliceCount == 1)
 			{
-				outgoingHolder.SetLastID(lastAckID);
+				incomingHolder.SetLastID(packetID);
 
 				HandleReceivedBuffer(Sender, buffer);
 
 				return;
 			}
-
-			IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
 
 			IncomingUDPPacket packet = incomingHolder.GetPacket(packetID);
 			if (packet == null)
@@ -238,7 +236,7 @@ namespace GameFramework.Networking
 
 			if (packet.IsCompleted)
 			{
-				outgoingHolder.SetLastID(lastAckID);
+				incomingHolder.SetLastID(packetID);
 
 				if (isReliable)
 				{
