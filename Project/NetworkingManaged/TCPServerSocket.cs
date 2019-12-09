@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
+using GameFramework.Common.Timing;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -82,9 +83,28 @@ namespace GameFramework.Networking
 			base.Listen();
 		}
 
-		protected override void SendOverSocket(Client Client, BufferStream Buffer)
+		public virtual void Send(Client Target, byte[] Buffer)
 		{
-			SendOverSocket(((TCPClient)Client).Socket, Buffer);
+			Send(Target, Buffer, 0, (uint)Buffer.Length);
+		}
+
+		public virtual void Send(Client Target, byte[] Buffer, uint Length)
+		{
+			Send(Target, Buffer, 0, Length);
+		}
+
+		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length)
+		{
+			BufferStream buffer = Packet.CreateOutgoingBufferStream(Length);
+
+			buffer.WriteBytes(Buffer, Index, Length);
+
+			SendInternal(Target, buffer);
+		}
+
+		protected virtual void SendInternal(Client Client, BufferStream Buffer)
+		{
+			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
 		}
 
 		protected override void AcceptClients()
@@ -138,6 +158,8 @@ namespace GameFramework.Networking
 							size = client.Socket.Receive(ReceiveBuffer);
 						}
 
+						client.AddBandwidthInFromLastSecond((uint)size);
+
 						ProcessReceivedBuffer(client, (uint)size);
 					}
 					catch (SocketException e)
@@ -166,15 +188,38 @@ namespace GameFramework.Networking
 			}
 		}
 
+		protected override void HandleIncommingBuffer(Client Client, BufferStream Buffer)
+		{
+			byte control = Buffer.ReadByte();
+
+			double time = Time.CurrentEpochTime;
+
+			Client.UpdateLastTouchTime(time);
+
+			if (control == Constants.Control.BUFFER)
+			{
+				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
+
+				ProcessReceivedBuffer(Client, buffer);
+			}
+			else if (control == Constants.Control.PING)
+			{
+				double sendTime = Buffer.ReadFloat64();
+
+				Client.UpdateLatency((uint)((time - sendTime) * 1000));
+
+				BufferStream pingBuffer = Packet.CreatePingBufferStream();
+
+				SendInternal(Client, pingBuffer);
+			}
+		}
+
 		protected override bool HandleSendCommand(SendCommand Command)
 		{
-			if (Timestamp < Command.SendTime + (LatencySimulation / 1000.0F))
-				return false;
-
 			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 			TCPClient client = (TCPClient)sendCommand.Client;
 
-			if (!SocketUtilities.GetIsReady(client.Socket))
+			if (!client.IsReady)
 				return false;
 
 			SendOverSocket(client.Socket, Command.Buffer);

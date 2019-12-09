@@ -69,18 +69,18 @@ namespace GameFramework::Networking
 		class ServerSendCommand : public SendCommand
 		{
 		public:
-			ServerSendCommand(Socket Socket, const BufferStream& Buffer, double SendTime) : SendCommand(Buffer, SendTime),
-				m_Socket(Socket)
+			ServerSendCommand(Client* Client, const BufferStream& Buffer, double SendTime) : SendCommand(Buffer, SendTime),
+				m_Client(Client)
 			{
 			}
 
-			Socket GetSocket(void) const
+			Client* GetClient(void)
 			{
-				return m_Socket;
+				return m_Client;
 			}
 
 		private:
-			Socket m_Socket;
+			Client* m_Client;
 		};
 
 	public:
@@ -92,24 +92,20 @@ namespace GameFramework::Networking
 
 		void Bind(const IPEndPoint& EndPoint);
 
-		void UnBind(void);
+		virtual void UnBind(void);
 
-		void DisconnectClient(Client* const Client);
+		virtual void DisconnectClient(Client* const Client);
 
 		void virtual Listen(void);
 
-		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Length);
-
-		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length);
-
 	protected:
-		virtual void SendInternal(const Client* Target, const BufferStream& Buffer);
-
 		virtual void Receive(void) override;
 
-		virtual void HandleIncommingBuffer(Client* Client, BufferStream& Buffer);
+		virtual void AcceptClients(void) = 0;
 
-		virtual bool HandleSendCommand(SendCommand* Command) override;
+		virtual void ReadFromClients(void) = 0;
+
+		virtual void HandleIncommingBuffer(Client* Client, BufferStream& Buffer) = 0;
 
 		virtual void ProcessEvent(EventBase* Event)  override;
 
@@ -117,15 +113,20 @@ namespace GameFramework::Networking
 
 		void HandleReceivedBuffer(Client* Sender, const BufferStream& Buffer);
 
+		virtual void CloseClientConnection(Client* Client)
+		{
+		}
+
+		void HandleClientDisconnection(Client* Client);
+
+		void RaiseOnClientConnected(Client* Client);
+
 		virtual bool GetIsReady(void) const override
 		{
 			return m_IsBound;
 		}
 
 		virtual double GetTimestamp(void) const override;
-
-	private:
-		void HandleClientDisconnection(Client* Client);
 
 	public:
 		Event<const Client*> OnClientConnected;
@@ -135,8 +136,6 @@ namespace GameFramework::Networking
 	private:
 		bool m_IsBound;
 
-		ClientList m_Clients;
-		atomic_bool m_ClientsLock;
 	};
 }
 

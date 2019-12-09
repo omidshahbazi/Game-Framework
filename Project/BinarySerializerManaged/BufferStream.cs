@@ -83,11 +83,25 @@ namespace GameFramework.BinarySerializer
 			return BitConverter.ToInt64(data, 0);
 		}
 
+		public ushort ReadUInt16()
+		{
+			byte[] data = new byte[sizeof(ushort)];
+			ReadBytes(data, 0, sizeof(ushort));
+			return BitConverter.ToUInt16(data, 0);
+		}
+
 		public uint ReadUInt32()
 		{
 			byte[] data = new byte[sizeof(uint)];
 			ReadBytes(data, 0, sizeof(uint));
 			return BitConverter.ToUInt32(data, 0);
+		}
+
+		public ulong ReadUInt64()
+		{
+			byte[] data = new byte[sizeof(ulong)];
+			ReadBytes(data, 0, sizeof(ulong));
+			return BitConverter.ToUInt64(data, 0);
 		}
 
 		public float ReadFloat32()
@@ -140,6 +154,16 @@ namespace GameFramework.BinarySerializer
 		}
 
 		public void WriteUInt32(uint Value)
+		{
+			WriteBytes(BitConverter.GetBytes(Value));
+		}
+
+		public void WriteUInt16(ushort Value)
+		{
+			WriteBytes(BitConverter.GetBytes(Value));
+		}
+
+		public void WriteUInt64(ulong Value)
 		{
 			WriteBytes(BitConverter.GetBytes(Value));
 		}

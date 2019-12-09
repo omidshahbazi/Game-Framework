@@ -63,6 +63,8 @@ namespace GameFramework.Networking
 			}
 		}
 
+		private long lastBandwidthInCheck = 0;
+
 		public delegate void ConnectionEventHandler(Client Client);
 		public delegate void BufferReceivedEventHandler(Client Sender, BufferStream Buffer);
 
@@ -81,12 +83,21 @@ namespace GameFramework.Networking
 			get;
 		}
 
+		public uint PacketRate
+		{
+			get;
+			set;
+		}
+
 		public event ConnectionEventHandler OnClientConnected = null;
 		public event ConnectionEventHandler OnClientDisconnected = null;
 		public event BufferReceivedEventHandler OnBufferReceived = null;
 
 		public ServerSocket(Protocols Type) : base(Type)
 		{
+			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
+
+			PacketRate = Constants.DEFAULT_PACKET_RATE;
 		}
 
 		public void Bind(string Host, ushort Port)
@@ -123,37 +134,13 @@ namespace GameFramework.Networking
 			RunSenndThread();
 		}
 
-		public virtual void Send(Client Target, byte[] Buffer)
-		{
-			Send(Target, Buffer, 0, (uint)Buffer.Length);
-		}
-
-		public virtual void Send(Client Target, byte[] Buffer, uint Length)
-		{
-			Send(Target, Buffer, 0, Length);
-		}
-
-		public virtual void Send(Client Target, byte[] Buffer, uint Index, uint Length)
-		{
-			BufferStream buffer = Constants.Packet.CreateOutgoingBufferStream(Length);
-
-			buffer.WriteBytes(Buffer, Index, Length);
-
-			AddSendCommand(Target, buffer);
-		}
-
-		protected virtual void AddSendCommand(Client Client, BufferStream Buffer)
-		{
-			AddSendCommand(new ServerSendCommand(Client, Buffer, Timestamp));
-		}
-
-		protected abstract void SendOverSocket(Client Client, BufferStream Buffer);
-
 		protected override void Receive()
 		{
 			AcceptClients();
 
 			ReadFromClients();
+
+			CheckClientsFlow();
 		}
 
 		protected abstract void AcceptClients();
@@ -165,11 +152,11 @@ namespace GameFramework.Networking
 			BandwidthIn += Size;
 
 			uint index = 0;
-			while (index != Size)
+			while (index < Size)
 			{
 				uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
-				index += Constants.Packet.PACKET_SIZE_SIZE;
+				index += Packet.PACKET_SIZE_SIZE;
 
 				HandleIncommingBuffer(Client, new BufferStream(ReceiveBuffer, index, packetSize));
 
@@ -177,31 +164,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		protected virtual void HandleIncommingBuffer(Client Client, BufferStream Buffer)
-		{
-			byte control = Buffer.ReadByte();
-
-			double time = Time.CurrentEpochTime;
-
-			Client.UpdateLastTouchTime(time);
-
-			if (control == Constants.Control.BUFFER)
-			{
-				BufferStream buffer = Constants.Packet.CreateIncommingBufferStream(Buffer.Buffer);
-
-				ProcessReceivedBuffer(Client, buffer);
-			}
-			else if (control == Constants.Control.PING)
-			{
-				double sendTime = Buffer.ReadFloat64();
-
-				Client.UpdateLatency((uint)((time - sendTime) * 1000));
-
-				BufferStream pingBuffer = Constants.Packet.CreatePingBufferStream();
-
-				SendOverSocket(Client, pingBuffer);
-			}
-		}
+		protected abstract void HandleIncommingBuffer(Client Client, BufferStream Buffer);
 
 		protected override void ProcessEvent(EventBase Event)
 		{
@@ -270,6 +233,35 @@ namespace GameFramework.Networking
 			{
 				AddEvent(new ClientConnectedEvent(Client));
 			}
+		}
+
+		private void CheckClientsFlow()
+		{
+			if (Time.CurrentEpochTime - lastBandwidthInCheck < 1)
+				return;
+
+			Client[] clients = Clients;
+
+			for (int i = 0; i < clients.Length; ++i)
+			{
+				Client client = clients[i];
+
+				if (client.BandwidthInFromLastSecond <= PacketRate)
+				{
+					client.ResetBandwidthInFromLastSecond();
+
+					continue;
+				}
+
+				//int hash = GetIPEndPointHash(client.EndPoint);
+
+				//clients.Remove(client);
+				//clientsMap.Remove(hash);
+
+				//HandleClientDisconnection(client);
+			}
+
+			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
 		}
 	}
 }

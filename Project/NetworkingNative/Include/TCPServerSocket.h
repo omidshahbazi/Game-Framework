@@ -41,13 +41,35 @@ namespace GameFramework::Networking
 			IPEndPoint m_EndPoint;
 		};
 
+		typedef List<TCPClient*> TCPClientList;
+
 	public:
 		TCPServerSocket(uint32_t MaxConnection);
 
+		void UnBind(void) override;
+
+		void DisconnectClient(Client* const Client) override;
+
 		virtual void Listen(void) override;
 
+		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Length);
+
+		virtual void Send(const Client* Target, byte* const Buffer, uint32_t Index, uint32_t Length);
+
 	protected:
+		virtual void AddSendCommand(Client* Target, const BufferStream& Buffer);
+
+		virtual void AcceptClients(void);
+
+		virtual void ReadFromClients(void);
+
+		void HandleIncommingBuffer(Client* Client, BufferStream& Buffer);
+
+		bool HandleSendCommand(SendCommand* Command) override;
+
 		void ProcessReceivedBuffer(Client* Sender, const BufferStream& Buffer) override;
+
+		void CloseClientConnection(Client* Client) override;
 
 	public:
 		uint32_t GetMaxConnection(void) const
@@ -57,6 +79,9 @@ namespace GameFramework::Networking
 
 	private:
 		uint32_t m_MaxConnection;
+
+		TCPClientList m_Clients;
+		atomic_bool m_ClientsLock;
 	};
 }
 

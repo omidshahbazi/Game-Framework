@@ -213,13 +213,25 @@ namespace GameFramework::Networking
 			{
 			}
 
+			SocketException(const std::string &Message) :
+				m_Error(Errors::NoError),
+				m_Message(Message)
+			{
+			}
+
 			Errors GetError(void) const
 			{
 				return m_Error;
 			}
 
+			const std::string& GetMessage(void) const
+			{
+				return m_Message;
+			}
+
 		private:
 			Errors m_Error;
+			std::string m_Message;
 		};
 
 		typedef uint32_t Handle;

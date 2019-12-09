@@ -41,6 +41,8 @@ namespace GameFramework::BinarySerializer
 
 		uint32_t ReadUInt32(void);
 
+		uint64_t ReadUInt64(void);
+
 		float ReadFloat32(void);
 
 		double ReadFloat64(void);
@@ -58,6 +60,8 @@ namespace GameFramework::BinarySerializer
 		void WriteInt64(int64_t Value);
 
 		void WriteUInt32(uint32_t Value);
+
+		void WriteUInt64(uint64_t Value);
 
 		void WriteFloat32(float Value);
 

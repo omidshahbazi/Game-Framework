@@ -1,6 +1,8 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
 namespace GameFramework.Networking
@@ -81,9 +83,9 @@ namespace GameFramework.Networking
 
 		public static IPAddress ResolveDomain(string Domain)
 		{
-			IPAddress ip;
-			if (IPAddress.TryParse(Domain, out ip))
-				return ip;
+			//IPAddress ip;
+			//if (IPAddress.TryParse(Domain, out ip))
+			//	return ip;
 
 			try
 			{
@@ -110,6 +112,42 @@ namespace GameFramework.Networking
 				throw new ArgumentException("IP must be v4");
 
 			return IPAddress.Parse("::ffff:" + IP.ToString());
+		}
+
+		public static uint FindOptimumMTU(IPAddress IP, uint MaxMTU)
+		{
+			IP = ResolveDomain(IP.ToString());
+
+			Ping ping = new Ping();
+
+			PingOptions options = new PingOptions();
+			options.DontFragment = true;
+
+			List<byte> bytesList = new List<byte>((int)MaxMTU);
+			for (uint i = 0; i < bytesList.Capacity; ++i)
+				bytesList.Add((byte)(i % 255));
+
+			PingReply reply = null;
+			do
+			{
+				reply = ping.Send(IP, 1000, bytesList.ToArray(), options);
+
+				if (reply == null)
+					throw new PingException("Finding optimum MTU failed");
+
+				if (reply.Status == IPStatus.Success)
+					break;
+
+				bytesList.RemoveAt(0);
+
+				if (reply.Status == IPStatus.PacketTooBig)
+					continue;
+
+				throw new PingException("Finding optimum MTU failed with error " + reply.Status.ToString());
+
+			} while (bytesList.Count != 0);
+
+			return (uint)bytesList.Count;
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using GameFramework.BinarySerializer;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -222,6 +223,32 @@ namespace GameFramework.Networking
 			}
 		}
 
+		protected virtual void SendOverSocket(IPEndPoint EndPoint, BufferStream Buffer)
+		{
+			try
+			{
+				if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
+					Socket.SendTo(Buffer.Buffer, EndPoint);
+
+				BandwidthOut += Buffer.Size;
+			}
+			catch (SocketException e)
+			{
+				if (e.SocketErrorCode == SocketError.ConnectionReset ||
+					e.SocketErrorCode == SocketError.ConnectionAborted ||
+					e.SocketErrorCode == SocketError.ConnectionRefused)
+				{
+					return;
+				}
+
+				throw e;
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+		}
+
 		protected abstract bool HandleSendCommand(SendCommand Command);
 
 		protected abstract void ProcessEvent(EventBase Event);
@@ -269,6 +296,11 @@ namespace GameFramework.Networking
 			{
 				for (int i = 0; i < sendCommands.Count; ++i)
 				{
+					SendCommand command = sendCommands[i];
+
+					if (Timestamp < command.SendTime + (LatencySimulation / 1000.0F))
+						continue;
+
 					if (!HandleSendCommand(sendCommands[i]))
 						continue;
 

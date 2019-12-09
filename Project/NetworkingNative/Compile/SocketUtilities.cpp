@@ -5,6 +5,9 @@ using namespace std;
 
 namespace GameFramework::Networking
 {
+	const IPAddress IPAddress::Any(PlatformNetwork::AddressFamilies::InterNetwork, "0.0.0.0");
+	const IPAddress IPAddress::AnyV6(PlatformNetwork::AddressFamilies::InterNetworkV6, "::0");
+
 	Socket SocketUtilities::CreateSocket(PlatformNetwork::IPProtocols Protocol)
 	{
 		PlatformNetwork::Initialize();
@@ -51,7 +54,7 @@ namespace GameFramework::Networking
 
 	void SocketUtilities::SetIPv6OnlyEnabled(Socket Socket, bool Value)
 	{
-		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::IPv6Only, (int32_t)Value);
+		PlatformNetwork::SetSocketOption(Socket, PlatformNetwork::OptionLevels::IPV6, PlatformNetwork::Options::IPv6Only, Value);
 	}
 
 	void SocketUtilities::SetChecksumEnabled(Socket Socket, bool Value)
@@ -151,7 +154,7 @@ namespace GameFramework::Networking
 	IPAddress SocketUtilities::MapIPv4ToIPv6(IPAddress IP)
 	{
 		if (IP.GetAddressFamily() != PlatformNetwork::AddressFamilies::InterNetwork)
-			throw exception("IP must be v4");
+			throw PlatformNetwork::SocketException("IP must be v4");
 
 		return ResolveDomain("::ffff:" + IP.GetIP());
 	}

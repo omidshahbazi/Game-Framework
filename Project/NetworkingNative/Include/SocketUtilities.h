@@ -13,6 +13,10 @@ namespace GameFramework::Networking
 	struct IPAddress
 	{
 	public:
+		static const IPAddress Any;
+		static const IPAddress AnyV6;
+
+	public:
 		IPAddress(void) :
 			m_Family(PlatformNetwork::AddressFamilies::InterNetwork)
 		{

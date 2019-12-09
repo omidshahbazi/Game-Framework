@@ -115,7 +115,7 @@ namespace GameFramework::Networking
 		m_SendThread = new thread(GlobalSendWorker, this);
 	}
 
-	void BaseSocket::SendInternal(Socket Target, const BufferStream& Buffer)
+	void BaseSocket::SendOverSocket(Socket Target, const BufferStream& Buffer)
 	{
 		try
 		{
@@ -182,6 +182,11 @@ namespace GameFramework::Networking
 
 		for (int i = 0; i < m_SendCommands.size(); ++i)
 		{
+			SendCommand* command = m_SendCommands[i];
+
+			if (GetTimestamp() < command->GetSendTime() + (m_LatencySimulation / 1000.0F))
+				continue;
+
 			if (!HandleSendCommand(m_SendCommands[i]))
 				continue;
 

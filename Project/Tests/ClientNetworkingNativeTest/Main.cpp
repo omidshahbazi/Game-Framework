@@ -43,9 +43,9 @@ void main()
 	//client.SetMultithreadedReceive(false);
 	//client.SetMultithreadedSend(false);
 
+	std::cout << "Client started connecting" << std::endl;
 	client.Connect("::1", 80);
 	//socket.Connect("fe80::c011:8430:ece7:975f%15", 80);
-	std::cout << "Client started connecting" << std::endl;
 
 	while (true)
 	{

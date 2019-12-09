@@ -35,6 +35,8 @@ namespace GameFramework::Networking
 			return m_Latency;
 		}
 
+		virtual const IPEndPoint& GetEndPoint(void) const = 0;
+
 	private:
 		double m_LastTouchTime;
 		uint32_t m_Latency;

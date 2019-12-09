@@ -1,6 +1,7 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\ClientSocket.h"
 #include "..\Include\Constants.h"
+#include "..\Include\Packet.h"
 #include "..\Include\CallbackUtilities.h"
 #include <Timing\Time.h>
 #include <Utilities\TypeHelper.h>
@@ -64,7 +65,7 @@ namespace GameFramework::Networking
 
 	void ClientSocket::Send(byte* const Buffer, uint32_t Index, uint32_t Length)
 	{
-		BufferStream buffer = Constants::Packet::CreateOutgoingBufferStream(Length);
+		BufferStream buffer = Packet::CreateOutgoingBufferStream(Length);
 
 		buffer.WriteBytes(Buffer, Index, Length);
 
@@ -106,7 +107,7 @@ namespace GameFramework::Networking
 			{
 				uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
 
-				index += Constants::Packet::PACKET_SIZE_SIZE;
+				index += Packet::PACKET_SIZE_SIZE;
 
 				BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
 
@@ -138,7 +139,7 @@ namespace GameFramework::Networking
 
 		if (control == Constants::Control::BUFFER)
 		{
-			BufferStream buffer = Constants::Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
+			BufferStream buffer = Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
 
 			if (GetMultithreadedCallbacks())
 			{
@@ -166,13 +167,10 @@ namespace GameFramework::Networking
 
 	bool ClientSocket::HandleSendCommand(SendCommand* Command)
 	{
-		if (GetTimestamp() < Command->GetSendTime() + (GetLatencySimulation() / 1000.0F))
-			return false;
-
 		if (!GetIsReady())
 			return false;
 
-		BaseSocket::SendInternal(GetSocket(), const_cast<BufferStream&>(Command->GetBuffer()));
+		BaseSocket::SendOverSocket(GetSocket(), const_cast<BufferStream&>(Command->GetBuffer()));
 
 		return true;
 	}
@@ -258,10 +256,10 @@ namespace GameFramework::Networking
 
 	void ClientSocket::SendPing(void)
 	{
-		BufferStream pingBuffer = Constants::Packet::CreatePingBufferStream();
+		BufferStream pingBuffer = Packet::CreatePingBufferStream();
 
 		m_LastPingTime = Time::GetCurrentEpochTime();
 
-		BaseSocket::SendInternal(GetSocket(), pingBuffer);
+		BaseSocket::SendOverSocket(GetSocket(), pingBuffer);
 	}
 }

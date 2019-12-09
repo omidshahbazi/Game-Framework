@@ -13,34 +13,6 @@ namespace ClientNetworkingManagedTest
 			client = new UDPClientSocket();
 			Console.WriteLine("Client created");
 
-			client.MultithreadedCallbacks = false;
-			client.MultithreadedReceive = false;
-			client.MultithreadedSend = false;
-
-			//client.MultithreadedCallbacks = true;
-			//client.MultithreadedReceive = false;
-			//client.MultithreadedSend = false;
-
-			//client.MultithreadedCallbacks = false;
-			//client.MultithreadedReceive = true;
-			//client.MultithreadedSend = false;
-
-			//client.MultithreadedCallbacks = false;
-			//client.MultithreadedReceive = false;
-			//client.MultithreadedSend = true;
-
-			//client.MultithreadedCallbacks = true;
-			//client.MultithreadedReceive = true;
-			//client.MultithreadedSend = false;
-
-			//client.MultithreadedCallbacks = true;
-			//client.MultithreadedReceive = false;
-			//client.MultithreadedSend = true;
-
-			//client.MultithreadedCallbacks = false;
-			//client.MultithreadedReceive = true;
-			//client.MultithreadedSend = true;
-
 			client.MultithreadedCallbacks = true;
 			client.MultithreadedReceive = true;
 			client.MultithreadedSend = true;
@@ -50,8 +22,8 @@ namespace ClientNetworkingManagedTest
 			client.OnDisconnected += Client_OnDisconnected;
 			client.OnBufferReceived += Client_OnBufferReceived;
 
-			client.Connect("::1", 80);
 			Console.WriteLine("Client started connecting");
+			client.Connect("127.0.0.1", 80);
 
 			while (true)
 			{
@@ -65,7 +37,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			client.Send(new byte[] { 10, 22, 16 });
+			client.Send(System.Text.Encoding.ASCII.GetBytes("asdadjaijijijanciojh82y3	[ncc9n0009u18u24cu4839cyur98ybuc4yc-1nhc1bc3uc127bcn187cb-81c7nc1u-8n147ncb87c4b431-7c17c3n7c13-987c189cn7c17c-81347nc1432n7"), false);
 		}
 
 		private static void Client_OnConnectionFailed()
@@ -82,7 +54,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnBufferReceived " + Buffer.Size);
 
-			client.Send(Buffer.Buffer);
+			client.Send(Buffer.Buffer, false);
 		}
 	}
 }

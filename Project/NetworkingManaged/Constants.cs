@@ -1,6 +1,4 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using GameFramework.BinarySerializer;
-using GameFramework.Common.Timing;
 using GameFramework.Common.Utilities;
 
 namespace GameFramework.Networking
@@ -12,43 +10,14 @@ namespace GameFramework.Networking
 			public const int SIZE = sizeof(byte);
 
 			public const byte BUFFER = 1;
-			public const byte PING = 2;
+			public const byte HANDSHAKE = 2;
+			public const byte HANDSHAKE_BACK = 2;
+			public const byte PING = 3;
 		}
 
-		public static class Packet
+		public static class UDP
 		{
-			public const uint PACKET_SIZE_SIZE = sizeof(uint);
-			public const uint HEADER_SIZE = Control.SIZE;
-
-			public static BufferStream CreateOutgoingBufferStream(uint Length)
-			{
-				uint length = HEADER_SIZE + Length;
-
-				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.ResetWrite();
-				buffer.WriteUInt32(length);
-				buffer.WriteBytes(Control.BUFFER);
-
-				return buffer;
-			}
-
-			public static BufferStream CreateIncommingBufferStream(byte[] Buffer)
-			{
-				return new BufferStream(Buffer, HEADER_SIZE, (uint)(Buffer.Length - HEADER_SIZE));
-			}
-
-			public static BufferStream CreatePingBufferStream()
-			{
-				uint length = HEADER_SIZE + sizeof(double);
-
-				BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
-				buffer.ResetWrite();
-				buffer.WriteUInt32(length);
-				buffer.WriteBytes(Control.PING);
-				buffer.WriteFloat64(Time.CurrentEpochTime);
-
-				return buffer;
-			}
+			public const uint PACKET_HEADER_SIZE = sizeof(bool) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort);
 		}
 
 		public const uint RECEIVE_TIMEOUT = 1;
@@ -59,6 +28,10 @@ namespace GameFramework.Networking
 		// https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.ttl?view=netframework-4.8#System_Net_Sockets_Socket_Ttl
 		public const ushort TIME_TO_LIVE = 64;
 		public const float PING_TIME = 5;
+
+		public const uint UDP_MAX_MTU = 1500;
+
+		public const uint DEFAULT_PACKET_RATE = 1024;
 
 		public static readonly Random Random = new Random();
 	}
