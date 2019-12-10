@@ -17,7 +17,7 @@ namespace GameFramework.Networking
 
 		public static class UDP
 		{
-			public const uint PACKET_HEADER_SIZE = sizeof(ulong) + sizeof(bool) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort);
+			public const uint PACKET_HEADER_SIZE = sizeof(ulong) + sizeof(uint) + sizeof(bool) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort);
 		}
 
 		public const uint RECEIVE_TIMEOUT = 1;

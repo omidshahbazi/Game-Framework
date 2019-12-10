@@ -1,6 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
 using GameFramework.Common.Timing;
+using GameFramework.Common.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -131,6 +132,76 @@ namespace GameFramework.Networking
 		}
 	}
 
+	class UDPPacketsHolder<T> where T : UDPPacket
+	{
+		public class PacketMap : Dictionary<ulong, T>
+		{ }
+
+		public PacketMap PacketsMap
+		{
+			get;
+			private set;
+		}
+
+		public ulong LastID
+		{
+			get;
+			private set;
+		}
+
+		public UDPPacketsHolder()
+		{
+			PacketsMap = new PacketMap();
+			LastID = 1;
+		}
+
+		public T GetPacket(ulong ID)
+		{
+			if (PacketsMap.ContainsKey(ID))
+				return PacketsMap[ID];
+
+			return null;
+		}
+
+		public void AddPacket(T Packet)
+		{
+			PacketsMap[Packet.ID] = Packet;
+		}
+
+		public void SetLastID(ulong ID)
+		{
+			LastID = ID;
+		}
+
+		public void IncreaseLastID()
+		{
+			++LastID;
+		}
+
+		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder)
+		{
+			uint mask = 0;
+
+			for (uint i = 0; i < sizeof(uint); ++i)
+			{
+				uint offset = i + 1;
+
+				if (offset > IncomingHolder.LastID)
+					break;
+
+				ulong packetID = IncomingHolder.LastID - offset;
+
+				T packet = null;
+				IncomingHolder.PacketsMap.TryGetValue(packetID, out packet);
+
+				if (packet != null && packet.IsCompleted)
+					mask = BitwiseHelper.Enable(mask, i);
+			}
+
+			return mask;
+		}
+	}
+
 	class IncomingUDPPacket : UDPPacket
 	{
 		public override bool IsCompleted
@@ -190,6 +261,8 @@ namespace GameFramework.Networking
 
 			OutgoingUDPPacket pakcet = new OutgoingUDPPacket(ID, sliceCount, IsReliable);
 
+			uint ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(IncomingHolder);
+
 			for (ushort i = 0; i < sliceCount; ++i)
 			{
 				uint index = Index + (i * mtu);
@@ -197,6 +270,7 @@ namespace GameFramework.Networking
 
 				BufferStream buffer = Packet.CreateOutgoingBufferStream(Constants.UDP.PACKET_HEADER_SIZE + length);
 				buffer.WriteUInt64(IncomingHolder.LastID);
+				buffer.WriteUInt32(ackMask);
 				buffer.WriteBool(IsReliable);
 				buffer.WriteUInt64(ID);
 				buffer.WriteUInt16(sliceCount);
@@ -207,53 +281,6 @@ namespace GameFramework.Networking
 			}
 
 			return pakcet;
-		}
-	}
-
-	class UDPPacketsHolder<T> where T : UDPPacket
-	{
-		public class PacketMap : SortedDictionary<ulong, T>
-		{ }
-
-		public PacketMap PacketsMap
-		{
-			get;
-			private set;
-		}
-
-		public ulong LastID
-		{
-			get;
-			private set;
-		}
-
-		public UDPPacketsHolder()
-		{
-			PacketsMap = new PacketMap();
-			LastID = 1;
-		}
-
-		public T GetPacket(ulong ID)
-		{
-			if (PacketsMap.ContainsKey(ID))
-				return PacketsMap[ID];
-
-			return null;
-		}
-
-		public void AddPacket(T Packet)
-		{
-			PacketsMap[Packet.ID] = Packet;
-		}
-
-		public void SetLastID(ulong ID)
-		{
-			LastID = ID;
-		}
-
-		public void IncreaseLastID()
-		{
-			++LastID;
 		}
 	}
 

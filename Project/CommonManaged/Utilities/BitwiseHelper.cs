@@ -7,12 +7,20 @@ namespace GameFramework.Common.Utilities
 		{
 			return (Mask | Bit);
 		}
+		public static uint Enable(uint Mask, uint Bit)
+		{
+			return (Mask | Bit);
+		}
 		public static long Enable(long Mask, long Bit)
 		{
 			return (Mask | Bit);
 		}
 
 		public static int Disable(int Mask, int Bit)
+		{
+			return Mask ^ (Mask & Bit);
+		}
+		public static uint Disable(uint Mask, uint Bit)
 		{
 			return Mask ^ (Mask & Bit);
 		}
@@ -25,12 +33,20 @@ namespace GameFramework.Common.Utilities
 		{
 			return (Mask ^ Bit);
 		}
+		public static uint Toggle(uint Mask, uint Bit)
+		{
+			return (Mask ^ Bit);
+		}
 		public static long Toggle(long Mask, long Bit)
 		{
 			return (Mask ^ Bit);
 		}
 
 		public static bool IsEnabled(int Mask, int Bit)
+		{
+			return (Mask == Bit || (Mask & Bit) != 0);
+		}
+		public static bool IsEnabled(uint Mask, uint Bit)
 		{
 			return (Mask == Bit || (Mask & Bit) != 0);
 		}
