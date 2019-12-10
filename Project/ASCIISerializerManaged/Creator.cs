@@ -125,12 +125,7 @@ namespace GameFramework.ASCIISerializer
 					else if (member is PropertyInfo)
 						memberType = ((PropertyInfo)member).PropertyType;
 
-					object value = Object.Get<object>(member.Name);
-
-					if (value is ISerializeData)
-						value = Bind((ISerializeData)value, memberType);
-					else
-						value = Convert.ChangeType(value, memberType);
+					object value = Cast(Object.Get<object>(member.Name), memberType);
 
 					if (member is FieldInfo)
 						((FieldInfo)member).SetValue(obj, value);
@@ -146,20 +141,17 @@ namespace GameFramework.ASCIISerializer
 				Array obj = (Array)Activator.CreateInstance(Type, (int)Array.Count);
 
 				for (uint i = 0; i < Array.Count; ++i)
-				{
-					object value = Array.Get<object>(i);
-
-					Type elementType = Type.GetElementType();
-
-					if (value is ISerializeData)
-						value = Bind((ISerializeData)value, Type.GetElementType());
-					else
-						value = Convert.ChangeType(value, elementType);
-
-					obj.SetValue(value, i);
-				}
+					obj.SetValue(Cast(Array.Get<object>(i), Type.GetElementType()), i);
 
 				return obj;
+			}
+
+			private static object Cast(object Value, Type Type)
+			{
+				if (Value is ISerializeData)
+					return Bind((ISerializeData)Value, Type);
+
+				return Convert.ChangeType(Value, Type);
 			}
 		}
 

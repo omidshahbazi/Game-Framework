@@ -12,6 +12,11 @@ namespace MathParserTest
 {
 	class Program
 	{
+		class obj1
+		{
+			int a;
+		}
+
 		class Obj
 		{
 			int a = 0;
@@ -21,12 +26,13 @@ namespace MathParserTest
 				private set;
 			}
 
-			int[] vals;
+			obj1[] vals;
 		}
 
 		static void Main(string[] args)
 		{
-			Obj[] obj = Creator.Create<Obj[]>("[{\"a\":10,\"test\":\"omid\",\"vals\":[1, 4, 6]},{\"a\":2,\"test\":\"asghar\"},{\"a\":534,\"test\":\"ali\"}]");
+			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":\"omid\",\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}]}");
+			int[]b = Creator.Create<int[]>("[1, 3, 5]");
 
 
 			FileSystem.DataPath = "D:\\";
