@@ -12,8 +12,23 @@ namespace MathParserTest
 {
 	class Program
 	{
+		class Obj
+		{
+			int a = 0;
+			public string test
+			{
+				get;
+				private set;
+			}
+
+			int[] vals;
+		}
+
 		static void Main(string[] args)
 		{
+			Obj[] obj = Creator.Create<Obj[]>("[{\"a\":10,\"test\":\"omid\",\"vals\":[1, 4, 6]},{\"a\":2,\"test\":\"asghar\"},{\"a\":534,\"test\":\"ali\"}]");
+
+
 			FileSystem.DataPath = "D:\\";
 			if (!FileSystem.DirectoryExists("omid"))
 				FileSystem.CreateDirectory("omid");
