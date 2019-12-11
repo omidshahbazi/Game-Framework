@@ -31,9 +31,10 @@ namespace MathParserTest
 
 		static void Main(string[] args)
 		{
-			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":\"omid\",\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}]}");
+			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":null,\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}]}");
 			int[]b = Creator.Create<int[]>("[1, 3, 5]");
 
+			ISerializeArray d = Creator.Create<ISerializeArray>(b);
 
 			FileSystem.DataPath = "D:\\";
 			if (!FileSystem.DirectoryExists("omid"))

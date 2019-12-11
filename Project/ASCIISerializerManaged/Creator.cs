@@ -3,6 +3,7 @@ using GameFramework.ASCIISerializer.JSONSerializer;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace GameFramework.ASCIISerializer
 {
@@ -155,6 +156,94 @@ namespace GameFramework.ASCIISerializer
 			}
 		}
 
+		private static class ObjectSerializer
+		{
+			public static ISerializeData Serialize(object Instance)
+			{
+				if (Instance == null)
+					throw new NullReferenceException("Instance is null");
+
+				Type type = Instance.GetType();
+
+				if (type.IsArray)
+					return SerializeArray(Instance);
+
+				return SerializeObject(Instance);
+			}
+
+			private static ISerializeObject SerializeObject(object Instance)
+			{
+				ISerializeObject obj = Creator.Create<ISerializeObject>();
+
+				Type type = Instance.GetType();
+
+				List<MemberInfo> members = new List<MemberInfo>();
+				members.AddRange(type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+				members.AddRange(type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+
+				for (int i = 0; i < members.Count; ++i)
+				{
+					MemberInfo member = members[i];
+
+					object[] attribs = member.GetCustomAttributes(typeof(CompilerGeneratedAttribute), true);
+					if (attribs != null && attribs.Length != 0)
+						continue;
+
+					string name = member.Name;
+					object value = null;
+
+					if (member is FieldInfo)
+						value = ((FieldInfo)member).GetValue(Instance);
+					else if (member is PropertyInfo)
+						value = ((PropertyInfo)member).GetValue(Instance, null);
+
+					if (value == null)
+						obj.Set(name, (object)null);
+					else
+					{
+						Type valueType = value.GetType();
+
+						if (valueType.IsArray)
+							obj.Set(name, SerializeArray(value));
+						else if (valueType.IsPrimitive)
+							obj.Set(name, value);
+						else
+							obj.Set(name, SerializeObject(value));
+					}
+				}
+
+				return obj;
+			}
+
+			private static ISerializeArray SerializeArray(object Instance)
+			{
+				ISerializeArray arr = Creator.Create<ISerializeArray>();
+
+				Array array = (Array)Instance;
+
+				for (int i = 0; i < array.Length; ++i)
+				{
+					object value = array.GetValue(i);
+
+					if (value == null)
+						arr.Add((object)null);
+					else
+					{
+						Type valueType = value.GetType();
+
+						if (valueType.IsArray)
+							arr.Add(SerializeArray(value));
+						else if (valueType.IsPrimitive)
+							arr.Add(value);
+						else
+							arr.Add(SerializeObject(value));
+					}
+				}
+
+				return arr;
+			}
+		}
+
 		private static readonly JSONParser parser = new JSONParser();
 
 		public static T Create<T>() where T : ISerializeData
@@ -163,6 +252,11 @@ namespace GameFramework.ASCIISerializer
 				return (T)(ISerializeData)new JSONSerializeObject(null);
 			else
 				return (T)(ISerializeData)new JSONSerializeArray(null);
+		}
+
+		public static T Create<T>(object Instance) where T : ISerializeData
+		{
+			return (T)ObjectSerializer.Serialize(Instance);
 		}
 
 		public static T Create<T>(string Data)
