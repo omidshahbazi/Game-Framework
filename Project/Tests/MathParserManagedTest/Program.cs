@@ -17,6 +17,12 @@ namespace MathParserTest
 			int a;
 		}
 
+		enum infos
+		{
+			element1,
+			element2
+		}
+
 		class Obj
 		{
 			int a = 0;
@@ -26,15 +32,17 @@ namespace MathParserTest
 				private set;
 			}
 
+			infos Info;
+
 			obj1[] vals;
 		}
 
 		static void Main(string[] args)
 		{
-			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":null,\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}]}");
-			int[]b = Creator.Create<int[]>("[1, 3, 5]");
+			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":null,\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}], \"Info\":\"element2\"}");
+			int[] b = Creator.Create<int[]>("[1, 3, 5]");
 
-			ISerializeArray d = Creator.Create<ISerializeArray>(b);
+			ISerializeObject d = Creator.Create<ISerializeObject>(obj);
 
 			FileSystem.DataPath = "D:\\";
 			if (!FileSystem.DirectoryExists("omid"))

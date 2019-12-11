@@ -152,6 +152,9 @@ namespace GameFramework.ASCIISerializer
 				if (Value is ISerializeData)
 					return Bind((ISerializeData)Value, Type);
 
+				if (Type.IsEnum)
+					return Enum.Parse(Type, Value.ToString());
+
 				return Convert.ChangeType(Value, Type);
 			}
 		}
@@ -207,6 +210,8 @@ namespace GameFramework.ASCIISerializer
 							obj.Set(name, SerializeArray(value));
 						else if (valueType.IsPrimitive)
 							obj.Set(name, value);
+						else if (valueType.IsEnum)
+							obj.Set(name, value.ToString());
 						else
 							obj.Set(name, SerializeObject(value));
 					}
@@ -235,6 +240,8 @@ namespace GameFramework.ASCIISerializer
 							arr.Add(SerializeArray(value));
 						else if (valueType.IsPrimitive)
 							arr.Add(value);
+						else if (valueType.IsEnum)
+							arr.Add(value.ToString());
 						else
 							arr.Add(SerializeObject(value));
 					}
