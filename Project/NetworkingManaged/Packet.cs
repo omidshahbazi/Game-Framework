@@ -182,9 +182,11 @@ namespace GameFramework.Networking
 		{
 			uint mask = 0;
 
-			for (uint i = 0; i < sizeof(uint); ++i)
+			ushort bitCount = sizeof(uint) * 8;
+
+			for (ushort i = 0; i < bitCount; ++i)
 			{
-				uint offset = i + 1;
+				ushort offset = (ushort)(i + 1);
 
 				if (offset > IncomingHolder.LastID)
 					break;
