@@ -105,7 +105,6 @@ namespace GameFramework.Networking
 		{
 			ulong lastAckID = Buffer.ReadUInt64();
 			uint ackMask = Buffer.ReadUInt32();
-			byte[] ackMaskBytes = System.BitConverter.GetBytes(ackMask);
 			bool isReliable = Buffer.ReadBool();
 			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();
