@@ -11,40 +11,40 @@ namespace GameFramework::Common::Utilities
 	static class COMMON_API BitwiseHelper
 	{
 	public:
-		static int32_t Enable(int32_t Mask, int32_t Bit)
+		static int32_t Enable(int32_t Mask, int32_t BitIndex)
 		{
-			return (Mask | Bit);
+			return Enable((int64_t)Mask, (int64_t)BitIndex);
 		}
-		static long Enable(int64_t Mask, int64_t Bit)
+		static long Enable(int64_t Mask, int64_t BitIndex)
 		{
-			return (Mask | Bit);
-		}
-
-		static int32_t Disable(int32_t Mask, int32_t Bit)
-		{
-			return Mask ^ (Mask & Bit);
-		}
-		static long Disable(int64_t Mask, int64_t Bit)
-		{
-			return Mask ^ (Mask & Bit);
+			return (Mask | (1 << BitIndex));
 		}
 
-		static int32_t Toggle(int32_t Mask, int32_t Bit)
+		static int32_t Disable(int32_t Mask, int32_t BitIndex)
 		{
-			return (Mask ^ Bit);
+			return Disable((int64_t)Mask, (int64_t)BitIndex);
 		}
-		static long Toggle(int64_t Mask, int64_t Bit)
+		static long Disable(int64_t Mask, int64_t BitIndex)
 		{
-			return (Mask ^ Bit);
+			return (Mask ^ (1 << BitIndex));
 		}
 
-		static bool IsEnabled(int32_t Mask, int32_t Bit)
+		static int32_t Toggle(int32_t Mask, int32_t BitIndex)
 		{
-			return (Mask == Bit || (Mask & Bit) != 0);
+			return Toggle((int64_t)Mask, (int64_t)BitIndex);
 		}
-		static bool IsEnabled(int64_t Mask, int64_t Bit)
+		static long Toggle(int64_t Mask, int64_t BitIndex)
 		{
-			return (Mask == Bit || (Mask & Bit) != 0);
+			return (Mask ^ (1 << BitIndex));
+		}
+
+		static bool IsEnabled(int32_t Mask, int32_t BitIndex)
+		{
+			return IsEnabled((int64_t)Mask, (int64_t)BitIndex);
+		}
+		static bool IsEnabled(int64_t Mask, int64_t BitIndex)
+		{
+			return (Mask & (1 << BitIndex) != 0);
 		}
 	};
 }

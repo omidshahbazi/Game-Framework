@@ -52,7 +52,7 @@ namespace GameFramework.Common.Utilities
 		}
 		public static bool IsEnabled(long Mask, ushort BitIndex)
 		{
-			return (Mask == BitIndex || (Mask & BitIndex) != 0);
+			return (Mask & (1L << BitIndex) != 0);
 		}
 	}
 }
