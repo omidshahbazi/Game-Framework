@@ -3,56 +3,56 @@ namespace GameFramework.Common.Utilities
 {
 	public static class BitwiseHelper
 	{
-		public static int Enable(int Mask, int Bit)
+		public static int Enable(int Mask, ushort BitIndex)
 		{
-			return (Mask | Bit);
+			return (int)(Enable((long)Mask, BitIndex));
 		}
-		public static uint Enable(uint Mask, uint Bit)
+		public static uint Enable(uint Mask, ushort BitIndex)
 		{
-			return (Mask | Bit);
+			return (uint)(Enable((long)Mask, BitIndex));
 		}
-		public static long Enable(long Mask, long Bit)
+		public static long Enable(long Mask, ushort BitIndex)
 		{
-			return (Mask | Bit);
-		}
-
-		public static int Disable(int Mask, int Bit)
-		{
-			return Mask ^ (Mask & Bit);
-		}
-		public static uint Disable(uint Mask, uint Bit)
-		{
-			return Mask ^ (Mask & Bit);
-		}
-		public static long Disable(long Mask, long Bit)
-		{
-			return Mask ^ (Mask & Bit);
+			return (Mask | (1L << BitIndex));
 		}
 
-		public static int Toggle(int Mask, int Bit)
+		public static int Disable(int Mask, ushort BitIndex)
 		{
-			return (Mask ^ Bit);
+			return (int)(Disable((long)Mask, BitIndex));
 		}
-		public static uint Toggle(uint Mask, uint Bit)
+		public static uint Disable(uint Mask, ushort BitIndex)
 		{
-			return (Mask ^ Bit);
+			return (uint)(Disable((long)Mask, BitIndex));
 		}
-		public static long Toggle(long Mask, long Bit)
+		public static long Disable(long Mask, ushort BitIndex)
 		{
-			return (Mask ^ Bit);
+			return (Mask & (1L << BitIndex));
 		}
 
-		public static bool IsEnabled(int Mask, int Bit)
+		public static int Toggle(int Mask, ushort BitIndex)
 		{
-			return (Mask == Bit || (Mask & Bit) != 0);
+			return (int)(Toggle((long)Mask, BitIndex));
 		}
-		public static bool IsEnabled(uint Mask, uint Bit)
+		public static uint Toggle(uint Mask, ushort BitIndex)
 		{
-			return (Mask == Bit || (Mask & Bit) != 0);
+			return (uint)(Toggle((long)Mask, BitIndex));
 		}
-		public static bool IsEnabled(long Mask, long Bit)
+		public static long Toggle(long Mask, ushort BitIndex)
 		{
-			return (Mask == Bit || (Mask & Bit) != 0);
+			return (Mask ^ (1L << BitIndex));
+		}
+
+		public static bool IsEnabled(int Mask, ushort BitIndex)
+		{
+			return IsEnabled((long)Mask, BitIndex);
+		}
+		public static bool IsEnabled(uint Mask, ushort BitIndex)
+		{
+			return IsEnabled((long)Mask, BitIndex);
+		}
+		public static bool IsEnabled(long Mask, ushort BitIndex)
+		{
+			return (Mask == BitIndex || (Mask & BitIndex) != 0);
 		}
 	}
 }

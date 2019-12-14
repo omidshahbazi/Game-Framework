@@ -211,7 +211,7 @@ namespace GameFramework.ASCIISerializer
 
 						if (valueType.IsArray)
 							obj.Set(name, SerializeArray(value));
-						else if (valueType.IsPrimitive)
+						else if (valueType.IsPrimitive || valueType == typeof(string))
 							obj.Set(name, value);
 						else if (valueType.IsEnum)
 							obj.Set(name, value.ToString());
@@ -241,7 +241,7 @@ namespace GameFramework.ASCIISerializer
 
 						if (valueType.IsArray)
 							arr.Add(SerializeArray(value));
-						else if (valueType.IsPrimitive)
+						else if (valueType.IsPrimitive || valueType == typeof(string))
 							arr.Add(value);
 						else if (valueType.IsEnum)
 							arr.Add(value.ToString());
