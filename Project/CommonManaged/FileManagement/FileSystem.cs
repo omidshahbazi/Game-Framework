@@ -5,10 +5,18 @@ namespace GameFramework.Common.FileLayer
 {
 	public static class FileSystem
 	{
+		private static string dataPath;
+
 		public static string DataPath
 		{
-			get;
-			set;
+			get { return dataPath; }
+			set
+			{
+				if (!value.EndsWith("/") && !value.EndsWith("\\"))
+					value += "/";
+
+				dataPath = value.Replace('\\', '/');
+			}
 		}
 
 		public static string Read(string Path)
@@ -100,7 +108,7 @@ namespace GameFramework.Common.FileLayer
 
 		public static string[] GetFiles(string Path)
 		{
-			return Directory.GetFiles(DataPath + Path);
+			return GetFiles(Path, "*.*", SearchOption.TopDirectoryOnly);
 		}
 
 		public static string[] GetFiles(string Path, string SearchPattern, SearchOption SearchOption = SearchOption.AllDirectories)
@@ -108,7 +116,12 @@ namespace GameFramework.Common.FileLayer
 			if (!DirectoryExists(Path))
 				return null;
 
-			return Directory.GetFiles(DataPath + Path, SearchPattern, SearchOption);
+			string[] files = Directory.GetFiles(DataPath + Path, SearchPattern, SearchOption);
+
+			for (int i = 0; i < files.Length; ++i)
+				files[i] = files[i].Substring(DataPath.Length);
+
+			return files;
 		}
 
 		public static void RenameFile(string OldFilePath, string NewFileName)
@@ -120,25 +133,28 @@ namespace GameFramework.Common.FileLayer
 
 		public static void CopyAllFiles(string From, string To, bool Overwrite = false)
 		{
-			if (!Directory.Exists(To))
-				Directory.CreateDirectory(To);
+			string from = DataPath + From;
+			string to = DataPath + To;
 
-			string[] items = Directory.GetFiles(From);
+			if (!Directory.Exists(to))
+				Directory.CreateDirectory(to);
+
+			string[] items = Directory.GetFiles(from);
 
 			for (int i = 0; i < items.Length; i++)
 			{
-				string destPath = Path.Combine(To, Path.GetFileName(items[i]));
+				string destPath = Path.Combine(to, Path.GetFileName(items[i]));
 
 				File.Copy(items[i], destPath, Overwrite);
 			}
 
-			items = Directory.GetDirectories(From);
+			items = Directory.GetDirectories(from);
 
 			for (int i = 0; i < items.Length; i++)
 			{
 				string item = items[i];
-				string destDir = To + item.Substring(item.LastIndexOf('/'));
-				CopyAllFiles(items[i], Path.Combine(To, destDir), Overwrite);
+				string destDir = to + item.Substring(item.LastIndexOf('/'));
+				CopyAllFiles(items[i], Path.Combine(to, destDir), Overwrite);
 			}
 		}
 

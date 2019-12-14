@@ -89,6 +89,9 @@ namespace GameFramework.ASCIISerializer
 		{
 			public static T Bind<T>(ISerializeData Data)
 			{
+				if (Data == null)
+					throw new NullReferenceException("Data cannot be null");
+
 				return (T)Bind(Data, typeof(T));
 			}
 
@@ -164,7 +167,7 @@ namespace GameFramework.ASCIISerializer
 			public static ISerializeData Serialize(object Instance)
 			{
 				if (Instance == null)
-					throw new NullReferenceException("Instance is null");
+					throw new NullReferenceException("Instance cannot be null");
 
 				Type type = Instance.GetType();
 
