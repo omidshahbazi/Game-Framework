@@ -264,11 +264,6 @@ namespace GameFramework.ASCIISerializer
 				return (T)(ISerializeData)new JSONSerializeArray(null);
 		}
 
-		public static T Create<T>(object Instance) where T : ISerializeData
-		{
-			return (T)ObjectSerializer.Serialize(Instance);
-		}
-
 		public static T Create<T>(string Data)
 		{
 			Type type = typeof(T);
@@ -278,7 +273,22 @@ namespace GameFramework.ASCIISerializer
 			if (data is T)
 				return (T)data;
 
-			return ObjectBinder.Bind<T>(data);
+			return Bind<T>(data);
+		}
+
+		public static T Bind<T>(ISerializeData Data)
+		{
+			Type type = typeof(T);
+
+			if (Data is T)
+				return (T)Data;
+
+			return ObjectBinder.Bind<T>(Data);
+		}
+
+		public static T Serialize<T>(object Instance) where T : ISerializeData
+		{
+			return (T)ObjectSerializer.Serialize(Instance);
 		}
 
 		public static void Override<T>(T Data, T On) where T : ISerializeData
