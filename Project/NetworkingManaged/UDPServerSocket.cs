@@ -213,7 +213,6 @@ namespace GameFramework.Networking
 			ushort sliceCount = Buffer.ReadUInt16();
 			ushort sliceIndex = Buffer.ReadUInt16();
 
-			Console.WriteLine(lastAckID);
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
 
 			UDPClient client = (UDPClient)Sender;
@@ -239,16 +238,7 @@ namespace GameFramework.Networking
 					incomingHolder.SetLastID(packetID);
 
 				if (isReliable)
-				{
-					ulong prevID = 0;
-
-					var it = incomingHolder.PacketsMap.GetEnumerator();
-					while (it.MoveNext())
-					{
-						//if (it.Current.Key)
-						HandleReceivedBuffer(Sender, packet.Combine());
-					}
-				}
+					ProcessOrderedPackets(client, incomingHolder);
 				else
 					HandleReceivedBuffer(Sender, packet.Combine());
 			}
@@ -327,6 +317,44 @@ namespace GameFramework.Networking
 
 				HandleClientDisconnection(client);
 			}
+		}
+
+		private void ProcessOrderedPackets(UDPClient Sender, IncomingUDPPacketsHolder IncommingHolder)
+		{
+			if (IncommingHolder.PacketsMap.Count < 2)
+				return;
+
+			List<ulong> completedIDs = new List<ulong>();
+
+			var it = IncommingHolder.PacketsMap.GetEnumerator();
+			while (it.MoveNext())
+			{
+				ulong id = it.Current.Key;
+				IncomingUDPPacket packet = it.Current.Value;
+
+				if (!it.Current.Value.IsCompleted)
+					break;
+
+				if (id < IncommingHolder.PrevID)
+				{
+					completedIDs.Add(id);
+					continue;
+				}
+
+				if (id - IncommingHolder.PrevID > 1)
+					break;
+
+				Console.WriteLine(id);
+				HandleReceivedBuffer(Sender, packet.Combine());
+
+				IncommingHolder.SetPrevID(id);
+
+				completedIDs.Add(id);
+
+			} while (it.MoveNext()) ;
+
+			for (int i = 0; i < completedIDs.Count; ++i)
+				IncommingHolder.PacketsMap.Remove(completedIDs[i]);
 		}
 
 		private UDPClient GetOrAddClient(IPEndPoint EndPoint)

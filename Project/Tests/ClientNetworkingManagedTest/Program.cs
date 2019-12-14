@@ -13,7 +13,7 @@ namespace ClientNetworkingManagedTest
 			client = new UDPClientSocket();
 			Console.WriteLine("Client created");
 
-			client.PacketLossSimulation = 0.03F;
+			//client.PacketLossSimulation = 0.03F;
 
 			client.MultithreadedCallbacks = true;
 			client.MultithreadedReceive = true;
@@ -33,7 +33,8 @@ namespace ClientNetworkingManagedTest
 
 				System.Threading.Thread.Sleep(100);
 
-				client.Send(new byte[] { 1, 2, 3 }, false);
+				if (client.IsConnected)
+					client.Send(new byte[] { 1, 2, 3 }, true);
 			}
 		}
 
@@ -59,7 +60,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnBufferReceived " + Buffer.Size);
 
-			client.Send(Buffer.Buffer, false);
+			//client.Send(Buffer.Buffer, true);
 		}
 	}
 }

@@ -49,7 +49,7 @@ namespace ServerNetworkingManagedTest
 		{
 			Console.WriteLine("Server_OnBufferReceived " + Sender.EndPoint + " " + Buffer.Size);
 
-			server.Send(Sender, Buffer.Buffer, false);
+			//server.Send(Sender, Buffer.Buffer, true);
 		}
 	}
 }

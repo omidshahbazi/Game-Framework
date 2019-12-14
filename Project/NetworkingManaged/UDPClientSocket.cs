@@ -1,6 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
 using GameFramework.Common.Timing;
+using System.Collections.Generic;
 using System.Net;
 
 namespace GameFramework.Networking
@@ -47,15 +48,39 @@ namespace GameFramework.Networking
 		{
 			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
 			IncomingUDPPacketsHolder incomingHolder = (Reliable ? incomingReliablePacketHolder : incomingPacketHolder);
-
-			System.Console.WriteLine(incomingHolder.LastID);
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, MTU, Reliable);
-
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID + 1, incomingHolder, Buffer, Index, Length, MTU, Reliable);
+			outgoingHolder.PacketsMap[packet.ID] = packet;
+			System.Console.WriteLine(packet.ID);
 			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
 				SendInternal(packet.SliceBuffers[i]);
 
+			packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, MTU, Reliable);
+			outgoingHolder.PacketsMap[packet.ID] = packet;
+			System.Console.WriteLine(packet.ID);
+			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
+				SendInternal(packet.SliceBuffers[i]);
+
+
+			outgoingHolder.IncreaseLastID();
 			outgoingHolder.IncreaseLastID();
 		}
+
+		//public virtual void Send(byte[] Buffer, uint Index, uint Length, bool Reliable = true)
+		//{
+		//	OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
+		//	IncomingUDPPacketsHolder incomingHolder = (Reliable ? incomingReliablePacketHolder : incomingPacketHolder);
+
+		//	OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, MTU, Reliable);
+
+		//	outgoingHolder.PacketsMap[packet.ID] = packet;
+
+
+		//	System.Console.WriteLine(packet.ID);
+		//	for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
+		//		SendInternal(packet.SliceBuffers[i]);
+
+		//	outgoingHolder.IncreaseLastID();
+		//}
 
 		protected virtual void SendInternal(BufferStream Buffer)
 		{
@@ -135,11 +160,43 @@ namespace GameFramework.Networking
 					incomingHolder.SetLastID(packetID);
 
 				if (isReliable)
-				{
-				}
+					ProcessOrderedPackets(incomingHolder);
 				else
 					HandleReceivedBuffer(packet.Combine());
 			}
+		}
+
+		private void ProcessOrderedPackets(IncomingUDPPacketsHolder IncommingHolder)
+		{
+			List<ulong> completedIDs = new List<ulong>();
+
+			var it = IncommingHolder.PacketsMap.GetEnumerator();
+			if (!it.MoveNext())
+				return;
+
+			ulong prevID = it.Current.Key;
+
+			do
+			{
+				ulong id = it.Current.Key;
+				IncomingUDPPacket packet = it.Current.Value;
+
+				if (!it.Current.Value.IsCompleted)
+					break;
+
+				if (id - prevID > 1)
+					break;
+
+				HandleReceivedBuffer(packet.Combine());
+
+				prevID = id;
+
+				completedIDs.Add(id);
+
+			} while (it.MoveNext());
+
+			for (int i = 0; i < completedIDs.Count; ++i)
+				IncommingHolder.PacketsMap.Remove(completedIDs[i]);
 		}
 
 		protected override BufferStream GetPingPacket()

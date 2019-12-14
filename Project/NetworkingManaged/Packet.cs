@@ -134,7 +134,7 @@ namespace GameFramework.Networking
 
 	class UDPPacketsHolder<T> where T : UDPPacket
 	{
-		public class PacketMap : Dictionary<ulong, T>
+		public class PacketMap : SortedDictionary<ulong, T>
 		{ }
 
 		public PacketMap PacketsMap
@@ -278,9 +278,20 @@ namespace GameFramework.Networking
 
 	class IncomingUDPPacketsHolder : UDPPacketsHolder<IncomingUDPPacket>
 	{
+		public ulong PrevID
+		{
+			get;
+			private set;
+		}
+
 		public void SetLastID(ulong Value)
 		{
 			LastID = Value;
+		}
+
+		public void SetPrevID(ulong Value)
+		{
+			PrevID = Value;
 		}
 	}
 
