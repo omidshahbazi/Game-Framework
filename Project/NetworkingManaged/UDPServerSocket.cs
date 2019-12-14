@@ -321,9 +321,6 @@ namespace GameFramework.Networking
 
 		private void ProcessOrderedPackets(UDPClient Sender, IncomingUDPPacketsHolder IncommingHolder)
 		{
-			if (IncommingHolder.PacketsMap.Count < 2)
-				return;
-
 			List<ulong> completedIDs = new List<ulong>();
 
 			var it = IncommingHolder.PacketsMap.GetEnumerator();
@@ -351,7 +348,7 @@ namespace GameFramework.Networking
 
 				completedIDs.Add(id);
 
-			} while (it.MoveNext()) ;
+			}
 
 			for (int i = 0; i < completedIDs.Count; ++i)
 				IncommingHolder.PacketsMap.Remove(completedIDs[i]);

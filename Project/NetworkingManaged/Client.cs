@@ -78,8 +78,7 @@ namespace GameFramework.Networking
 	{
 		public virtual bool IsReady
 		{
-			//get { return (Time.CurrentEpochTime - Statistics.LastTouchTime < Constants.PING_TIME * 2); }
-			get { return true; }
+			get { return (Time.CurrentEpochTime - Statistics.LastTouchTime < Constants.PING_TIME * 2); }
 		}
 
 		public NetowrkingStatistics Statistics
