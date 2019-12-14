@@ -146,13 +146,7 @@ namespace GameFramework.Networking
 		public ulong LastID
 		{
 			get;
-			private set;
-		}
-
-		public ulong AckMask
-		{
-			get;
-			private set;
+			protected set;
 		}
 
 		public UDPPacketsHolder()
@@ -172,21 +166,6 @@ namespace GameFramework.Networking
 		public void AddPacket(T Packet)
 		{
 			PacketsMap[Packet.ID] = Packet;
-		}
-
-		public void SetLastID(ulong Value)
-		{
-			LastID = Value;
-		}
-
-		public void SetAckMask(uint Value)
-		{
-			AckMask = Value;
-		}
-
-		public void IncreaseLastID()
-		{
-			++LastID;
 		}
 
 		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder)
@@ -298,8 +277,40 @@ namespace GameFramework.Networking
 	}
 
 	class IncomingUDPPacketsHolder : UDPPacketsHolder<IncomingUDPPacket>
-	{ }
+	{
+		public void SetLastID(ulong Value)
+		{
+			LastID = Value;
+		}
+	}
 
 	class OutgoingUDPPacketsHolder : UDPPacketsHolder<OutgoingUDPPacket>
-	{ }
+	{
+		public ulong LastAckID
+		{
+			get;
+			private set;
+		}
+
+		public uint AckMask
+		{
+			get;
+			private set;
+		}
+
+		public void IncreaseLastID()
+		{
+			++LastID;
+		}
+
+		public void SetLastAckID(ulong Value)
+		{
+			LastAckID = Value;
+		}
+
+		public void SetAckMask(uint Value)
+		{
+			AckMask = Value;
+		}
+	}
 }

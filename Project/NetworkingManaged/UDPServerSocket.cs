@@ -208,18 +208,18 @@ namespace GameFramework.Networking
 		{
 			ulong lastAckID = Buffer.ReadUInt64();
 			uint ackMask = Buffer.ReadUInt32();
-			byte[] bits = Common.Utilities.BitwiseHelper.GetBits(ackMask);
 			bool isReliable = Buffer.ReadBool();
 			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();
 			ushort sliceIndex = Buffer.ReadUInt16();
 
+			Console.WriteLine(lastAckID);
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
 
 			UDPClient client = (UDPClient)Sender;
 
 			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
-			outgoingHolder.SetLastID(lastAckID);
+			outgoingHolder.SetLastAckID(lastAckID);
 			outgoingHolder.SetAckMask(ackMask);
 
 			IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
