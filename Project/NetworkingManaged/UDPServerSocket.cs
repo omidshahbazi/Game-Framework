@@ -147,7 +147,7 @@ namespace GameFramework.Networking
 
 			double time = Time.CurrentEpochTime;
 
-			Client.UpdateLastTouchTime(time);
+			Client.Statistics.SetLastTouchTime(time);
 
 			UDPClient client = (UDPClient)Client;
 
@@ -170,7 +170,7 @@ namespace GameFramework.Networking
 				lock (clients)
 					clients.Add(client);
 
-				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(PacketRate);
+				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(PacketCountRate);
 
 				SendInternal(Client, buffer);
 			}
@@ -181,7 +181,7 @@ namespace GameFramework.Networking
 
 				double sendTime = Buffer.ReadFloat64();
 
-				Client.UpdateLatency((uint)((time - sendTime) * 1000));
+				Client.Statistics.SetLatency((uint)((time - sendTime) * 1000));
 
 				BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
@@ -197,6 +197,8 @@ namespace GameFramework.Networking
 			if (!client.IsReady)
 				return false;
 
+			client.Statistics.AddBandwidthOut(Command.Buffer.Size);
+
 			SendOverSocket(client.EndPoint, Command.Buffer);
 
 			return true;
@@ -211,9 +213,14 @@ namespace GameFramework.Networking
 			ushort sliceCount = Buffer.ReadUInt16();
 			ushort sliceIndex = Buffer.ReadUInt16();
 
+			Console.WriteLine(lastAckID);
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
 
 			UDPClient client = (UDPClient)Sender;
+
+			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
+			outgoingHolder.SetLastAckID(lastAckID);
+			outgoingHolder.SetAckMask(ackMask);
 
 			IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
 
@@ -228,7 +235,8 @@ namespace GameFramework.Networking
 
 			if (packet.IsCompleted)
 			{
-				incomingHolder.SetLastID(packetID);
+				if (incomingHolder.LastID < packetID)
+					incomingHolder.SetLastID(packetID);
 
 				if (isReliable)
 				{
@@ -267,7 +275,7 @@ namespace GameFramework.Networking
 
 				UDPClient client = GetOrAddClient(ipEndPoint);
 
-				client.AddBandwidthInFromLastSecond((uint)size);
+				client.Statistics.AddRecievedPacketFromLastSecond();
 
 				ProcessReceivedBuffer(client, (uint)size);
 			}

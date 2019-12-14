@@ -53,7 +53,7 @@ namespace GameFramework.Networking
 		{
 			double time = Time.CurrentEpochTime;
 
-			LastTouchTime = time;
+			Statistics.SetLastTouchTime(time);
 
 			byte control = Buffer.ReadByte();
 

@@ -12,7 +12,6 @@ namespace ServerNetworkingManagedTest
 		{
 			server = new UDPServerSocket();
 			Console.WriteLine("Server created");
-			server.PacketRate = 10000;
 
 			server.MultithreadedCallbacks = true;
 			server.MultithreadedReceive = true;

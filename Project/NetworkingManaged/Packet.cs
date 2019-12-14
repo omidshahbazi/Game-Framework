@@ -42,7 +42,7 @@ namespace GameFramework.Networking
 			return buffer;
 		}
 
-		public static BufferStream CreateHandshakeBackBufferStream(uint PacketRate)
+		public static BufferStream CreateHandshakeBackBufferStream(uint PacketCountRate)
 		{
 			uint length = HEADER_SIZE + sizeof(uint);
 
@@ -50,7 +50,7 @@ namespace GameFramework.Networking
 			buffer.ResetWrite();
 			buffer.WriteUInt32(length);
 			buffer.WriteBytes(Constants.Control.HANDSHAKE_BACK);
-			buffer.WriteUInt32(PacketRate);
+			buffer.WriteUInt32(PacketCountRate);
 
 			return buffer;
 		}
@@ -146,7 +146,7 @@ namespace GameFramework.Networking
 		public ulong LastID
 		{
 			get;
-			private set;
+			protected set;
 		}
 
 		public UDPPacketsHolder()
@@ -166,16 +166,6 @@ namespace GameFramework.Networking
 		public void AddPacket(T Packet)
 		{
 			PacketsMap[Packet.ID] = Packet;
-		}
-
-		public void SetLastID(ulong ID)
-		{
-			LastID = ID;
-		}
-
-		public void IncreaseLastID()
-		{
-			++LastID;
 		}
 
 		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder)
@@ -287,8 +277,40 @@ namespace GameFramework.Networking
 	}
 
 	class IncomingUDPPacketsHolder : UDPPacketsHolder<IncomingUDPPacket>
-	{ }
+	{
+		public void SetLastID(ulong Value)
+		{
+			LastID = Value;
+		}
+	}
 
 	class OutgoingUDPPacketsHolder : UDPPacketsHolder<OutgoingUDPPacket>
-	{ }
+	{
+		public ulong LastAckID
+		{
+			get;
+			private set;
+		}
+
+		public uint AckMask
+		{
+			get;
+			private set;
+		}
+
+		public void IncreaseLastID()
+		{
+			++LastID;
+		}
+
+		public void SetLastAckID(ulong Value)
+		{
+			LastAckID = Value;
+		}
+
+		public void SetAckMask(uint Value)
+		{
+			AckMask = Value;
+		}
+	}
 }

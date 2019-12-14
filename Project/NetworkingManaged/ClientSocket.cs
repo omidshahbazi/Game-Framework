@@ -61,18 +61,6 @@ namespace GameFramework.Networking
 			get { return Time.CurrentEpochTime + timeOffset; }
 		}
 
-		public double LastTouchTime
-		{
-			get;
-			protected set;
-		}
-
-		public uint Latency
-		{
-			get;
-			private set;
-		}
-
 		public event ConnectionEventHandler OnConnected = null;
 		public event ConnectionEventHandler OnConnectionFailed = null;
 		public event ConnectionEventHandler OnDisconnected = null;
@@ -84,9 +72,9 @@ namespace GameFramework.Networking
 
 		public override void Service()
 		{
-			if (IsConnected && LastTouchTime + Constants.PING_TIME <= Time.CurrentEpochTime)
+			if (IsConnected && Statistics.LastTouchTime + Constants.PING_TIME <= Time.CurrentEpochTime)
 			{
-				LastTouchTime = Time.CurrentEpochTime;
+				Statistics.SetLastTouchTime(Time.CurrentEpochTime);
 
 				SendPing();
 			}
@@ -138,7 +126,7 @@ namespace GameFramework.Networking
 					size = Socket.Receive(ReceiveBuffer);
 				}
 
-				BandwidthIn += (uint)size;
+				Statistics.AddBandwidthIn((uint)size);
 
 				uint index = 0;
 				while (index < size)
@@ -262,7 +250,7 @@ namespace GameFramework.Networking
 
 			double sendTime = Buffer.ReadFloat64();
 
-			Latency = (uint)((time - sendTime) * 1000);
+			Statistics.SetLatency((uint)((time - sendTime) * 1000));
 
 			double t0 = lastPingTime;
 			double t1 = sendTime;

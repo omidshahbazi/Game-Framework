@@ -83,7 +83,7 @@ namespace GameFramework.Networking
 			get;
 		}
 
-		public uint PacketRate
+		public uint PacketCountRate
 		{
 			get;
 			set;
@@ -97,7 +97,7 @@ namespace GameFramework.Networking
 		{
 			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
 
-			PacketRate = Constants.DEFAULT_PACKET_RATE;
+			PacketCountRate = Constants.DEFAULT_PACKET_COUNT_RATE;
 		}
 
 		public void Bind(string Host, ushort Port)
@@ -149,7 +149,8 @@ namespace GameFramework.Networking
 
 		protected void ProcessReceivedBuffer(Client Client, uint Size)
 		{
-			BandwidthIn += Size;
+			Statistics.AddBandwidthIn(Size);
+			Client.Statistics.AddBandwidthIn(Size);
 
 			uint index = 0;
 			while (index < Size)
@@ -246,9 +247,9 @@ namespace GameFramework.Networking
 			{
 				Client client = clients[i];
 
-				if (client.BandwidthInFromLastSecond <= PacketRate)
+				if (client.Statistics.RecievedPacketFromLastSecond <= PacketCountRate)
 				{
-					client.ResetBandwidthInFromLastSecond();
+					client.Statistics.ResetRecievedPacketFromLastSecond();
 
 					continue;
 				}

@@ -89,6 +89,9 @@ namespace GameFramework.ASCIISerializer
 		{
 			public static T Bind<T>(ISerializeData Data)
 			{
+				if (Data == null)
+					throw new NullReferenceException("Data cannot be null");
+
 				return (T)Bind(Data, typeof(T));
 			}
 
@@ -164,7 +167,7 @@ namespace GameFramework.ASCIISerializer
 			public static ISerializeData Serialize(object Instance)
 			{
 				if (Instance == null)
-					throw new NullReferenceException("Instance is null");
+					throw new NullReferenceException("Instance cannot be null");
 
 				Type type = Instance.GetType();
 
@@ -261,11 +264,6 @@ namespace GameFramework.ASCIISerializer
 				return (T)(ISerializeData)new JSONSerializeArray(null);
 		}
 
-		public static T Create<T>(object Instance) where T : ISerializeData
-		{
-			return (T)ObjectSerializer.Serialize(Instance);
-		}
-
 		public static T Create<T>(string Data)
 		{
 			Type type = typeof(T);
@@ -275,7 +273,22 @@ namespace GameFramework.ASCIISerializer
 			if (data is T)
 				return (T)data;
 
-			return ObjectBinder.Bind<T>(data);
+			return Bind<T>(data);
+		}
+
+		public static T Bind<T>(ISerializeData Data)
+		{
+			Type type = typeof(T);
+
+			if (Data is T)
+				return (T)Data;
+
+			return ObjectBinder.Bind<T>(Data);
+		}
+
+		public static T Serialize<T>(object Instance) where T : ISerializeData
+		{
+			return (T)ObjectSerializer.Serialize(Instance);
 		}
 
 		public static void Override<T>(T Data, T On) where T : ISerializeData

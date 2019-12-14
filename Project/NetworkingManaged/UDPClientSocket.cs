@@ -48,6 +48,7 @@ namespace GameFramework.Networking
 			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
 			IncomingUDPPacketsHolder incomingHolder = (Reliable ? incomingReliablePacketHolder : incomingPacketHolder);
 
+			System.Console.WriteLine(incomingHolder.LastID);
 			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, MTU, Reliable);
 
 			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
@@ -77,7 +78,7 @@ namespace GameFramework.Networking
 
 		protected override void HandleIncommingBuffer(BufferStream Buffer)
 		{
-			LastTouchTime = Time.CurrentEpochTime;
+			Statistics.SetLatency((uint)Time.CurrentEpochTime);
 
 			byte control = Buffer.ReadByte();
 
@@ -105,12 +106,17 @@ namespace GameFramework.Networking
 		{
 			ulong lastAckID = Buffer.ReadUInt64();
 			uint ackMask = Buffer.ReadUInt32();
+			byte[] bits = Common.Utilities.BitwiseHelper.GetBits(ackMask);
 			bool isReliable = Buffer.ReadBool();
 			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();
 			ushort sliceIndex = Buffer.ReadUInt16();
 
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
+
+			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
+			outgoingHolder.SetLastAckID(lastAckID);
+			outgoingHolder.SetAckMask(ackMask);
 
 			IncomingUDPPacketsHolder incomingHolder = (isReliable ? incomingReliablePacketHolder : incomingPacketHolder);
 
@@ -125,7 +131,8 @@ namespace GameFramework.Networking
 
 			if (packet.IsCompleted)
 			{
-				incomingHolder.SetLastID(packetID);
+				if (incomingHolder.LastID < packetID)
+					incomingHolder.SetLastID(packetID);
 
 				if (isReliable)
 				{

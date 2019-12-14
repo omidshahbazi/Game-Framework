@@ -31,7 +31,7 @@ namespace GameFramework.Networking
 
 		public const uint UDP_MAX_MTU = 1500;
 
-		public const uint DEFAULT_PACKET_RATE = 1024;
+		public const uint DEFAULT_PACKET_COUNT_RATE = 32;
 
 		public static readonly Random Random = new Random();
 	}
