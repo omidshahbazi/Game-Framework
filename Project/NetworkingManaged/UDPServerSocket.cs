@@ -197,7 +197,7 @@ namespace GameFramework.Networking
 			if (!client.IsReady)
 				return false;
 
-			client.Statistics.AddBandwidthIn(Command.Buffer.Size);
+			client.Statistics.AddBandwidthOut(Command.Buffer.Size);
 
 			SendOverSocket(client.EndPoint, Command.Buffer);
 
@@ -208,6 +208,7 @@ namespace GameFramework.Networking
 		{
 			ulong lastAckID = Buffer.ReadUInt64();
 			uint ackMask = Buffer.ReadUInt32();
+			byte[] bits = Common.Utilities.BitwiseHelper.GetBits(ackMask);
 			bool isReliable = Buffer.ReadBool();
 			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();

@@ -52,7 +52,18 @@ namespace GameFramework.Common.Utilities
 		}
 		public static bool IsEnabled(long Mask, ushort BitIndex)
 		{
-			return (Mask & (1L << BitIndex) != 0);
+			return ((Mask & (1L << BitIndex)) != 0);
+		}
+
+		public static byte[] GetBits(uint Value)
+		{
+			ushort bitCount = sizeof(uint) * 8;
+
+			byte[] result = new byte[bitCount];
+			for (ushort i = 0; i < bitCount; ++i)
+				result[i] = (byte)((Value & (1 << i)) == 0 ? 0 : 1);
+
+			return result;
 		}
 	}
 }

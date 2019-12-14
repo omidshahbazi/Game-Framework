@@ -128,6 +128,8 @@ namespace GameFramework.Networking
 
 			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 
+			Statistics = new NetowrkingStatistics();
+
 			MultithreadedCallbacks = true;
 			MultithreadedReceive = true;
 			MultithreadedSend = true;

@@ -44,7 +44,7 @@ namespace GameFramework::Common::Utilities
 		}
 		static bool IsEnabled(int64_t Mask, int64_t BitIndex)
 		{
-			return (Mask & (1 << BitIndex) != 0);
+			return ((Mask & (1 << BitIndex)) != 0);
 		}
 	};
 }

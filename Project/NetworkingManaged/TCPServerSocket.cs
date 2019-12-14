@@ -222,7 +222,7 @@ namespace GameFramework.Networking
 			if (!client.IsReady)
 				return false;
 
-			client.Statistics.AddBandwidthIn(Command.Buffer.Size);
+			client.Statistics.AddBandwidthOut(Command.Buffer.Size);
 
 			SendOverSocket(client.Socket, Command.Buffer);
 
