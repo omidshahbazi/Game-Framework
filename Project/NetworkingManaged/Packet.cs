@@ -149,6 +149,12 @@ namespace GameFramework.Networking
 			private set;
 		}
 
+		public ulong AckMask
+		{
+			get;
+			private set;
+		}
+
 		public UDPPacketsHolder()
 		{
 			PacketsMap = new PacketMap();
@@ -168,9 +174,14 @@ namespace GameFramework.Networking
 			PacketsMap[Packet.ID] = Packet;
 		}
 
-		public void SetLastID(ulong ID)
+		public void SetLastID(ulong Value)
 		{
-			LastID = ID;
+			LastID = Value;
+		}
+
+		public void SetAckMask(uint Value)
+		{
+			AckMask = Value;
 		}
 
 		public void IncreaseLastID()

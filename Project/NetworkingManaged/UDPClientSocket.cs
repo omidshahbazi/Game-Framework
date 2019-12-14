@@ -105,13 +105,16 @@ namespace GameFramework.Networking
 		{
 			ulong lastAckID = Buffer.ReadUInt64();
 			uint ackMask = Buffer.ReadUInt32();
-			byte[] ackMaskBytes = System.BitConverter.GetBytes(ackMask);
 			bool isReliable = Buffer.ReadBool();
 			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();
 			ushort sliceIndex = Buffer.ReadUInt16();
 
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
+
+			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
+			outgoingHolder.SetLastID(lastAckID);
+			outgoingHolder.SetAckMask(ackMask);
 
 			IncomingUDPPacketsHolder incomingHolder = (isReliable ? incomingReliablePacketHolder : incomingPacketHolder);
 
@@ -126,7 +129,8 @@ namespace GameFramework.Networking
 
 			if (packet.IsCompleted)
 			{
-				incomingHolder.SetLastID(packetID);
+				if (incomingHolder.LastID < packetID)
+					incomingHolder.SetLastID(packetID);
 
 				if (isReliable)
 				{
