@@ -72,16 +72,10 @@ namespace GameFramework.Networking
 			get;
 		}
 
-		public ulong BandwidthIn
+		public NetowrkingStatistics Statistics
 		{
 			get;
-			protected set;
-		}
-
-		public ulong BandwidthOut
-		{
-			get;
-			protected set;
+			private set;
 		}
 
 		public bool MultithreadedCallbacks
@@ -201,7 +195,7 @@ namespace GameFramework.Networking
 					if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
 						Target.Send(Buffer.Buffer);
 
-					BandwidthOut += Buffer.Size;
+					Statistics.AddBandwidthOut(Buffer.Size);
 				}
 			}
 			catch (SocketException e)
@@ -230,7 +224,7 @@ namespace GameFramework.Networking
 				if (PacketLossSimulation == 0 || Constants.Random.NextDouble() > PacketLossSimulation)
 					Socket.SendTo(Buffer.Buffer, EndPoint);
 
-				BandwidthOut += Buffer.Size;
+				Statistics.AddBandwidthOut(Buffer.Size);
 			}
 			catch (SocketException e)
 			{

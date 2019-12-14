@@ -147,7 +147,7 @@ namespace GameFramework.Networking
 
 			double time = Time.CurrentEpochTime;
 
-			Client.UpdateLastTouchTime(time);
+			Client.Statistics.SetLastTouchTime(time);
 
 			UDPClient client = (UDPClient)Client;
 
@@ -170,7 +170,7 @@ namespace GameFramework.Networking
 				lock (clients)
 					clients.Add(client);
 
-				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(PacketRate);
+				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(PacketCountRate);
 
 				SendInternal(Client, buffer);
 			}
@@ -181,7 +181,7 @@ namespace GameFramework.Networking
 
 				double sendTime = Buffer.ReadFloat64();
 
-				Client.UpdateLatency((uint)((time - sendTime) * 1000));
+				Client.Statistics.SetLatency((uint)((time - sendTime) * 1000));
 
 				BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
@@ -196,6 +196,8 @@ namespace GameFramework.Networking
 
 			if (!client.IsReady)
 				return false;
+
+			client.Statistics.AddBandwidthIn(Command.Buffer.Size);
 
 			SendOverSocket(client.EndPoint, Command.Buffer);
 
@@ -272,7 +274,7 @@ namespace GameFramework.Networking
 
 				UDPClient client = GetOrAddClient(ipEndPoint);
 
-				client.AddBandwidthInFromLastSecond((uint)size);
+				client.Statistics.AddRecievedPacketFromLastSecond();
 
 				ProcessReceivedBuffer(client, (uint)size);
 			}

@@ -42,7 +42,7 @@ namespace GameFramework.Networking
 			return buffer;
 		}
 
-		public static BufferStream CreateHandshakeBackBufferStream(uint PacketRate)
+		public static BufferStream CreateHandshakeBackBufferStream(uint PacketCountRate)
 		{
 			uint length = HEADER_SIZE + sizeof(uint);
 
@@ -50,7 +50,7 @@ namespace GameFramework.Networking
 			buffer.ResetWrite();
 			buffer.WriteUInt32(length);
 			buffer.WriteBytes(Constants.Control.HANDSHAKE_BACK);
-			buffer.WriteUInt32(PacketRate);
+			buffer.WriteUInt32(PacketCountRate);
 
 			return buffer;
 		}

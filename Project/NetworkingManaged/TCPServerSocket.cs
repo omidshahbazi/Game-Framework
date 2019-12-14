@@ -158,7 +158,7 @@ namespace GameFramework.Networking
 							size = client.Socket.Receive(ReceiveBuffer);
 						}
 
-						client.AddBandwidthInFromLastSecond((uint)size);
+						client.Statistics.AddRecievedPacketFromLastSecond();
 
 						ProcessReceivedBuffer(client, (uint)size);
 					}
@@ -194,7 +194,7 @@ namespace GameFramework.Networking
 
 			double time = Time.CurrentEpochTime;
 
-			Client.UpdateLastTouchTime(time);
+			Client.Statistics.SetLastTouchTime(time);
 
 			if (control == Constants.Control.BUFFER)
 			{
@@ -206,7 +206,7 @@ namespace GameFramework.Networking
 			{
 				double sendTime = Buffer.ReadFloat64();
 
-				Client.UpdateLatency((uint)((time - sendTime) * 1000));
+				Client.Statistics.SetLatency((uint)((time - sendTime) * 1000));
 
 				BufferStream pingBuffer = Packet.CreatePingBufferStream();
 
@@ -221,6 +221,8 @@ namespace GameFramework.Networking
 
 			if (!client.IsReady)
 				return false;
+
+			client.Statistics.AddBandwidthIn(Command.Buffer.Size);
 
 			SendOverSocket(client.Socket, Command.Buffer);
 

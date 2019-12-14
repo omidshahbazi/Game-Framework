@@ -1,17 +1,13 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.Common.Timing;
+using System;
 using System.Collections.Generic;
 using System.Net;
 
 namespace GameFramework.Networking
 {
-	public abstract class Client
+	public class NetowrkingStatistics
 	{
-		public virtual bool IsReady
-		{
-			get { return (Time.CurrentEpochTime - LastTouchTime < Constants.PING_TIME * 2); }
-		}
-
 		public double LastTouchTime
 		{
 			get;
@@ -24,40 +20,81 @@ namespace GameFramework.Networking
 			private set;
 		}
 
-		public abstract IPEndPoint EndPoint
-		{
-			get;
-		}
-
-		public uint BandwidthInFromLastSecond
+		public uint RecievedPacketFromLastSecond
 		{
 			get;
 			private set;
 		}
 
-		public Client()
+		public ulong BandwidthIn
+		{
+			get;
+			protected set;
+		}
+
+		public ulong BandwidthOut
+		{
+			get;
+			protected set;
+		}
+
+		public NetowrkingStatistics()
 		{
 			LastTouchTime = Time.CurrentEpochTime;
 		}
 
-		public void UpdateLastTouchTime(double Time)
+		public void SetLastTouchTime(double Time)
 		{
 			LastTouchTime = Time;
 		}
 
-		public void UpdateLatency(uint Latency)
+		public void SetLatency(uint Latency)
 		{
 			this.Latency = Latency;
 		}
 
-		public void AddBandwidthInFromLastSecond(uint Count)
+		public void AddRecievedPacketFromLastSecond()
 		{
-			BandwidthInFromLastSecond += Count;
+			++RecievedPacketFromLastSecond;
 		}
 
-		public void ResetBandwidthInFromLastSecond()
+		public void ResetRecievedPacketFromLastSecond()
 		{
-			BandwidthInFromLastSecond = 0;
+			RecievedPacketFromLastSecond = 0;
+		}
+
+		public void AddBandwidthIn(uint Size)
+		{
+			BandwidthIn += Size;
+		}
+
+		public void AddBandwidthOut(uint Size)
+		{
+			BandwidthOut += Size;
+		}
+	}
+
+	public abstract class Client
+	{
+		public virtual bool IsReady
+		{
+			get { return (Time.CurrentEpochTime - Statistics.LastTouchTime < Constants.PING_TIME * 2); }
+		}
+
+		public NetowrkingStatistics Statistics
+		{
+			get;
+			private set;
+		}
+
+		public abstract IPEndPoint EndPoint
+		{
+			get;
+		}
+
+		public Client()
+		{
+			Statistics = new NetowrkingStatistics();
 		}
 	}
 

@@ -13,6 +13,8 @@ namespace ClientNetworkingManagedTest
 			client = new UDPClientSocket();
 			Console.WriteLine("Client created");
 
+			client.PacketLossSimulation = 0.3F;
+
 			client.MultithreadedCallbacks = true;
 			client.MultithreadedReceive = true;
 			client.MultithreadedSend = true;
