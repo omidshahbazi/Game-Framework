@@ -59,9 +59,10 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnBufferReceived " + Buffer.Size);
 
-			if (sentCount++ == 100)
-				client.PacketLossSimulation = 0.4F;
+			client.PacketLossSimulation = 0.5F;
+			client.Send(Buffer.Buffer, true);
 
+			client.PacketLossSimulation = 0;
 			client.Send(Buffer.Buffer, true);
 		}
 	}
