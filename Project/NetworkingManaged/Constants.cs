@@ -7,7 +7,7 @@ namespace GameFramework.Networking
 	{
 		public static class Control
 		{
-			public const int SIZE = sizeof(byte);
+			public const ushort SIZE = sizeof(byte);
 
 			public const byte BUFFER = 1;
 			public const byte HANDSHAKE = 2;
@@ -17,7 +17,13 @@ namespace GameFramework.Networking
 
 		public static class UDP
 		{
-			public const uint PACKET_HEADER_SIZE = sizeof(ulong) + sizeof(uint) + sizeof(bool) + sizeof(ulong) + sizeof(ushort) + sizeof(ushort);
+			public const ushort LAST_ACK_ID_SIZE = sizeof(ulong);
+			public const ushort LAST_ACK_MASK_SIZE = sizeof(uint);
+			public const ushort IS_RELIABLE_SIZE = sizeof(bool);
+			public const ushort ID_SIZE = sizeof(ulong);
+			public const ushort SLICE_COUNT_SIZE = sizeof(ushort);
+			public const ushort SLICE_INDEX_SIZE = sizeof(ushort);
+			public const ushort PACKET_HEADER_SIZE = LAST_ACK_ID_SIZE + LAST_ACK_MASK_SIZE + IS_RELIABLE_SIZE + ID_SIZE + SLICE_COUNT_SIZE + SLICE_INDEX_SIZE;
 		}
 
 		public const uint RECEIVE_TIMEOUT = 1;

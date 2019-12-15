@@ -135,7 +135,7 @@ namespace GameFramework.Networking
 
 					index += Packet.PACKET_SIZE_SIZE;
 
-					HandleIncommingBuffer(new BufferStream(ReceiveBuffer, index, packetSize));
+					HandleIncomingBuffer(new BufferStream(ReceiveBuffer, index, packetSize));
 
 					index += packetSize;
 				}
@@ -153,7 +153,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		protected abstract void HandleIncommingBuffer(BufferStream Buffer);
+		protected abstract void HandleIncomingBuffer(BufferStream Buffer);
 
 		protected override bool HandleSendCommand(SendCommand Command)
 		{

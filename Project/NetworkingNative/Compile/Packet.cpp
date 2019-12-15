@@ -23,7 +23,7 @@ namespace GameFramework::Networking
 		return buffer;
 	}
 
-	BufferStream Packet::CreateIncommingBufferStream(std::byte* const Buffer, uint32_t Length)
+	BufferStream Packet::CreateIncomingBufferStream(std::byte* const Buffer, uint32_t Length)
 	{
 		return BufferStream(Buffer, HEADER_SIZE, (uint32_t)(Length - HEADER_SIZE));
 	}

@@ -9,10 +9,10 @@ namespace GameFramework.Networking
 	public class UDPClientSocket : ClientSocket
 	{
 		private IncomingUDPPacketsHolder incomingReliablePacketHolder = null;
-		private IncomingUDPPacketsHolder incomingPacketHolder = null;
+		private IncomingUDPPacketsHolder incomingNonReliablePacketHolder = null;
 
 		private OutgoingUDPPacketsHolder outgoingReliablePacketHolder = null;
-		private OutgoingUDPPacketsHolder outgoingPacketHolder = null;
+		private OutgoingUDPPacketsHolder outgoingNonReliablePacketHolder = null;
 
 		public uint MTU
 		{
@@ -29,9 +29,9 @@ namespace GameFramework.Networking
 		public UDPClientSocket() : base(Protocols.UDP)
 		{
 			incomingReliablePacketHolder = new IncomingUDPPacketsHolder();
-			incomingPacketHolder = new IncomingUDPPacketsHolder();
+			incomingNonReliablePacketHolder = new IncomingUDPPacketsHolder();
 			outgoingReliablePacketHolder = new OutgoingUDPPacketsHolder();
-			outgoingPacketHolder = new OutgoingUDPPacketsHolder();
+			outgoingNonReliablePacketHolder = new OutgoingUDPPacketsHolder();
 		}
 
 		public virtual void Send(byte[] Buffer, bool Reliable = true)
@@ -46,17 +46,15 @@ namespace GameFramework.Networking
 
 		public virtual void Send(byte[] Buffer, uint Index, uint Length, bool Reliable = true)
 		{
-			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
-			IncomingUDPPacketsHolder incomingHolder = (Reliable ? incomingReliablePacketHolder : incomingPacketHolder);
-
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, MTU, Reliable);
-
-			outgoingHolder.PacketsMap[packet.ID] = packet;
-
-			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
-				SendInternal(packet.SliceBuffers[i]);
+			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? outgoingReliablePacketHolder : outgoingNonReliablePacketHolder);
+			IncomingUDPPacketsHolder incomingHolder = (Reliable ? incomingReliablePacketHolder : incomingNonReliablePacketHolder);
 
 			outgoingHolder.IncreaseLastID();
+
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, MTU, Reliable);
+			outgoingHolder.AddPacket(packet);
+
+			SendPacket(packet);
 		}
 
 		protected virtual void SendInternal(BufferStream Buffer)
@@ -78,7 +76,7 @@ namespace GameFramework.Networking
 			RunSenndThread();
 		}
 
-		protected override void HandleIncommingBuffer(BufferStream Buffer)
+		protected override void HandleIncomingBuffer(BufferStream Buffer)
 		{
 			Statistics.SetLatency((uint)Time.CurrentEpochTime);
 
@@ -86,7 +84,7 @@ namespace GameFramework.Networking
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncomingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(buffer);
 			}
@@ -108,7 +106,6 @@ namespace GameFramework.Networking
 		{
 			ulong lastAckID = Buffer.ReadUInt64();
 			uint ackMask = Buffer.ReadUInt32();
-			byte[] bits = Common.Utilities.BitwiseHelper.GetBits(ackMask);
 			bool isReliable = Buffer.ReadBool();
 			ulong packetID = Buffer.ReadUInt64();
 			ushort sliceCount = Buffer.ReadUInt16();
@@ -116,11 +113,7 @@ namespace GameFramework.Networking
 
 			BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
 
-			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? outgoingReliablePacketHolder : outgoingPacketHolder);
-			outgoingHolder.SetLastAckID(lastAckID);
-			outgoingHolder.SetAckMask(ackMask);
-
-			IncomingUDPPacketsHolder incomingHolder = (isReliable ? incomingReliablePacketHolder : incomingPacketHolder);
+			IncomingUDPPacketsHolder incomingHolder = (isReliable ? incomingReliablePacketHolder : incomingNonReliablePacketHolder);
 
 			IncomingUDPPacket packet = incomingHolder.GetPacket(packetID);
 			if (packet == null)
@@ -142,61 +135,40 @@ namespace GameFramework.Networking
 					ProcessIncomingNonReliablePacket(packet);
 			}
 
+			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? outgoingReliablePacketHolder : outgoingNonReliablePacketHolder);
+			outgoingHolder.SetLastAckID(lastAckID);
+			outgoingHolder.SetAckMask(ackMask);
+
 			if (isReliable)
 				ProcessOutgoingReliablePackets();
 			else
 				ProcessOutgoingNonReliablePackets();
 		}
 
+		private void SendPacket(OutgoingUDPPacket Packet)
+		{
+			for (ushort i = 0; i < Packet.SliceBuffers.Length; ++i)
+				SendInternal(Packet.SliceBuffers[i]);
+		}
+
 		private void ProcessIncomingReliablePackets()
 		{
-			List<ulong> completedIDs = new List<ulong>();
-
-			var it = incomingReliablePacketHolder.PacketsMap.GetEnumerator();
-			while (it.MoveNext())
-			{
-				ulong id = it.Current.Key;
-				IncomingUDPPacket packet = it.Current.Value;
-
-				if (!it.Current.Value.IsCompleted)
-					break;
-
-				if (id < incomingReliablePacketHolder.PrevID)
-				{
-					completedIDs.Add(id);
-					continue;
-				}
-
-				if (id - incomingReliablePacketHolder.PrevID > 1)
-					break;
-
-				HandleReceivedBuffer(packet.Combine());
-
-				incomingReliablePacketHolder.SetPrevID(id);
-
-				completedIDs.Add(id);
-
-			}
-
-			for (int i = 0; i < completedIDs.Count; ++i)
-				incomingReliablePacketHolder.PacketsMap.Remove(completedIDs[i]);
+			IncomingUDPPacketsHolder.ProcessReliablePackets(incomingReliablePacketHolder, HandleReceivedBuffer);
 		}
 
 		private void ProcessIncomingNonReliablePacket(IncomingUDPPacket Packet)
 		{
-			HandleReceivedBuffer(Packet.Combine());
-
-			incomingPacketHolder.PacketsMap.Remove(Packet.ID);
+			IncomingUDPPacketsHolder.ProcessNonReliablePacket(incomingNonReliablePacketHolder, Packet, HandleReceivedBuffer);
 		}
 
 		private void ProcessOutgoingReliablePackets()
 		{
-
+			OutgoingUDPPacketsHolder.ProcessReliablePackets(outgoingReliablePacketHolder, SendPacket);
 		}
 
 		private void ProcessOutgoingNonReliablePackets()
 		{
-
+			OutgoingUDPPacketsHolder.ProcessNonReliablePackets(outgoingNonReliablePacketHolder, SendPacket);
 		}
 
 		protected override BufferStream GetPingPacket()

@@ -63,7 +63,7 @@ namespace GameFramework::Networking
 
 		virtual void ReadFromClients(void);
 
-		void HandleIncommingBuffer(Client* Client, BufferStream& Buffer);
+		void HandleIncomingBuffer(Client* Client, BufferStream& Buffer);
 
 		bool HandleSendCommand(SendCommand* Command) override;
 

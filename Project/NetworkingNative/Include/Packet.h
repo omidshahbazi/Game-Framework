@@ -22,7 +22,7 @@ namespace GameFramework::Networking
 	public:
 		static BufferStream CreateOutgoingBufferStream(uint32_t Length);
 
-		static BufferStream CreateIncommingBufferStream(std::byte* const Buffer, uint32_t Length);
+		static BufferStream CreateIncomingBufferStream(std::byte* const Buffer, uint32_t Length);
 
 		static BufferStream CreatePingBufferStream(void);
 	};

@@ -49,7 +49,7 @@ namespace GameFramework.Networking
 			base.Receive();
 		}
 
-		protected override void HandleIncommingBuffer(BufferStream Buffer)
+		protected override void HandleIncomingBuffer(BufferStream Buffer)
 		{
 			double time = Time.CurrentEpochTime;
 
@@ -59,7 +59,7 @@ namespace GameFramework.Networking
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncomingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(buffer);
 			}

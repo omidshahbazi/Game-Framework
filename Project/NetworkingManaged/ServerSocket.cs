@@ -159,13 +159,13 @@ namespace GameFramework.Networking
 
 				index += Packet.PACKET_SIZE_SIZE;
 
-				HandleIncommingBuffer(Client, new BufferStream(ReceiveBuffer, index, packetSize));
+				HandleIncomingBuffer(Client, new BufferStream(ReceiveBuffer, index, packetSize));
 
 				index += packetSize;
 			}
 		}
 
-		protected abstract void HandleIncommingBuffer(Client Client, BufferStream Buffer);
+		protected abstract void HandleIncomingBuffer(Client Client, BufferStream Buffer);
 
 		protected override void ProcessEvent(EventBase Event)
 		{

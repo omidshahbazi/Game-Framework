@@ -188,7 +188,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		protected override void HandleIncommingBuffer(Client Client, BufferStream Buffer)
+		protected override void HandleIncomingBuffer(Client Client, BufferStream Buffer)
 		{
 			byte control = Buffer.ReadByte();
 
@@ -198,7 +198,7 @@ namespace GameFramework.Networking
 
 			if (control == Constants.Control.BUFFER)
 			{
-				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncomingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(Client, buffer);
 			}

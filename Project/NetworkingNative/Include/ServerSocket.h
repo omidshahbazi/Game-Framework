@@ -105,7 +105,7 @@ namespace GameFramework::Networking
 
 		virtual void ReadFromClients(void) = 0;
 
-		virtual void HandleIncommingBuffer(Client* Client, BufferStream& Buffer) = 0;
+		virtual void HandleIncomingBuffer(Client* Client, BufferStream& Buffer) = 0;
 
 		virtual void ProcessEvent(EventBase* Event)  override;
 

@@ -111,7 +111,7 @@ namespace GameFramework::Networking
 
 				BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
 
-				HandleIncommingBuffer(buffer);
+				HandleIncomingBuffer(buffer);
 
 				index += packetSize;
 			}
@@ -129,7 +129,7 @@ namespace GameFramework::Networking
 		}
 	}
 
-	void ClientSocket::HandleIncommingBuffer(BufferStream& Buffer)
+	void ClientSocket::HandleIncomingBuffer(BufferStream& Buffer)
 	{
 		double time = Time::GetCurrentEpochTime();
 
@@ -139,7 +139,7 @@ namespace GameFramework::Networking
 
 		if (control == Constants::Control::BUFFER)
 		{
-			BufferStream buffer = Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
+			BufferStream buffer = Packet::CreateIncomingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
 
 			if (GetMultithreadedCallbacks())
 			{

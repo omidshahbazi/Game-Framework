@@ -31,7 +31,7 @@ namespace GameFramework.Networking
 				private set;
 			}
 
-			public IncomingUDPPacketsHolder IncomingPacketHolder
+			public IncomingUDPPacketsHolder IncomingNonReliablePacketHolder
 			{
 				get;
 				private set;
@@ -43,7 +43,7 @@ namespace GameFramework.Networking
 				private set;
 			}
 
-			public OutgoingUDPPacketsHolder OutgoingPacketHolder
+			public OutgoingUDPPacketsHolder OutgoingNonReliablePacketHolder
 			{
 				get;
 				private set;
@@ -60,9 +60,9 @@ namespace GameFramework.Networking
 				endPoint = EndPoint;
 
 				IncomingReliablePacketHolder = new IncomingUDPPacketsHolder();
-				IncomingPacketHolder = new IncomingUDPPacketsHolder();
+				IncomingNonReliablePacketHolder = new IncomingUDPPacketsHolder();
 				OutgoingReliablePacketHolder = new OutgoingUDPPacketsHolder();
-				OutgoingPacketHolder = new OutgoingUDPPacketsHolder();
+				OutgoingNonReliablePacketHolder = new OutgoingUDPPacketsHolder();
 			}
 
 			public void SetIsConnected(bool Value)
@@ -114,15 +114,15 @@ namespace GameFramework.Networking
 		{
 			UDPClient client = (UDPClient)Target;
 
-			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
-			IncomingUDPPacketsHolder incomingHolder = (Reliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
-
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, client.MTU, Reliable);
-
-			for (ushort i = 0; i < packet.SliceBuffers.Length; ++i)
-				SendInternal(Target, packet.SliceBuffers[i]);
+			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? client.OutgoingReliablePacketHolder : client.OutgoingNonReliablePacketHolder);
+			IncomingUDPPacketsHolder incomingHolder = (Reliable ? client.IncomingReliablePacketHolder : client.IncomingNonReliablePacketHolder);
 
 			outgoingHolder.IncreaseLastID();
+
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, client.MTU, Reliable);
+			outgoingHolder.AddPacket(packet);
+
+			SendPacket(Target, packet);
 		}
 
 		protected virtual void SendInternal(Client Client, BufferStream Buffer)
@@ -141,7 +141,7 @@ namespace GameFramework.Networking
 			CheckClientsConnection();
 		}
 
-		protected override void HandleIncommingBuffer(Client Client, BufferStream Buffer)
+		protected override void HandleIncomingBuffer(Client Client, BufferStream Buffer)
 		{
 			byte control = Buffer.ReadByte();
 
@@ -156,7 +156,7 @@ namespace GameFramework.Networking
 				if (!client.IsConnected)
 					return;
 
-				BufferStream buffer = Packet.CreateIncommingBufferStream(Buffer.Buffer);
+				BufferStream buffer = Packet.CreateIncomingBufferStream(Buffer.Buffer);
 
 				ProcessReceivedBuffer(Client, buffer);
 			}
@@ -217,11 +217,7 @@ namespace GameFramework.Networking
 
 			UDPClient client = (UDPClient)Sender;
 
-			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? client.OutgoingReliablePacketHolder : client.OutgoingPacketHolder);
-			outgoingHolder.SetLastAckID(lastAckID);
-			outgoingHolder.SetAckMask(ackMask);
-
-			IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingPacketHolder);
+			IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingNonReliablePacketHolder);
 
 			IncomingUDPPacket packet = incomingHolder.GetPacket(packetID);
 			if (packet == null)
@@ -242,6 +238,10 @@ namespace GameFramework.Networking
 				else
 					ProcessIncomingNonReliablePacket(client, packet);
 			}
+
+			OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? client.OutgoingReliablePacketHolder : client.OutgoingNonReliablePacketHolder);
+			outgoingHolder.SetLastAckID(lastAckID);
+			outgoingHolder.SetAckMask(ackMask);
 
 			if (isReliable)
 				ProcessOutgoingReliablePackets(client);
@@ -324,55 +324,42 @@ namespace GameFramework.Networking
 			}
 		}
 
+		private void SendPacket(Client Target, OutgoingUDPPacket Packet)
+		{
+			for (ushort i = 0; i < Packet.SliceBuffers.Length; ++i)
+				SendInternal(Target, Packet.SliceBuffers[i]);
+		}
+
 		private void ProcessIncomingReliablePackets(UDPClient Sender)
 		{
-			List<ulong> completedIDs = new List<ulong>();
-
-			var it = Sender.IncomingReliablePacketHolder.PacketsMap.GetEnumerator();
-			while (it.MoveNext())
+			IncomingUDPPacketsHolder.ProcessReliablePackets(Sender.IncomingReliablePacketHolder, (Buffer) =>
 			{
-				ulong id = it.Current.Key;
-				IncomingUDPPacket packet = it.Current.Value;
-
-				if (!it.Current.Value.IsCompleted)
-					break;
-
-				if (id < Sender.IncomingReliablePacketHolder.PrevID)
-				{
-					completedIDs.Add(id);
-					continue;
-				}
-
-				if (id - Sender.IncomingReliablePacketHolder.PrevID > 1)
-					break;
-
-				HandleReceivedBuffer(Sender, packet.Combine());
-
-				Sender.IncomingReliablePacketHolder.SetPrevID(id);
-
-				completedIDs.Add(id);
-
-			}
-
-			for (int i = 0; i < completedIDs.Count; ++i)
-				Sender.IncomingReliablePacketHolder.PacketsMap.Remove(completedIDs[i]);
+				HandleReceivedBuffer(Sender, Buffer);
+			});
 		}
 
 		private void ProcessIncomingNonReliablePacket(UDPClient Sender, IncomingUDPPacket Packet)
 		{
-			HandleReceivedBuffer(Sender, Packet.Combine());
-
-			Sender.IncomingPacketHolder.PacketsMap.Remove(Packet.ID);
+			IncomingUDPPacketsHolder.ProcessNonReliablePacket(Sender.IncomingNonReliablePacketHolder, Packet, (Buffer) =>
+			{
+				HandleReceivedBuffer(Sender, Buffer);
+			});
 		}
 
-		private void ProcessOutgoingReliablePackets(UDPClient Sender)
+		private void ProcessOutgoingReliablePackets(UDPClient Target)
 		{
-
+			OutgoingUDPPacketsHolder.ProcessReliablePackets(Target.OutgoingReliablePacketHolder, (Packet) =>
+			{
+				SendPacket(Target, Packet);
+			});
 		}
 
-		private void ProcessOutgoingNonReliablePackets(UDPClient Sender)
+		private void ProcessOutgoingNonReliablePackets(UDPClient Target)
 		{
-
+			OutgoingUDPPacketsHolder.ProcessNonReliablePackets(Target.OutgoingNonReliablePacketHolder, (Packet) =>
+			{
+				SendPacket(Target, Packet);
+			});
 		}
 
 		private UDPClient GetOrAddClient(IPEndPoint EndPoint)

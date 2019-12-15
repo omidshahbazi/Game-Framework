@@ -122,7 +122,7 @@ namespace GameFramework::Networking
 
 					BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
 
-					HandleIncommingBuffer(client, buffer);
+					HandleIncomingBuffer(client, buffer);
 
 					index += packetSize;
 				}
@@ -154,7 +154,7 @@ namespace GameFramework::Networking
 		}
 	}
 
-	void TCPServerSocket::HandleIncommingBuffer(Client* Client, BufferStream& Buffer)
+	void TCPServerSocket::HandleIncomingBuffer(Client* Client, BufferStream& Buffer)
 	{
 		byte control = Buffer.ReadByte();
 
@@ -164,7 +164,7 @@ namespace GameFramework::Networking
 
 		if (control == Constants::Control::BUFFER)
 		{
-			BufferStream buffer = Packet::CreateIncommingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
+			BufferStream buffer = Packet::CreateIncomingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
 
 			ProcessReceivedBuffer(Client, buffer);
 		}
