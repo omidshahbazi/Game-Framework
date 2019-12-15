@@ -70,7 +70,7 @@ namespace GameFramework.Networking
 				IsConnected = Value;
 			}
 
-			public void UpdateMTU(uint MTU)
+			public void SetMTU(uint MTU)
 			{
 				this.MTU = MTU;
 			}
@@ -165,7 +165,7 @@ namespace GameFramework.Networking
 				client.SetIsConnected(true);
 
 				uint mtu = Buffer.ReadUInt32();
-				client.UpdateMTU(mtu);
+				client.SetMTU(mtu);
 
 				lock (clients)
 					clients.Add(client);
@@ -234,14 +234,19 @@ namespace GameFramework.Networking
 
 			if (packet.IsCompleted)
 			{
-				if (incomingHolder.LastID < packetID)
-					incomingHolder.SetLastID(packetID);
+				if (incomingHolder.LastID < packet.ID)
+					incomingHolder.SetLastID(packet.ID);
 
 				if (isReliable)
-					ProcessOrderedPackets(client, incomingHolder);
+					ProcessIncomingReliablePackets(client);
 				else
-					HandleReceivedBuffer(Sender, packet.Combine());
+					ProcessIncomingNonReliablePacket(client, packet);
 			}
+
+			if (isReliable)
+				ProcessOutgoingReliablePackets(client);
+			else
+				ProcessOutgoingNonReliablePackets(client);
 		}
 
 		private void ReadFromSocket()
@@ -319,11 +324,11 @@ namespace GameFramework.Networking
 			}
 		}
 
-		private void ProcessOrderedPackets(UDPClient Sender, IncomingUDPPacketsHolder IncommingHolder)
+		private void ProcessIncomingReliablePackets(UDPClient Sender)
 		{
 			List<ulong> completedIDs = new List<ulong>();
 
-			var it = IncommingHolder.PacketsMap.GetEnumerator();
+			var it = Sender.IncomingReliablePacketHolder.PacketsMap.GetEnumerator();
 			while (it.MoveNext())
 			{
 				ulong id = it.Current.Key;
@@ -332,26 +337,42 @@ namespace GameFramework.Networking
 				if (!it.Current.Value.IsCompleted)
 					break;
 
-				if (id < IncommingHolder.PrevID)
+				if (id < Sender.IncomingReliablePacketHolder.PrevID)
 				{
 					completedIDs.Add(id);
 					continue;
 				}
 
-				if (id - IncommingHolder.PrevID > 1)
+				if (id - Sender.IncomingReliablePacketHolder.PrevID > 1)
 					break;
 
-				Console.WriteLine(id);
 				HandleReceivedBuffer(Sender, packet.Combine());
 
-				IncommingHolder.SetPrevID(id);
+				Sender.IncomingReliablePacketHolder.SetPrevID(id);
 
 				completedIDs.Add(id);
 
 			}
 
 			for (int i = 0; i < completedIDs.Count; ++i)
-				IncommingHolder.PacketsMap.Remove(completedIDs[i]);
+				Sender.IncomingReliablePacketHolder.PacketsMap.Remove(completedIDs[i]);
+		}
+
+		private void ProcessIncomingNonReliablePacket(UDPClient Sender, IncomingUDPPacket Packet)
+		{
+			HandleReceivedBuffer(Sender, Packet.Combine());
+
+			Sender.IncomingPacketHolder.PacketsMap.Remove(Packet.ID);
+		}
+
+		private void ProcessOutgoingReliablePackets(UDPClient Sender)
+		{
+
+		}
+
+		private void ProcessOutgoingNonReliablePackets(UDPClient Sender)
+		{
+
 		}
 
 		private UDPClient GetOrAddClient(IPEndPoint EndPoint)

@@ -69,7 +69,7 @@ namespace GameFramework.Networking
 			Socket.Connect(EndPoint);
 
 			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, Constants.UDP_MAX_MTU);
-			//MTU = 17;  //TODO: it's just a hack to test
+			MTU = 30;  //TODO: it's just a hack to test
 
 			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
 			SendInternal(buffer);
@@ -133,21 +133,26 @@ namespace GameFramework.Networking
 
 			if (packet.IsCompleted)
 			{
-				if (incomingHolder.LastID < packetID)
-					incomingHolder.SetLastID(packetID);
+				if (incomingHolder.LastID < packet.ID)
+					incomingHolder.SetLastID(packet.ID);
 
 				if (isReliable)
-					ProcessOrderedPackets(incomingHolder);
+					ProcessIncomingReliablePackets();
 				else
-					HandleReceivedBuffer(packet.Combine());
+					ProcessIncomingNonReliablePacket(packet);
 			}
+
+			if (isReliable)
+				ProcessOutgoingReliablePackets();
+			else
+				ProcessOutgoingNonReliablePackets();
 		}
 
-		private void ProcessOrderedPackets(IncomingUDPPacketsHolder IncommingHolder)
+		private void ProcessIncomingReliablePackets()
 		{
 			List<ulong> completedIDs = new List<ulong>();
 
-			var it = IncommingHolder.PacketsMap.GetEnumerator();
+			var it = incomingReliablePacketHolder.PacketsMap.GetEnumerator();
 			while (it.MoveNext())
 			{
 				ulong id = it.Current.Key;
@@ -156,26 +161,42 @@ namespace GameFramework.Networking
 				if (!it.Current.Value.IsCompleted)
 					break;
 
-				if (id < IncommingHolder.PrevID)
+				if (id < incomingReliablePacketHolder.PrevID)
 				{
 					completedIDs.Add(id);
 					continue;
 				}
 
-				if (id - IncommingHolder.PrevID > 1)
+				if (id - incomingReliablePacketHolder.PrevID > 1)
 					break;
 
-				System.Console.WriteLine(id);
 				HandleReceivedBuffer(packet.Combine());
 
-				IncommingHolder.SetPrevID(id);
+				incomingReliablePacketHolder.SetPrevID(id);
 
 				completedIDs.Add(id);
 
 			}
 
 			for (int i = 0; i < completedIDs.Count; ++i)
-				IncommingHolder.PacketsMap.Remove(completedIDs[i]);
+				incomingReliablePacketHolder.PacketsMap.Remove(completedIDs[i]);
+		}
+
+		private void ProcessIncomingNonReliablePacket(IncomingUDPPacket Packet)
+		{
+			HandleReceivedBuffer(Packet.Combine());
+
+			incomingPacketHolder.PacketsMap.Remove(Packet.ID);
+		}
+
+		private void ProcessOutgoingReliablePackets()
+		{
+
+		}
+
+		private void ProcessOutgoingNonReliablePackets()
+		{
+
 		}
 
 		protected override BufferStream GetPingPacket()
