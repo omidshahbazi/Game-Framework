@@ -167,10 +167,8 @@ namespace GameFramework.Networking
 			PacketsMap[Packet.ID] = Packet;
 		}
 
-		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder)
+		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder, uint AckMask)
 		{
-			uint mask = 0;
-
 			ushort bitCount = Constants.UDP.LAST_ACK_MASK_SIZE * 8;
 
 			for (ushort i = 0; i < bitCount; ++i)
@@ -185,11 +183,11 @@ namespace GameFramework.Networking
 				T packet = null;
 				IncomingHolder.PacketsMap.TryGetValue(packetID, out packet);
 
-				if (packet != null && packet.IsCompleted)
-					mask = BitwiseHelper.Enable(mask, i);
+				if (packet == null || packet.IsCompleted)
+					AckMask = BitwiseHelper.Enable(AckMask, i);
 			}
 
-			return mask;
+			return AckMask;
 		}
 	}
 
@@ -241,18 +239,24 @@ namespace GameFramework.Networking
 			SliceBuffers[Index] = Buffer;
 		}
 
-		public static OutgoingUDPPacket Create(ulong ID, IncomingUDPPacketsHolder IncomingHolder, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
+		public static OutgoingUDPPacket Create(OutgoingUDPPacketsHolder OutgoingHolder, IncomingUDPPacketsHolder IncomingHolder, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
 		{
 			if (Constants.UDP.PACKET_HEADER_SIZE >= MTU)
 				throw new Exception("PACKET_HEADER_SIZE [" + Constants.UDP.PACKET_HEADER_SIZE + "] is greater than or equal to MTU [" + MTU + "]");
+
+			OutgoingHolder.IncreaseLastID();
+
+			ulong id = OutgoingHolder.LastID;
 
 			uint mtu = MTU - Constants.UDP.PACKET_HEADER_SIZE;
 
 			ushort sliceCount = (ushort)Math.Ceiling(Length / (float)mtu);
 
-			OutgoingUDPPacket pakcet = new OutgoingUDPPacket(ID, sliceCount, IsReliable);
+			OutgoingUDPPacket packet = new OutgoingUDPPacket(id, sliceCount, IsReliable);
 
-			uint ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(IncomingHolder);
+			uint ackMask = OutgoingHolder.AckMask;
+			ackMask = ackMask << 1;
+			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(IncomingHolder, ackMask);
 
 			for (ushort i = 0; i < sliceCount; ++i)
 			{
@@ -263,15 +267,17 @@ namespace GameFramework.Networking
 				buffer.WriteUInt64(IncomingHolder.LastID);
 				buffer.WriteUInt32(ackMask);
 				buffer.WriteBool(IsReliable);
-				buffer.WriteUInt64(ID);
+				buffer.WriteUInt64(id);
 				buffer.WriteUInt16(sliceCount);
 				buffer.WriteUInt16(i);
 				buffer.WriteBytes(Buffer, index, length);
 
-				pakcet.SetSliceBuffer(i, buffer);
+				packet.SetSliceBuffer(i, buffer);
 			}
 
-			return pakcet;
+			OutgoingHolder.AddPacket(packet);
+
+			return packet;
 		}
 	}
 
@@ -364,6 +370,33 @@ namespace GameFramework.Networking
 			AckMask = Value;
 		}
 
+		//public static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, Action<OutgoingUDPPacket> SendPacket)
+		//{
+		//	ulong lastAckID = Holder.LastAckID;
+
+		//	if (lastAckID == 0)
+		//		return;
+
+		//	short count = (short)Math.Min(lastAckID - 1, Constants.UDP.LAST_ACK_MASK_SIZE * 8);
+
+		//	for (short i = count; i >= 0; --i)
+		//	{
+		//		ulong id = (ulong)((long)lastAckID - i);
+
+		//		bool acked = (BitwiseHelper.IsEnabled(Holder.AckMask, (ushort)i) || id == lastAckID);
+
+		//		if (acked)
+		//		{
+		//			Holder.PacketsMap.Remove(id);
+		//			continue;
+		//		}
+
+		//		OutgoingUDPPacket packet = Holder.PacketsMap[id];
+
+		//		SendPacket(packet);
+		//	}
+		//}
+
 		public static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, Action<OutgoingUDPPacket> SendPacket)
 		{
 			ulong lastAckID = Holder.LastAckID;
@@ -371,7 +404,7 @@ namespace GameFramework.Networking
 			if (lastAckID == 0)
 				return;
 
-			short count = (short)Math.Min(lastAckID - 1, Constants.UDP.LAST_ACK_MASK_SIZE * 8);
+			short count = (short)Math.Min(Holder.LastID - 1, Constants.UDP.LAST_ACK_MASK_SIZE * 8);
 
 			for (short i = count; i >= 0; --i)
 			{

@@ -117,10 +117,7 @@ namespace GameFramework.Networking
 			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? client.OutgoingReliablePacketHolder : client.OutgoingNonReliablePacketHolder);
 			IncomingUDPPacketsHolder incomingHolder = (Reliable ? client.IncomingReliablePacketHolder : client.IncomingNonReliablePacketHolder);
 
-			outgoingHolder.IncreaseLastID();
-
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, client.MTU, Reliable);
-			outgoingHolder.AddPacket(packet);
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder, incomingHolder, Buffer, Index, Length, client.MTU, Reliable);
 
 			SendPacket(Target, packet);
 		}

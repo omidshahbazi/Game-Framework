@@ -49,12 +49,17 @@ namespace GameFramework.Networking
 			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? outgoingReliablePacketHolder : outgoingNonReliablePacketHolder);
 			IncomingUDPPacketsHolder incomingHolder = (Reliable ? incomingReliablePacketHolder : incomingNonReliablePacketHolder);
 
-			outgoingHolder.IncreaseLastID();
-
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder.LastID, incomingHolder, Buffer, Index, Length, MTU, Reliable);
-			outgoingHolder.AddPacket(packet);
+			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder, incomingHolder, Buffer, Index, Length, MTU, Reliable);
 
 			SendPacket(packet);
+		}
+
+		public override void Service()
+		{
+			base.Service();
+
+
+			ProcessOutgoingReliablePackets();
 		}
 
 		protected virtual void SendInternal(BufferStream Buffer)
@@ -139,10 +144,10 @@ namespace GameFramework.Networking
 			outgoingHolder.SetLastAckID(lastAckID);
 			outgoingHolder.SetAckMask(ackMask);
 
-			if (isReliable)
-				ProcessOutgoingReliablePackets();
-			else
-				ProcessOutgoingNonReliablePackets();
+			//if (isReliable)
+			//	ProcessOutgoingReliablePackets();
+			//else
+			//	ProcessOutgoingNonReliablePackets();
 		}
 
 		private void SendPacket(OutgoingUDPPacket Packet)
