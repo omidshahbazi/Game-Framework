@@ -410,11 +410,6 @@ namespace GameFramework.Networking
 					continue;
 				}
 
-				if (!Holder.PacketsMap.ContainsKey(id))
-				{
-					int a = 1;
-				}
-
 				OutgoingUDPPacket packet = Holder.PacketsMap[id];
 
 				SendPacket(packet);
