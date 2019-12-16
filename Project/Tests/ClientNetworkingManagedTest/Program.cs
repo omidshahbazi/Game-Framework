@@ -41,7 +41,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			client.Send(System.Text.Encoding.ASCII.GetBytes("asdadjaijijijanciojh82y3	[ncc9n0009u18u24cu4839cyur98ybuc4yc-1nhc1bc3uc127bcn187cb-81c7nc1u-8n147ncb87c4b431-7c17c3n7c13-987c189cn7c17c-81347nc1432n7"), true);
+			//client.Send(System.Text.Encoding.ASCII.GetBytes("asdadjaijijijanciojh82y3	[ncc9n0009u18u24cu4839cyur98ybuc4yc-1nhc1bc3uc127bcn187cb-81c7nc1u-8n147ncb87c4b431-7c17c3n7c13-987c189cn7c17c-81347nc1432n7"), true);
 			//client.Send(new byte[] { 1, 2, 3 }, true);
 		}
 
@@ -59,11 +59,11 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnBufferReceived " + Buffer.Size);
 
-			client.PacketLossSimulation = 0.5F;
-			client.Send(Buffer.Buffer, true);
+			//client.PacketLossSimulation = 0.5F;
+			//client.Send(Buffer.Buffer, true);
 
-			client.PacketLossSimulation = 0;
-			client.Send(Buffer.Buffer, true);
+			//client.PacketLossSimulation = 0;
+			//client.Send(Buffer.Buffer, true);
 		}
 	}
 }

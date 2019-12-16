@@ -244,7 +244,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		protected void HandlePingPacket(BufferStream Buffer)
+		protected virtual void HandlePingPacket(BufferStream Buffer)
 		{
 			double time = Time.CurrentEpochTime;
 
@@ -258,6 +258,14 @@ namespace GameFramework.Networking
 			double t3 = time;
 
 			timeOffset = ((t1 - t0) + (t2 - t3)) / 2;
+
+			uint payloadSize = Buffer.Size - Packet.PING_SIZE;
+			if (payloadSize != 0)
+				HandlePingPacketPayload(new BufferStream(Buffer.Buffer, Packet.PING_SIZE, payloadSize));
+		}
+
+		protected virtual void HandlePingPacketPayload(BufferStream Buffer)
+		{
 		}
 
 		protected abstract BufferStream GetPingPacket();

@@ -12,6 +12,8 @@ namespace GameFramework.Networking
 		public const ushort PACKET_SIZE_SIZE = sizeof(uint);
 		public const ushort HEADER_SIZE = Constants.Control.SIZE;
 
+		public const ushort PING_SIZE = PACKET_SIZE_SIZE + HEADER_SIZE + sizeof(double);
+
 		public static BufferStream CreateOutgoingBufferStream(uint Length)
 		{
 			uint length = HEADER_SIZE + Length;
@@ -57,9 +59,9 @@ namespace GameFramework.Networking
 
 		public static BufferStream CreatePingBufferStream(uint PayloadSize = 0)
 		{
-			uint length = HEADER_SIZE + sizeof(double);
+			uint length = (PING_SIZE - PACKET_SIZE_SIZE) + PayloadSize;
 
-			BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length + PayloadSize]);
+			BufferStream buffer = new BufferStream(new byte[PING_SIZE + PayloadSize]);
 			buffer.ResetWrite();
 			buffer.WriteUInt32(length);
 			buffer.WriteBytes(Constants.Control.PING);
@@ -169,7 +171,7 @@ namespace GameFramework.Networking
 
 		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder, uint AckMask)
 		{
-			ushort bitCount = Constants.UDP.LAST_ACK_MASK_SIZE * 8;
+			ushort bitCount = Constants.UDP.ACK_MASK_SIZE * 8;
 
 			for (ushort i = 0; i < bitCount; ++i)
 			{
@@ -239,7 +241,7 @@ namespace GameFramework.Networking
 			SliceBuffers[Index] = Buffer;
 		}
 
-		public static OutgoingUDPPacket Create(OutgoingUDPPacketsHolder OutgoingHolder, IncomingUDPPacketsHolder IncomingHolder, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
+		public static OutgoingUDPPacket CreateOutgoingBufferStream(OutgoingUDPPacketsHolder OutgoingHolder, IncomingUDPPacketsHolder IncomingHolder, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
 		{
 			if (Constants.UDP.PACKET_HEADER_SIZE >= MTU)
 				throw new Exception("PACKET_HEADER_SIZE [" + Constants.UDP.PACKET_HEADER_SIZE + "] is greater than or equal to MTU [" + MTU + "]");
@@ -278,6 +280,25 @@ namespace GameFramework.Networking
 			OutgoingHolder.AddPacket(packet);
 
 			return packet;
+		}
+
+		public static BufferStream CreatePingBufferStream(OutgoingUDPPacketsHolder ReliableOutgoingHolder, IncomingUDPPacketsHolder ReliableIncomingHolder, OutgoingUDPPacketsHolder NonReliableOutgoingHolder, IncomingUDPPacketsHolder NonReliableIncomingHolder)
+		{
+			BufferStream buffer = Packet.CreatePingBufferStream((Constants.UDP.LAST_ACK_ID_SIZE + Constants.UDP.ACK_MASK_SIZE) * 2);
+
+			uint ackMask = ReliableOutgoingHolder.AckMask;
+			ackMask = ackMask << 1;
+			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(ReliableIncomingHolder, ackMask);
+			buffer.WriteUInt64(ReliableIncomingHolder.LastID);
+			buffer.WriteUInt32(ackMask);
+
+			ackMask = NonReliableOutgoingHolder.AckMask;
+			ackMask = ackMask << 1;
+			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(NonReliableIncomingHolder, ackMask);
+			buffer.WriteUInt64(NonReliableIncomingHolder.LastID);
+			buffer.WriteUInt32(ackMask);
+
+			return buffer;
 		}
 	}
 
@@ -404,7 +425,7 @@ namespace GameFramework.Networking
 			if (lastAckID == 0)
 				return;
 
-			short count = (short)Math.Min(Holder.LastID - 1, Constants.UDP.LAST_ACK_MASK_SIZE * 8);
+			short count = (short)Math.Min(Holder.LastAckID, Constants.UDP.ACK_MASK_SIZE * 8);
 
 			for (short i = count; i >= 0; --i)
 			{
@@ -416,6 +437,11 @@ namespace GameFramework.Networking
 				{
 					Holder.PacketsMap.Remove(id);
 					continue;
+				}
+
+				if (!Holder.PacketsMap.ContainsKey(id))
+				{
+					int a = 1;
 				}
 
 				OutgoingUDPPacket packet = Holder.PacketsMap[id];

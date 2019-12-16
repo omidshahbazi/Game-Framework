@@ -117,7 +117,7 @@ namespace GameFramework.Networking
 			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? client.OutgoingReliablePacketHolder : client.OutgoingNonReliablePacketHolder);
 			IncomingUDPPacketsHolder incomingHolder = (Reliable ? client.IncomingReliablePacketHolder : client.IncomingNonReliablePacketHolder);
 
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder, incomingHolder, Buffer, Index, Length, client.MTU, Reliable);
+			OutgoingUDPPacket packet = OutgoingUDPPacket.CreateOutgoingBufferStream(outgoingHolder, incomingHolder, Buffer, Index, Length, client.MTU, Reliable);
 
 			SendPacket(Target, packet);
 		}
@@ -180,7 +180,7 @@ namespace GameFramework.Networking
 
 				Client.Statistics.SetLatency((uint)((time - sendTime) * 1000));
 
-				BufferStream pingBuffer = Packet.CreatePingBufferStream();
+				BufferStream pingBuffer = OutgoingUDPPacket.CreatePingBufferStream(client.OutgoingReliablePacketHolder, client.IncomingReliablePacketHolder, client.OutgoingNonReliablePacketHolder, client.IncomingNonReliablePacketHolder);
 
 				SendInternal(Client, pingBuffer);
 			}

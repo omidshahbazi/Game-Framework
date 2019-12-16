@@ -49,7 +49,7 @@ namespace GameFramework.Networking
 			OutgoingUDPPacketsHolder outgoingHolder = (Reliable ? outgoingReliablePacketHolder : outgoingNonReliablePacketHolder);
 			IncomingUDPPacketsHolder incomingHolder = (Reliable ? incomingReliablePacketHolder : incomingNonReliablePacketHolder);
 
-			OutgoingUDPPacket packet = OutgoingUDPPacket.Create(outgoingHolder, incomingHolder, Buffer, Index, Length, MTU, Reliable);
+			OutgoingUDPPacket packet = OutgoingUDPPacket.CreateOutgoingBufferStream(outgoingHolder, incomingHolder, Buffer, Index, Length, MTU, Reliable);
 
 			SendPacket(packet);
 		}
@@ -176,13 +176,16 @@ namespace GameFramework.Networking
 			OutgoingUDPPacketsHolder.ProcessNonReliablePackets(outgoingNonReliablePacketHolder, SendPacket);
 		}
 
+		protected override void HandlePingPacketPayload(BufferStream Buffer)
+		{
+			base.HandlePingPacketPayload(Buffer);
+
+
+		}
+
 		protected override BufferStream GetPingPacket()
 		{
-			BufferStream buffer = Packet.CreatePingBufferStream();
-
-
-
-			return buffer;
+			return OutgoingUDPPacket.CreatePingBufferStream(outgoingReliablePacketHolder, incomingReliablePacketHolder, outgoingNonReliablePacketHolder, incomingNonReliablePacketHolder);
 		}
 	}
 }
