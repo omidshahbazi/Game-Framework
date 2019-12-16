@@ -149,6 +149,11 @@ namespace GameFramework::Networking
 			QOSReceivedProviderType,
 			QOSSecureHostNotFound,
 			IPSecPolicy,
+			InsufficientBuffer,
+			InvalidParameters,
+			IOPending,
+			NotEnoughMemory,
+			NotSupported
 		};
 
 		enum class ShutdownHows
@@ -214,7 +219,7 @@ namespace GameFramework::Networking
 			{
 			}
 
-			SocketException(const std::string &Message) :
+			SocketException(const std::string& Message) :
 				m_Error(Errors::NoError),
 				m_Message(Message)
 			{
@@ -271,7 +276,7 @@ namespace GameFramework::Networking
 
 		static Errors GetLastError(void);
 
-		static void Ping(const std::string &Address, uint32_t Timeout, const std::byte *Buffer, uint32_t Length, bool DontFragment);
+		static void Ping(AddressFamilies AddressFamily, const std::string& Address, uint32_t Timeout, std::byte* Buffer, uint32_t BufferLength, bool DontFragment);
 	};
 }
 

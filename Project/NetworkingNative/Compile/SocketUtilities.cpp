@@ -161,6 +161,9 @@ namespace GameFramework::Networking
 
 	uint32_t SocketUtilities::FindOptimumMTU(IPAddress IP, uint32_t Timeout, uint32_t MaxMTU)
 	{
-		 PlatformNetwork::Create(PlatformNetwork::AddressFamilies::InterNetworkV6, PlatformNetwork::Types::RawProtocol, PlatformNetwork::IPProtocols::ICMP);
+		std::byte data[3] = { (std::byte)1, (std::byte)2, (std::byte)3 };
+
+		PlatformNetwork::Ping(IP.GetAddressFamily(), IP.GetIP(), Timeout, data, 3, true);
+ 		return 0;
 	}
 }

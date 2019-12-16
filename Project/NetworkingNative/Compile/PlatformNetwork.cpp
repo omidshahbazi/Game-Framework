@@ -4,12 +4,15 @@
 #include <Utilities\BitwiseHelper.h>
 #include <winsock2.h>
 #include <ws2ipdef.h>
-#include <WS2tcpip.h>
-#include <WS2tcpip.h>
-#include <IcmpAPI.h>
+#include <ws2tcpip.h>
+#include <wdmguid.h>
+#include <iphlpapi.h>
+#include <icmpapi.h>
+#include <icmpapi.h>
 
 #pragma comment(lib, "wsock32.lib")
 #pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "iphlpapi.lib")
 
 
 using namespace GameFramework::Common::Utilities;
@@ -152,7 +155,7 @@ namespace GameFramework::Networking
 		return 0;
 	}
 
-	PlatformNetwork::Errors GetError(int ErrorCode)
+	PlatformNetwork::Errors GetError(int32_t ErrorCode)
 	{
 		switch (ErrorCode)
 		{
@@ -245,6 +248,11 @@ namespace GameFramework::Networking
 		case WSA_QOS_RESERVED_PETYPE: return PlatformNetwork::Errors::QOSReceivedProviderType;
 		case WSA_SECURE_HOST_NOT_FOUND: return PlatformNetwork::Errors::QOSSecureHostNotFound;
 		case WSA_IPSEC_NAME_POLICY_ERROR: return PlatformNetwork::Errors::IPSecPolicy;
+		case ERROR_INSUFFICIENT_BUFFER:return PlatformNetwork::Errors::InsufficientBuffer;
+		case ERROR_INVALID_PARAMETER: return PlatformNetwork::Errors::InvalidParameters;
+		case ERROR_IO_PENDING: return PlatformNetwork::Errors::IOPending;
+		case ERROR_NOT_ENOUGH_MEMORY: return PlatformNetwork::Errors::NotEnoughMemory;
+		case ERROR_NOT_SUPPORTED: return PlatformNetwork::Errors::NotSupported;
 		}
 
 		return PlatformNetwork::Errors::NoError;
@@ -597,7 +605,7 @@ namespace GameFramework::Networking
 	//	sockaddr_in address;
 	//	int32_t addressSize = sizeof(sockaddr_in);
 
-	//	int receivedLength = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
+	//	int32_t receivedLength = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
 
 	//	if (receivedLength == SOCKET_ERROR)
 	//		return false;
@@ -649,10 +657,63 @@ namespace GameFramework::Networking
 		return GetError(WSAGetLastError());
 	}
 
-	void PlatformNetwork::Ping(const std::string& Address, uint32_t Timeout, const std::byte* Buffer, uint32_t Length, bool DontFragment)
+	void PlatformNetwork::Ping(AddressFamilies AddressFamily, const std::string& Address, uint32_t Timeout, std::byte* Buffer, uint32_t BufferLength, bool DontFragment)
 	{
-		IcmpSendEcho()
-			Handle socket = Create(AddressFamilies::InterNetworkV6, Types::RawProtocol, IPProtocols::ICMP);
+		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), 0);
+
+		uint32_t replySize = 0;
+		if (AddressFamily == AddressFamilies::InterNetwork)
+			replySize = sizeof(ICMP_ECHO_REPLY);
+		else
+			replySize = sizeof(ICMPV6_ECHO_REPLY) + sizeof(uint64_t);
+		replySize += BufferLength;
+
+		void* replyBuffer = malloc(replySize);
+
+		IP_OPTION_INFORMATION options;
+		ZeroMemory(&options, sizeof(IP_OPTION_INFORMATION));
+		if (DontFragment)
+			options.Flags |= IP_FLAG_DF;
+
+		uint32_t result = 0;
+		if (AddressFamily == AddressFamilies::InterNetwork)
+		{
+			HANDLE handle = IcmpCreateFile();
+			if (handle == INVALID_HANDLE_VALUE)
+				throw SocketException(GetLastError());
+
+			result = IcmpSendEcho(handle, addressV4.sin_addr.S_un.S_addr, reinterpret_cast<void*>(Buffer), BufferLength, &options, replyBuffer, replySize, Timeout);
+
+			if (result == 0)
+				throw SocketException(GetLastError());
+
+			ICMP_ECHO_REPLY* reply = reinterpret_cast<ICMP_ECHO_REPLY*>(replyBuffer);
+
+			IcmpCloseHandle(handle);
+		}
+		else
+		{
+			sockaddr_in6 sourceAddress;
+			sourceAddress.sin6_family = GetAddressFamiliy(AddressFamily);
+			sourceAddress.sin6_port = 0;
+			sourceAddress.sin6_scope_id = 0;
+			sourceAddress.sin6_addr = in6addr_any;
+
+			HANDLE handle = Icmp6CreateFile();
+			if (handle == INVALID_HANDLE_VALUE)
+				throw SocketException(GetLastError());
+
+			result = Icmp6SendEcho2(handle, nullptr, nullptr, nullptr, &sourceAddress, &addressV6, reinterpret_cast<void*>(Buffer), BufferLength, &options, replyBuffer, replySize, Timeout);
+
+			if (result == 0)
+				throw SocketException(GetLastError());
+
+			ICMPV6_ECHO_REPLY* reply = reinterpret_cast<ICMPV6_ECHO_REPLY*>(replyBuffer);
+
+			IcmpCloseHandle(handle);
+		}
+
+		free(replyBuffer);
 	}
 }
 #endif

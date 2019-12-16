@@ -17,6 +17,16 @@ namespace GameFramework::Networking
 		void ConnectInternal(const IPEndPoint& EndPoint) override;
 
 		void ProcessReceivedBuffer(const BufferStream &Buffer) override;
+
+		virtual void HandleIncomingBuffer(BufferStream& Buffer) override
+		{
+
+		}
+
+		virtual BufferStream GetPingPacket(void) override
+		{
+			return BufferStream(0);
+		}
 	};
 }
 

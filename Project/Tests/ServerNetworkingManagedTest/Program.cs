@@ -6,11 +6,11 @@ namespace ServerNetworkingManagedTest
 {
 	class Program
 	{
-		private static UDPServerSocket server = null;
+		private static TCPServerSocket server = null;
 
 		static void Main(string[] args)
 		{
-			server = new UDPServerSocket();
+			server = new TCPServerSocket();
 			Console.WriteLine("Server created");
 
 			server.MultithreadedCallbacks = true;
@@ -49,7 +49,7 @@ namespace ServerNetworkingManagedTest
 		{
 			Console.WriteLine("Server_OnBufferReceived " + Sender.EndPoint + " " + Buffer.Size);
 
-			server.Send(Sender, Buffer.Buffer, true);
+			server.Send(Sender, Buffer.Buffer); //, true
 		}
 	}
 }
