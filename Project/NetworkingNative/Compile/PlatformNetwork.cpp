@@ -672,6 +672,7 @@ namespace GameFramework::Networking
 
 		IP_OPTION_INFORMATION options;
 		ZeroMemory(&options, sizeof(IP_OPTION_INFORMATION));
+		options.Ttl = 255;
 		if (DontFragment)
 			options.Flags |= IP_FLAG_DF;
 
