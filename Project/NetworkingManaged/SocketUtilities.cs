@@ -114,7 +114,7 @@ namespace GameFramework.Networking
 			return IPAddress.Parse("::ffff:" + IP.ToString());
 		}
 
-		public static uint FindOptimumMTU(IPAddress IP, uint MaxMTU)
+		public static uint FindOptimumMTU(IPAddress IP, uint Timeout, uint MaxMTU)
 		{
 			IP = ResolveDomain(IP.ToString());
 
@@ -130,7 +130,7 @@ namespace GameFramework.Networking
 			PingReply reply = null;
 			do
 			{
-				reply = ping.Send(IP, 1000, bytesList.ToArray(), options);
+				reply = ping.Send(IP, (int)Timeout, bytesList.ToArray(), options);
 
 				if (reply == null)
 					throw new PingException("Finding optimum MTU failed");

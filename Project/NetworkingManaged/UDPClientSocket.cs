@@ -54,14 +54,6 @@ namespace GameFramework.Networking
 			SendPacket(packet);
 		}
 
-		public override void Service()
-		{
-			base.Service();
-
-
-			ProcessOutgoingReliablePackets();
-		}
-
 		protected virtual void SendInternal(BufferStream Buffer)
 		{
 			AddSendCommand(new SendCommand(Buffer, Timestamp));
@@ -71,8 +63,7 @@ namespace GameFramework.Networking
 		{
 			Socket.Connect(EndPoint);
 
-			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, Constants.UDP_MAX_MTU);
-			MTU = 30;  //TODO: it's just a hack to test
+			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, 1000, Constants.UDP_MAX_MTU);
 
 			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
 			SendInternal(buffer);
@@ -144,10 +135,10 @@ namespace GameFramework.Networking
 			outgoingHolder.SetLastAckID(lastAckID);
 			outgoingHolder.SetAckMask(ackMask);
 
-			//if (isReliable)
-			//	ProcessOutgoingReliablePackets();
-			//else
-			//	ProcessOutgoingNonReliablePackets();
+			if (isReliable)
+				ProcessOutgoingReliablePackets();
+			else
+				ProcessOutgoingNonReliablePackets();
 		}
 
 		private void SendPacket(OutgoingUDPPacket Packet)
