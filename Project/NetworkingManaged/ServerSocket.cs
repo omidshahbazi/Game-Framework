@@ -247,9 +247,9 @@ namespace GameFramework.Networking
 			{
 				Client client = clients[i];
 
-				if (client.Statistics.RecievedPacketFromLastSecond <= PacketCountRate)
+				if (client.Statistics.ReceivedPacketFromLastSecond <= PacketCountRate)
 				{
-					client.Statistics.ResetRecievedPacketFromLastSecond();
+					client.Statistics.ResetReceivedPacketFromLastSecond();
 
 					continue;
 				}

@@ -54,6 +54,9 @@
     <ClInclude Include="Include\Packet.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\NetworkingStatistics.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\Constants.cpp">
@@ -90,6 +93,9 @@
       <Filter>Compile</Filter>
     </ClCompile>
     <ClCompile Include="Compile\Packet.cpp">
+      <Filter>Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\NetworkingStatistics.cpp">
       <Filter>Compile</Filter>
     </ClCompile>
   </ItemGroup>

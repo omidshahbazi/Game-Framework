@@ -111,7 +111,7 @@ namespace GameFramework::Networking
 				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
 					continue;
 
-				AddBandwidthIn(size);
+				GetStatistics().AddBandwidthIn(size);
 
 				uint32_t index = 0;
 				while (index != size)
@@ -160,7 +160,7 @@ namespace GameFramework::Networking
 
 		double time = Time::GetCurrentEpochTime();
 
-		Client->UpdateLastTouchTime(time);
+		Client->GetStatistics().SetLastTouchTime(time);
 
 		if (control == Constants::Control::BUFFER)
 		{
@@ -172,7 +172,7 @@ namespace GameFramework::Networking
 		{
 			double sendTime = Buffer.ReadFloat64();
 
-			Client->UpdateLatency(abs(time - sendTime) * 1000);
+			Client->GetStatistics().SetLatency(abs(time - sendTime) * 1000);
 
 			BufferStream pingBuffer = Packet::CreatePingBufferStream();
 

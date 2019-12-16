@@ -72,7 +72,7 @@ namespace GameFramework.Networking
 			get;
 		}
 
-		public NetowrkingStatistics Statistics
+		public NetworkingStatistics Statistics
 		{
 			get;
 			private set;
@@ -128,7 +128,7 @@ namespace GameFramework.Networking
 
 			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 
-			Statistics = new NetowrkingStatistics();
+			Statistics = new NetworkingStatistics();
 
 			MultithreadedCallbacks = true;
 			MultithreadedReceive = true;

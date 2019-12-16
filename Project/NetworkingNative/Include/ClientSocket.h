@@ -75,18 +75,12 @@ namespace GameFramework::Networking
 
 		virtual void Disconnect(void);
 
-		virtual void Send(byte* const Buffer, uint32_t Length);
-
-		virtual void Send(byte* const Buffer, uint32_t Index, uint32_t Length);
-
 	protected:
 		virtual void ConnectInternal(const IPEndPoint& EndPoint) = 0;
 
-		virtual void SendInternal(const BufferStream& Buffer);
-
 		virtual void Receive(void) override;
 
-		virtual void HandleIncomingBuffer(BufferStream& Buffer); ///????????????????????????????????????????????? as like as C# version
+		virtual void HandleIncomingBuffer(BufferStream& Buffer) = 0;
 
 		virtual bool HandleSendCommand(SendCommand* Command) override;
 
@@ -111,16 +105,6 @@ namespace GameFramework::Networking
 		}
 
 	public:
-		double GetLastTouchTime(void) const
-		{
-			return m_LastTouchTime;
-		}
-
-		uint32_t GetLatency(void) const
-		{
-			return m_Latency;
-		}
-
 		virtual bool GetIsReady(void) const override
 		{
 			return SocketUtilities::GetIsReady(GetSocket());
@@ -132,6 +116,14 @@ namespace GameFramework::Networking
 		void RaiseOnConnectedEvent(void);
 
 		void RaiseOnConnectionFailedEvent(void);
+
+		virtual void HandlePingPacket(BufferStream& Buffer);
+
+		virtual void HandlePingPacketPayload(BufferStream& Buffer)
+		{
+		}
+
+		virtual BufferStream GetPingPacket(void) = 0;
 
 	private:
 		void SendPing(void);
@@ -146,8 +138,6 @@ namespace GameFramework::Networking
 		bool m_IsConnected;
 		double m_LastPingTime;
 		double m_TimeOffset;
-		double m_LastTouchTime;
-		uint32_t m_Latency;
 	};
 }
 

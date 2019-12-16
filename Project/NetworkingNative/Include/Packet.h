@@ -16,15 +16,17 @@ namespace GameFramework::Networking
 	static class NETWORKING_API Packet
 	{
 	public:
-		static const uint32_t PACKET_SIZE_SIZE;
-		static const uint32_t HEADER_SIZE;
+		static const uint16_t PACKET_SIZE_SIZE;
+		static const uint16_t HEADER_SIZE;
+
+		static const uint16_t PING_SIZE;
 
 	public:
 		static BufferStream CreateOutgoingBufferStream(uint32_t Length);
 
 		static BufferStream CreateIncomingBufferStream(std::byte* const Buffer, uint32_t Length);
 
-		static BufferStream CreatePingBufferStream(void);
+		static BufferStream CreatePingBufferStream(uint32_t PayloadSize = 0);
 	};
 }
 

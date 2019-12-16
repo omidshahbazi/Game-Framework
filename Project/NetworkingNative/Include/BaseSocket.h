@@ -5,6 +5,7 @@
 #define BASE_SOCKET_H
 
 #include "Common.h"
+#include "NetworkingStatistics.h"
 #include "SocketUtilities.h"
 #include <BufferStream.h>
 #include <thread>
@@ -112,26 +113,15 @@ namespace GameFramework::Networking
 
 		virtual double GetTimestamp(void) const = 0;
 
-	protected:
-		void AddBandwidthIn(uint32_t Value)
-		{
-			m_BandwidthIn += Value;
-		}
-
-		void AddBandwidthOut(uint32_t Value)
-		{
-			m_BandwidthOut += Value;
-		}
-
 	public:
-		const uint64_t& GetBandwidthIn(void) const
+		NetworkingStatistics& GetStatistics(void)
 		{
-			return m_BandwidthIn;
+			return m_Statistics;
 		}
 
-		const uint64_t& GetBandwidthOut(void) const
+		const NetworkingStatistics& GetStatistics(void) const
 		{
-			return m_BandwidthOut;
+			return m_Statistics;
 		}
 
 		bool GetMultithreadedCallbacks(void) const
@@ -189,13 +179,11 @@ namespace GameFramework::Networking
 		SendCommandList m_SendCommands;
 		atomic_bool m_SendCommandsLock;
 
-	private:
 		Socket m_Socket;
 
 		std::byte* m_ReceiveBuffer;
 
-		uint64_t m_BandwidthIn;
-		uint64_t m_BandwidthOut;
+		NetworkingStatistics m_Statistics;
 
 		bool m_MultithreadedCallbacks;
 		bool m_MultithreadedReceive;

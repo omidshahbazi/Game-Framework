@@ -156,6 +156,7 @@
     <ClInclude Include="Include\Common.h" />
     <ClInclude Include="Include\Constants.h" />
     <ClInclude Include="Include\Enums.h" />
+    <ClInclude Include="Include\NetworkingStatistics.h" />
     <ClInclude Include="Include\Packet.h" />
     <ClInclude Include="Include\PlatformNetwork.h" />
     <ClInclude Include="Include\SocketUtilities.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="Compile\Client.cpp" />
     <ClCompile Include="Compile\ClientSocket.cpp" />
     <ClCompile Include="Compile\Constants.cpp" />
+    <ClCompile Include="Compile\NetworkingStatistics.cpp" />
     <ClCompile Include="Compile\Packet.cpp" />
     <ClCompile Include="Compile\PlatformNetwork.cpp" />
     <ClCompile Include="Compile\SocketUtilities.cpp" />

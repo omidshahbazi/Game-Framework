@@ -20,8 +20,6 @@ namespace GameFramework::Networking
 		m_EventsLock(0),
 		m_Socket(0),
 		m_ReceiveBuffer(nullptr),
-		m_BandwidthIn(0),
-		m_BandwidthOut(0),
 		m_MultithreadedCallbacks(true),
 		m_MultithreadedReceive(true),
 		m_MultithreadedSend(true),
@@ -122,7 +120,7 @@ namespace GameFramework::Networking
 			if (m_PacketLossSimulation == 0 || Constants::Random.NextDouble() > m_PacketLossSimulation)
 				SocketUtilities::Send(Target, Buffer.GetBuffer(), Buffer.GetSize());
 
-			m_BandwidthOut += Buffer.GetSize();
+			m_Statistics.AddBandwidthOut(Buffer.GetSize());
 		}
 		catch (PlatformNetwork::SocketException e)
 		{

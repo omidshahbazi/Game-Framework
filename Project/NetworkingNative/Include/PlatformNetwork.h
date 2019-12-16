@@ -31,7 +31,8 @@ namespace GameFramework::Networking
 		enum class IPProtocols
 		{
 			TCP,
-			UDP
+			UDP,
+			ICMP
 		};
 
 		enum class SendModes
@@ -269,6 +270,8 @@ namespace GameFramework::Networking
 		static void ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address);
 
 		static Errors GetLastError(void);
+
+		static void Ping(const std::string &Address, uint32_t Timeout, const std::byte *Buffer, uint32_t Length, bool DontFragment);
 	};
 }
 

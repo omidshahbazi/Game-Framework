@@ -277,7 +277,7 @@ namespace GameFramework.Networking
 
 				UDPClient client = GetOrAddClient(ipEndPoint);
 
-				client.Statistics.AddRecievedPacketFromLastSecond();
+				client.Statistics.AddReceivedPacketFromLastSecond();
 
 				ProcessReceivedBuffer(client, (uint)size);
 			}

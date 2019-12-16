@@ -9,15 +9,8 @@ using namespace GameFramework::Common::Timing;
 
 namespace GameFramework::Networking
 {
-	Client::Client(void) :
-		m_LastTouchTime(0),
-		m_Latency(0)
-	{
-		m_LastTouchTime = Time::GetCurrentEpochTime();
-	}
-
 	bool Client::GetIsReady(void) const
 	{
-		return (Time::GetCurrentEpochTime() - m_LastTouchTime < Constants::PING_TIME * 2);
+		return (Time::GetCurrentEpochTime() - GetStatistics().GetLastTouchTime() < Constants::PING_TIME * 2);
 	}
 }

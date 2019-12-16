@@ -144,6 +144,8 @@ namespace GameFramework::Networking
 		static IPAddress ResolveDomain(const std::string& Domain);
 
 		static IPAddress MapIPv4ToIPv6(IPAddress IP);
+
+		static uint32_t FindOptimumMTU(IPAddress IP, uint32_t Timeout, uint32_t MaxMTU);
 	};
 }
 

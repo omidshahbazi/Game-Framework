@@ -13,14 +13,26 @@ namespace GameFramework::Networking
 	public:
 		TCPClientSocket(void);
 
+		virtual void Send(byte* const Buffer, uint32_t Length);
+
+		virtual void Send(byte* const Buffer, uint32_t Index, uint32_t Length);
+
 		virtual void Service(void) override;
 
 		virtual void Disconnect(void) override;
 
 	protected:
-		void ConnectInternal(const IPEndPoint& EndPoint) override;
+		virtual void SendInternal(const BufferStream& Buffer);
 
-		void ProcessReceivedBuffer(const BufferStream& Buffer) override;
+		virtual void ConnectInternal(const IPEndPoint& EndPoint) override;
+
+		virtual void Receive(void) override;
+
+		virtual void HandleIncomingBuffer(BufferStream& Buffer) override;
+
+		virtual void ProcessReceivedBuffer(const BufferStream& Buffer) override;
+
+		virtual BufferStream GetPingPacket(void) override;
 
 	private:
 		void CheckConnectionStatus(void);

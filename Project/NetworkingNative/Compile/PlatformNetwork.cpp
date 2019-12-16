@@ -5,6 +5,8 @@
 #include <winsock2.h>
 #include <ws2ipdef.h>
 #include <WS2tcpip.h>
+#include <WS2tcpip.h>
+#include <IcmpAPI.h>
 
 #pragma comment(lib, "wsock32.lib")
 #pragma comment(lib, "Ws2_32.lib")
@@ -87,7 +89,7 @@ namespace GameFramework::Networking
 		return 0;
 	}
 
-	int32_t GetIPProtocol(PlatformNetwork::IPProtocols IPProtocol)
+	int32_t GetIPProtocol(PlatformNetwork::IPProtocols IPProtocol, PlatformNetwork::AddressFamilies Family)
 	{
 		switch (IPProtocol)
 		{
@@ -96,6 +98,9 @@ namespace GameFramework::Networking
 
 		case PlatformNetwork::IPProtocols::UDP:
 			return IPPROTO_UDP;
+
+		case PlatformNetwork::IPProtocols::ICMP:
+			return (Family == PlatformNetwork::AddressFamilies::InterNetwork ? IPPROTO_ICMP : IPPROTO_ICMPV6);
 		}
 
 		return IPPROTO_MAX;
@@ -384,7 +389,7 @@ namespace GameFramework::Networking
 
 	PlatformNetwork::Handle PlatformNetwork::Create(AddressFamilies AddressFamily, Types Type, IPProtocols IPProtocol)
 	{
-		return (Handle)socket(GetAddressFamiliy(AddressFamily), GetType(Type), GetIPProtocol(IPProtocol));
+		return (Handle)socket(GetAddressFamiliy(AddressFamily), GetType(Type), GetIPProtocol(IPProtocol, AddressFamily));
 	}
 
 	void PlatformNetwork::Shutdown(Handle Handle, ShutdownHows How)
@@ -557,7 +562,7 @@ namespace GameFramework::Networking
 
 		if (result == 0)
 			throw SocketException(PlatformNetwork::Errors::Timeout);
-		
+
 		if (result == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 
@@ -642,6 +647,12 @@ namespace GameFramework::Networking
 	PlatformNetwork::Errors PlatformNetwork::GetLastError(void)
 	{
 		return GetError(WSAGetLastError());
+	}
+
+	void PlatformNetwork::Ping(const std::string& Address, uint32_t Timeout, const std::byte* Buffer, uint32_t Length, bool DontFragment)
+	{
+		IcmpSendEcho()
+			Handle socket = Create(AddressFamilies::InterNetworkV6, Types::RawProtocol, IPProtocols::ICMP);
 	}
 }
 #endif

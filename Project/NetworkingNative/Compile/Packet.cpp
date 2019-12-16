@@ -8,8 +8,10 @@ using namespace GameFramework::Common::Utilities;
 
 namespace GameFramework::Networking
 {
-	const uint32_t Packet::PACKET_SIZE_SIZE = sizeof(uint32_t);
-	const uint32_t Packet::HEADER_SIZE = Constants::Control::SIZE;
+	const uint16_t Packet::PACKET_SIZE_SIZE = sizeof(uint32_t);
+	const uint16_t Packet::HEADER_SIZE = Constants::Control::SIZE;
+
+	const uint16_t Packet::PING_SIZE = Packet::PACKET_SIZE_SIZE + Packet::HEADER_SIZE + sizeof(double);
 
 	BufferStream Packet::CreateOutgoingBufferStream(uint32_t Length)
 	{
@@ -28,9 +30,9 @@ namespace GameFramework::Networking
 		return BufferStream(Buffer, HEADER_SIZE, (uint32_t)(Length - HEADER_SIZE));
 	}
 
-	BufferStream Packet::CreatePingBufferStream(void)
+	BufferStream Packet::CreatePingBufferStream(uint32_t PayloadSize)
 	{
-		uint32_t length = HEADER_SIZE + sizeof(double);
+		uint32_t length = (PING_SIZE - PACKET_SIZE_SIZE) + PayloadSize;
 
 		BufferStream buffer(PACKET_SIZE_SIZE + length);
 		buffer.ResetWrite();

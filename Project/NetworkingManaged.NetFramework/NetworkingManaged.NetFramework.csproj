@@ -57,6 +57,9 @@
     <Compile Include="..\NetworkingManaged\Enums.cs">
       <Link>Enums.cs</Link>
     </Compile>
+    <Compile Include="..\NetworkingManaged\NetworkingStatistics.cs">
+      <Link>NetworkingStatistics.cs</Link>
+    </Compile>
     <Compile Include="..\NetworkingManaged\Packet.cs">
       <Link>Packet.cs</Link>
     </Compile>

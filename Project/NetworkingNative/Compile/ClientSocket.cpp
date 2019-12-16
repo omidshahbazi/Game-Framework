@@ -15,17 +15,15 @@ namespace GameFramework::Networking
 		BaseSocket(Type),
 		m_IsConnected(false),
 		m_LastPingTime(0),
-		m_TimeOffset(0),
-		m_LastTouchTime(0),
-		m_Latency(0)
+		m_TimeOffset(0)
 	{
 	}
 
 	void ClientSocket::Service(void)
 	{
-		if (m_IsConnected && m_LastTouchTime + Constants::PING_TIME <= Time::GetCurrentEpochTime())
+		if (m_IsConnected && GetStatistics().GetLastTouchTime() + Constants::PING_TIME <= Time::GetCurrentEpochTime())
 		{
-			m_LastTouchTime = Time::GetCurrentEpochTime();
+			GetStatistics().SetLastTouchTime(Time::GetCurrentEpochTime());
 
 			SendPing();
 		}
@@ -58,30 +56,8 @@ namespace GameFramework::Networking
 		Shutdown();
 	}
 
-	void ClientSocket::Send(byte* const Buffer, uint32_t Length)
-	{
-		Send(Buffer, 0, Length);
-	}
-
-	void ClientSocket::Send(byte* const Buffer, uint32_t Index, uint32_t Length)
-	{
-		BufferStream buffer = Packet::CreateOutgoingBufferStream(Length);
-
-		buffer.WriteBytes(Buffer, Index, Length);
-
-		SendInternal(buffer);
-	}
-
-	void ClientSocket::SendInternal(const BufferStream& Buffer)
-	{
-		AddSendCommand(new SendCommand(Buffer, GetTimestamp()));
-	}
-
 	void ClientSocket::Receive(void)
 	{
-		if (!m_IsConnected)
-			return;
-
 		Socket socket = GetSocket();
 
 		try
@@ -100,7 +76,7 @@ namespace GameFramework::Networking
 			if (!SocketUtilities::Receive(socket, receiveBuffer, size))
 				return;
 
-			AddBandwidthIn(size);
+			GetStatistics().AddBandwidthIn(size);
 
 			uint32_t index = 0;
 			while (index != size)
@@ -126,42 +102,6 @@ namespace GameFramework::Networking
 			}
 
 			throw e;
-		}
-	}
-
-	void ClientSocket::HandleIncomingBuffer(BufferStream& Buffer)
-	{
-		double time = Time::GetCurrentEpochTime();
-
-		m_LastTouchTime = time;
-
-		byte control = Buffer.ReadByte();
-
-		if (control == Constants::Control::BUFFER)
-		{
-			BufferStream buffer = Packet::CreateIncomingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
-
-			if (GetMultithreadedCallbacks())
-			{
-				CallbackUtilities::InvokeCallback(OnBufferReceived, buffer);
-			}
-			else
-			{
-				AddEvent(new BufferReceivedvent(buffer));
-			}
-		}
-		else if (control == Constants::Control::PING)
-		{
-			double sendTime = Buffer.ReadFloat64();
-
-			m_Latency = (time - sendTime) * 1000;
-
-			double t0 = m_LastPingTime;
-			double t1 = sendTime;
-			double t2 = sendTime;
-			double t3 = time;
-
-			m_TimeOffset = ((t1 - t0) + (t2 - t3)) / 2;
 		}
 	}
 
@@ -254,9 +194,32 @@ namespace GameFramework::Networking
 		}
 	}
 
+	void ClientSocket::HandlePingPacket(BufferStream& Buffer)
+	{
+		double time = Time::GetCurrentEpochTime();
+
+		double sendTime = Buffer.ReadFloat64();
+
+		GetStatistics().SetLatency((time - sendTime) * 1000);
+
+		double t0 = m_LastPingTime;
+		double t1 = sendTime;
+		double t2 = sendTime;
+		double t3 = time;
+
+		m_TimeOffset = ((t1 - t0) + (t2 - t3)) / 2;
+
+		uint32_t payloadSize = Buffer.GetSize() - Packet::PING_SIZE; //TODO: CHeck this ? ?Packet::PACKET_SIZE_SIZE
+		if (payloadSize != 0)
+		{
+			BufferStream buffer(Buffer.GetBuffer(), Packet::PING_SIZE - Packet::PACKET_SIZE_SIZE, payloadSize);
+			HandlePingPacketPayload(buffer);
+		}
+	}
+
 	void ClientSocket::SendPing(void)
 	{
-		BufferStream pingBuffer = Packet::CreatePingBufferStream();
+		BufferStream pingBuffer = GetPingPacket();
 
 		m_LastPingTime = Time::GetCurrentEpochTime();
 

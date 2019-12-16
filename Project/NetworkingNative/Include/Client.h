@@ -4,6 +4,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include "NetworkingStatistics.h"
 #include "SocketUtilities.h"
 
 namespace GameFramework::Networking
@@ -11,34 +12,26 @@ namespace GameFramework::Networking
 	class NETWORKING_API Client
 	{
 	public:
-		Client(void);
-
-		void UpdateLastTouchTime(double Time)
+		Client(void)
 		{
-			m_LastTouchTime = Time;
-		}
-
-		void UpdateLatency(uint32_t Latency)
-		{
-			m_Latency = Latency;
 		}
 
 		virtual bool GetIsReady(void) const;
 
-		double GetLastTouchTime(void) const
+		NetworkingStatistics& GetStatistics(void)
 		{
-			return m_LastTouchTime;
+			return m_Statistics;
 		}
 
-		uint32_t GetLatency(void) const
+		const NetworkingStatistics& GetStatistics(void) const
 		{
-			return m_Latency;
+			return m_Statistics;
 		}
 
 		virtual const IPEndPoint& GetEndPoint(void) const = 0;
 
 	private:
-		double m_LastTouchTime;
+		NetworkingStatistics m_Statistics;
 		uint32_t m_Latency;
 	};
 
