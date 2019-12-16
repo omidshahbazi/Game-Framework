@@ -261,7 +261,7 @@ namespace GameFramework.Networking
 
 			uint payloadSize = Buffer.Size - Packet.PING_SIZE;
 			if (payloadSize != 0)
-				HandlePingPacketPayload(new BufferStream(Buffer.Buffer, Packet.PING_SIZE, payloadSize));
+				HandlePingPacketPayload(new BufferStream(Buffer.Buffer, Packet.PING_SIZE - Packet.PACKET_SIZE_SIZE, payloadSize));
 		}
 
 		protected virtual void HandlePingPacketPayload(BufferStream Buffer)
@@ -272,7 +272,7 @@ namespace GameFramework.Networking
 
 		private void SendPing()
 		{
-			BufferStream pingBuffer = Packet.CreatePingBufferStream();
+			BufferStream pingBuffer = GetPingPacket();
 
 			lastPingTime = Time.CurrentEpochTime;
 

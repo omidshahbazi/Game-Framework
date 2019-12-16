@@ -183,6 +183,16 @@ namespace GameFramework.Networking
 				BufferStream pingBuffer = OutgoingUDPPacket.CreatePingBufferStream(client.OutgoingReliablePacketHolder, client.IncomingReliablePacketHolder, client.OutgoingNonReliablePacketHolder, client.IncomingNonReliablePacketHolder);
 
 				SendInternal(Client, pingBuffer);
+
+				ulong lastAckID = Buffer.ReadUInt64();
+				uint ackMask = Buffer.ReadUInt32();
+				client.OutgoingReliablePacketHolder.SetLastAckID(lastAckID);
+				client.OutgoingReliablePacketHolder.SetAckMask(ackMask);
+
+				lastAckID = Buffer.ReadUInt64();
+				ackMask = Buffer.ReadUInt32();
+				client.OutgoingNonReliablePacketHolder.SetLastAckID(lastAckID);
+				client.OutgoingNonReliablePacketHolder.SetAckMask(ackMask);
 			}
 		}
 

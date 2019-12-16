@@ -180,7 +180,15 @@ namespace GameFramework.Networking
 		{
 			base.HandlePingPacketPayload(Buffer);
 
+			ulong lastAckID = Buffer.ReadUInt64();
+			uint ackMask = Buffer.ReadUInt32();
+			outgoingReliablePacketHolder.SetLastAckID(lastAckID);
+			outgoingReliablePacketHolder.SetAckMask(ackMask);
 
+			lastAckID = Buffer.ReadUInt64();
+			ackMask = Buffer.ReadUInt32();
+			outgoingNonReliablePacketHolder.SetLastAckID(lastAckID);
+			outgoingNonReliablePacketHolder.SetAckMask(ackMask);
 		}
 
 		protected override BufferStream GetPingPacket()

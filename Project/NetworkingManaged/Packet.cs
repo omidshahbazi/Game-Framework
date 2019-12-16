@@ -177,7 +177,7 @@ namespace GameFramework.Networking
 			{
 				ushort offset = (ushort)(i + 1);
 
-				if (offset > IncomingHolder.LastID)
+				if (offset >= IncomingHolder.LastID)
 					break;
 
 				ulong packetID = IncomingHolder.LastID - offset;
@@ -186,7 +186,7 @@ namespace GameFramework.Networking
 				IncomingHolder.PacketsMap.TryGetValue(packetID, out packet);
 
 				if (packet == null || packet.IsCompleted)
-					AckMask = BitwiseHelper.Enable(AckMask, i);
+					AckMask = BitwiseHelper.Enable(AckMask, (ushort)(bitCount - offset));
 			}
 
 			return AckMask;
@@ -391,33 +391,6 @@ namespace GameFramework.Networking
 			AckMask = Value;
 		}
 
-		//public static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, Action<OutgoingUDPPacket> SendPacket)
-		//{
-		//	ulong lastAckID = Holder.LastAckID;
-
-		//	if (lastAckID == 0)
-		//		return;
-
-		//	short count = (short)Math.Min(lastAckID - 1, Constants.UDP.LAST_ACK_MASK_SIZE * 8);
-
-		//	for (short i = count; i >= 0; --i)
-		//	{
-		//		ulong id = (ulong)((long)lastAckID - i);
-
-		//		bool acked = (BitwiseHelper.IsEnabled(Holder.AckMask, (ushort)i) || id == lastAckID);
-
-		//		if (acked)
-		//		{
-		//			Holder.PacketsMap.Remove(id);
-		//			continue;
-		//		}
-
-		//		OutgoingUDPPacket packet = Holder.PacketsMap[id];
-
-		//		SendPacket(packet);
-		//	}
-		//}
-
 		public static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, Action<OutgoingUDPPacket> SendPacket)
 		{
 			ulong lastAckID = Holder.LastAckID;
@@ -425,13 +398,15 @@ namespace GameFramework.Networking
 			if (lastAckID == 0)
 				return;
 
-			short count = (short)Math.Min(Holder.LastAckID, Constants.UDP.ACK_MASK_SIZE * 8);
+			ushort bitCount = Constants.UDP.ACK_MASK_SIZE * 8;
 
-			for (short i = count; i >= 0; --i)
+			ushort count = (ushort)Math.Min(Holder.LastAckID - 1, bitCount);
+
+			for (short i = (short)count; i >= 0; --i)
 			{
 				ulong id = (ulong)((long)lastAckID - i);
 
-				bool acked = (BitwiseHelper.IsEnabled(Holder.AckMask, (ushort)i) || id == lastAckID);
+				bool acked = (BitwiseHelper.IsEnabled(Holder.AckMask, (ushort)(bitCount - i)) || id == lastAckID);
 
 				if (acked)
 				{
