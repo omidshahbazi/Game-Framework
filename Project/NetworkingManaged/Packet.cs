@@ -171,6 +171,8 @@ namespace GameFramework.Networking
 
 		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder, uint AckMask)
 		{
+			AckMask <<= 1;
+
 			ushort bitCount = Constants.UDP.ACK_MASK_SIZE * 8;
 
 			for (ushort i = 0; i < bitCount; ++i)
@@ -256,9 +258,7 @@ namespace GameFramework.Networking
 
 			OutgoingUDPPacket packet = new OutgoingUDPPacket(id, sliceCount, IsReliable);
 
-			uint ackMask = OutgoingHolder.AckMask;
-			ackMask = ackMask << 1;
-			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(IncomingHolder, ackMask);
+			uint ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(IncomingHolder, OutgoingHolder.AckMask);
 
 			for (ushort i = 0; i < sliceCount; ++i)
 			{
@@ -286,15 +286,11 @@ namespace GameFramework.Networking
 		{
 			BufferStream buffer = Packet.CreatePingBufferStream((Constants.UDP.LAST_ACK_ID_SIZE + Constants.UDP.ACK_MASK_SIZE) * 2);
 
-			uint ackMask = ReliableOutgoingHolder.AckMask;
-			ackMask = ackMask << 1;
-			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(ReliableIncomingHolder, ackMask);
+			uint ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(ReliableIncomingHolder, ReliableOutgoingHolder.AckMask);
 			buffer.WriteUInt64(ReliableIncomingHolder.LastID);
 			buffer.WriteUInt32(ackMask);
 
-			ackMask = NonReliableOutgoingHolder.AckMask;
-			ackMask = ackMask << 1;
-			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(NonReliableIncomingHolder, ackMask);
+			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(NonReliableIncomingHolder, NonReliableOutgoingHolder.AckMask);
 			buffer.WriteUInt64(NonReliableIncomingHolder.LastID);
 			buffer.WriteUInt32(ackMask);
 
