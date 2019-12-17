@@ -10,7 +10,7 @@ void Server_OnConnected(void)
 	std::cout << "Server_OnConnected " << std::endl;
 
 	byte data[3] = { (byte)10, (byte)22, (byte)16 };
-	//client.Send(data, 3);
+	client.Send(data, 3);
 }
 
 void Server_OnConnectionFailed(void)
@@ -27,7 +27,7 @@ void Client_OnBufferReceived(BufferStream Buffer)
 {
 	std::cout << "Server_OnBufferReceived " << " " << Buffer.GetSize() << std::endl;
 
-	//client.Send(Buffer.GetBuffer(), Buffer.GetSize());
+	client.Send(Buffer.GetBuffer(), Buffer.GetSize());
 }
 
 void main()
