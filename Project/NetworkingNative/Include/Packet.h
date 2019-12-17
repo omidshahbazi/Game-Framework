@@ -207,7 +207,7 @@ namespace GameFramework::Networking
 			for (uint16_t i = 0; i < sliceCount; ++i)
 			{
 				uint32_t index = Index + (i * mtu);
-				uint32_t length = (uint32_t)fmin(mtu, Length - (i * mtu));
+				uint32_t length = fmin(mtu, Length - (i * mtu));
 
 				BufferStream buffer = Packet::CreateOutgoingBufferStream(Constants::UDP::PACKET_HEADER_SIZE + length);
 				buffer.WriteUInt64(IncomingHolder.GetLastID());
@@ -332,66 +332,70 @@ namespace GameFramework::Networking
 
 	class OutgoingUDPPacketsHolder : UDPPacketsHolder<OutgoingUDPPacket>
 	{
-		public ulong LastAckID
-		{
-			get;
-			private set;
-		}
+	public:
 
-			public uint AckMask
+		static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket)
 		{
-			get;
-			private set;
-		}
-
-			public void IncreaseLastID()
-		{
-			++LastID;
-		}
-
-		public void SetLastAckID(ulong Value)
-		{
-			LastAckID = Value;
-		}
-
-		public void SetAckMask(uint Value)
-		{
-			AckMask = Value;
-		}
-
-		public static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, Action<OutgoingUDPPacket> SendPacket)
-		{
-			ulong lastAckID = Holder.LastAckID;
+			uint64_t lastAckID = Holder.GetLastAckID();
 
 			if (lastAckID == 0)
 				return;
 
-			ushort bitCount = Constants.UDP.ACK_MASK_SIZE * 8;
+			uint16_t bitCount = Constants::UDP::ACK_MASK_SIZE * 8;
 
-			ushort count = (ushort)Math.Min(Holder.LastAckID - 1, bitCount);
+			uint16_t count = fmin(lastAckID - 1, bitCount);
 
 			for (short i = (short)count; i >= 0; --i)
 			{
-				ulong id = (ulong)((long)lastAckID - i);
+				uint64_t id = lastAckID - i;
 
-				bool acked = (BitwiseHelper.IsEnabled(Holder.AckMask, (ushort)(bitCount - i)) || id == lastAckID);
+				bool acked = (BitwiseHelper::IsEnabled(Holder.GetAckMask(), bitCount - i) || id == lastAckID);
 
 				if (acked)
 				{
-					Holder.PacketsMap.Remove(id);
+					Holder.GetPacketsMap().erase(id);
 					continue;
 				}
 
-				OutgoingUDPPacket packet = Holder.PacketsMap[id];
+				OutgoingUDPPacket* packet = Holder.GetPacket(id);
 
 				SendPacket(packet);
 			}
 		}
 
-		public static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, Action<OutgoingUDPPacket> SendPacket)
+		static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket)
 		{
 			ProcessReliablePackets(Holder, SendPacket);
 		}
+
+		void IncreaseLastID(void)
+		{
+			SetLastID(GetLastID() + 1);
+		}
+
+		uint64_t GetLastAckID(void) const
+		{
+			return m_LastAckID;
+		}
+
+		void SetLastAckID(uint64_t Value)
+		{
+			m_LastAckID = Value;
+		}
+
+		uint32_t GetAckMask(void) const
+		{
+			return m_AckMask;
+		}
+
+		void SetAckMask(uint32_t Value)
+		{
+			m_AckMask = Value;
+		}
+
+	private:
+		uint64_t m_LastAckID;
+		uint32_t m_AckMask;
 	};
 }
 
