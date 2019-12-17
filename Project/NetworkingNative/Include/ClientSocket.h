@@ -88,7 +88,7 @@ namespace GameFramework::Networking
 
 		virtual void HandleDisconnection(Socket Socket) override;
 
-		virtual	void ProcessReceivedBuffer(const BufferStream& Buffer) = 0;
+		virtual	void ProcessReceivedBuffer(BufferStream& Buffer) = 0;
 
 		void HandleReceivedBuffer(const BufferStream& Buffer);
 

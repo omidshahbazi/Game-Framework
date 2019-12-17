@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <BufferStream.h>
 #include <map>
+#include  <functional>
 
 using namespace GameFramework::BinarySerializer;
 
@@ -41,19 +42,34 @@ namespace GameFramework::Networking
 
 		~UDPPacket(void);
 
-		uint64_t GetID(void) const;
+		uint64_t GetID(void) const
+		{
+			return m_ID;
+		}
 
-		BufferStream* GetSliceBuffer(uint32_t Index);
+		BufferStream& GetSliceBuffer(uint32_t Index)
+		{
+			return m_SliceBuffers[Index];
+		}
 
-		void SetScliceBuffer(uint32_t Index, BufferStream* Buffer);
+		void SetSliceBuffer(uint32_t Index, BufferStream& Buffer)
+		{
+			if (m_SliceBuffers[Index].GetSize() != 0)
+				return;
 
-		uint32_t GetSliceCount(void) const;
+			m_SliceBuffers[Index] = Buffer;
+		}
+
+		uint32_t GetSliceCount(void) const
+		{
+			return m_SliceCount;
+		}
 
 		uint32_t GetLength(void) const;
 
 	private:
 		uint64_t m_ID;
-		BufferStream** m_SliceBuffers;
+		BufferStream* m_SliceBuffers;
 		uint32_t m_SliceCount;
 	};
 
@@ -69,7 +85,7 @@ namespace GameFramework::Networking
 		{
 		}
 
-		public T* GetPacket(uint64_t ID)
+		T* GetPacket(uint64_t ID)
 		{
 			if (m_PacketsMap.find(ID) != m_PacketsMap.end())
 				return m_PacketsMap[ID];
@@ -77,7 +93,7 @@ namespace GameFramework::Networking
 			return nullptr;
 		}
 
-		public void AddPacket(T* Packet)
+		void AddPacket(T* Packet)
 		{
 			m_PacketsMap[Packet->GetID()] = Packet;
 		}
@@ -110,15 +126,27 @@ namespace GameFramework::Networking
 
 		BufferStream Combine(void);
 
-		bool GetIsCompleted(void);
+		bool GetIsCompleted(void)
+		{
+			uint32_t count = GetSliceCount();
+
+			for (uint32_t i = 0; i < count; ++i)
+				if (GetSliceBuffer(i).GetSize() == 0)
+					return false;
+
+			return true;
+		}
 	};
+
+	class OutgoingUDPPacketsHolder;
+	class IncomingUDPPacketsHolder;
 
 	class OutgoingUDPPacket : public UDPPacket
 	{
 	public:
 		OutgoingUDPPacket(uint64_t ID, uint32_t SliceCount);
 
-		static OutgoingUDPPacket CreateOutgoingBufferStream(OutgoingUDPPacketsHolder& OutgoingHolder, IncomingUDPPacketsHolder& IncomingHolder, byte* const Buffer, uint32_t Index, uint32_t Length, uint32_t MTU, bool IsReliable);
+		static OutgoingUDPPacket* CreateOutgoingBufferStream(OutgoingUDPPacketsHolder& OutgoingHolder, IncomingUDPPacketsHolder& IncomingHolder, byte* const Buffer, uint32_t Index, uint32_t Length, uint32_t MTU, bool IsReliable);
 
 		static BufferStream CreatePingBufferStream(OutgoingUDPPacketsHolder& ReliableOutgoingHolder, IncomingUDPPacketsHolder& ReliableIncomingHolder, OutgoingUDPPacketsHolder& NonReliableOutgoingHolder, IncomingUDPPacketsHolder& NonReliableIncomingHolder);
 	};
@@ -126,30 +154,48 @@ namespace GameFramework::Networking
 	class IncomingUDPPacketsHolder : public UDPPacketsHolder<IncomingUDPPacket>
 	{
 	public:
+		typedef std::function<void(const BufferStream&)> HandleReceivedBufferCallback;
+
+	public:
 		static uint32_t GetAckMask(IncomingUDPPacketsHolder& IncomingHolder, uint32_t AckMask);
 
-		static void ProcessReliablePackets(IncomingUDPPacketsHolder Holder, std::function<void(BufferStream)> HandleReceivedBuffer);
+		static void ProcessReliablePackets(IncomingUDPPacketsHolder Holder, HandleReceivedBufferCallback HandleReceivedBuffer);
 
-		static void ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, std::function<void(BufferStream)> HandleReceivedBuffer);
+		static void ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, HandleReceivedBufferCallback HandleReceivedBuffer);
 
-		void SetLastID(uint64_t Value);
+		void SetLastID(uint64_t Value)
+		{
+			UDPPacketsHolder::SetLastID(Value);
+		}
 
-		uint64_t GetPrevID(void) const;
+		uint64_t GetPrevID(void) const
+		{
+			return m_PrevID;
+		}
 
-		void SetPrevID(uint64_t Value);
+		void SetPrevID(uint64_t Value)
+		{
+			m_PrevID = Value;
+		}
 
 	private:
 		uint64_t m_PrevID;
 	};
 
-	class OutgoingUDPPacketsHolder : UDPPacketsHolder<OutgoingUDPPacket>
+	class OutgoingUDPPacketsHolder : public UDPPacketsHolder<OutgoingUDPPacket>
 	{
 	public:
-		static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket);
+		typedef std::function<void(OutgoingUDPPacket*)> SendPacketCallback;
 
-		static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket);
+	public:
+		static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket);
 
-		void IncreaseLastID(void);
+		static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket);
+
+		void IncreaseLastID(void)
+		{
+			SetLastID(GetLastID() + 1);
+		}
 
 		uint64_t GetLastAckID(void) const
 		{

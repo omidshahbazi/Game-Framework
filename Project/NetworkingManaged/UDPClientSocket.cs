@@ -134,6 +134,26 @@ namespace GameFramework.Networking
 				ProcessOutgoingNonReliablePackets();
 		}
 
+		protected override void HandlePingPacketPayload(BufferStream Buffer)
+		{
+			base.HandlePingPacketPayload(Buffer);
+
+			ulong lastAckID = Buffer.ReadUInt64();
+			uint ackMask = Buffer.ReadUInt32();
+			outgoingReliablePacketHolder.SetLastAckID(lastAckID);
+			outgoingReliablePacketHolder.SetAckMask(ackMask);
+
+			lastAckID = Buffer.ReadUInt64();
+			ackMask = Buffer.ReadUInt32();
+			outgoingNonReliablePacketHolder.SetLastAckID(lastAckID);
+			outgoingNonReliablePacketHolder.SetAckMask(ackMask);
+		}
+
+		protected override BufferStream GetPingPacket()
+		{
+			return OutgoingUDPPacket.CreatePingBufferStream(outgoingReliablePacketHolder, incomingReliablePacketHolder, outgoingNonReliablePacketHolder, incomingNonReliablePacketHolder);
+		}
+
 		private void SendPacket(OutgoingUDPPacket Packet)
 		{
 			for (ushort i = 0; i < Packet.SliceBuffers.Length; ++i)
@@ -158,26 +178,6 @@ namespace GameFramework.Networking
 		private void ProcessOutgoingNonReliablePackets()
 		{
 			OutgoingUDPPacketsHolder.ProcessNonReliablePackets(outgoingNonReliablePacketHolder, SendPacket);
-		}
-
-		protected override void HandlePingPacketPayload(BufferStream Buffer)
-		{
-			base.HandlePingPacketPayload(Buffer);
-
-			ulong lastAckID = Buffer.ReadUInt64();
-			uint ackMask = Buffer.ReadUInt32();
-			outgoingReliablePacketHolder.SetLastAckID(lastAckID);
-			outgoingReliablePacketHolder.SetAckMask(ackMask);
-
-			lastAckID = Buffer.ReadUInt64();
-			ackMask = Buffer.ReadUInt32();
-			outgoingNonReliablePacketHolder.SetLastAckID(lastAckID);
-			outgoingNonReliablePacketHolder.SetAckMask(ackMask);
-		}
-
-		protected override BufferStream GetPingPacket()
-		{
-			return OutgoingUDPPacket.CreatePingBufferStream(outgoingReliablePacketHolder, incomingReliablePacketHolder, outgoingNonReliablePacketHolder, incomingNonReliablePacketHolder);
 		}
 	}
 }

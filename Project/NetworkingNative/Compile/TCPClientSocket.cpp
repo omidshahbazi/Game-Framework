@@ -82,7 +82,7 @@ namespace GameFramework::Networking
 		}
 	}
 
-	void TCPClientSocket::ProcessReceivedBuffer(const BufferStream& Buffer)
+	void TCPClientSocket::ProcessReceivedBuffer(BufferStream& Buffer)
 	{
 		HandleReceivedBuffer(Buffer);
 	}

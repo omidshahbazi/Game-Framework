@@ -30,7 +30,7 @@ namespace GameFramework::Networking
 
 		virtual void HandleIncomingBuffer(BufferStream& Buffer) override;
 
-		virtual void ProcessReceivedBuffer(const BufferStream& Buffer) override;
+		virtual void ProcessReceivedBuffer(BufferStream& Buffer) override;
 
 		virtual BufferStream GetPingPacket(void) override;
 

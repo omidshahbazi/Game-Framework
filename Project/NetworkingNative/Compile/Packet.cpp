@@ -2,6 +2,7 @@
 #include "..\Include\Packet.h"
 #include "..\Include\Constants.h"
 #include <Timing\Time.h>
+#include <Utilities\BitwiseHelper.h>
 
 using namespace GameFramework::Common::Timing;
 using namespace GameFramework::Common::Utilities;
@@ -74,37 +75,16 @@ namespace GameFramework::Networking
 		m_SliceCount(m_SliceCount),
 		m_SliceBuffers(nullptr)
 	{
-		uint32_t size = m_SliceCount * sizeof(BufferStream*);
-		m_SliceBuffers = reinterpret_cast<BufferStream * *>(malloc(size));
-		memset(m_SliceBuffers, 0, size);
+		uint32_t size = m_SliceCount * sizeof(BufferStream);
+		m_SliceBuffers = reinterpret_cast<BufferStream*>(malloc(size));
+
+		for (uint32_t i = 0; i < m_SliceCount; ++i)
+			new (&m_SliceBuffers[i]) BufferStream(0);
 	}
 
 	UDPPacket::	~UDPPacket(void)
 	{
 		free(m_SliceBuffers);
-	}
-
-	uint64_t UDPPacket::GetID(void) const
-	{
-		return m_ID;
-	}
-
-	BufferStream* UDPPacket::GetSliceBuffer(uint32_t Index)
-	{
-		return m_SliceBuffers[Index];
-	}
-
-	void UDPPacket::SetScliceBuffer(uint32_t Index, BufferStream* Buffer)
-	{
-		if (m_SliceBuffers[Index] != nullptr)
-			return;
-
-		m_SliceBuffers[Index] = Buffer;
-	}
-
-	uint32_t UDPPacket::GetSliceCount(void) const
-	{
-		return m_SliceCount;
 	}
 
 	uint32_t UDPPacket::GetLength(void) const
@@ -113,10 +93,7 @@ namespace GameFramework::Networking
 
 		for (uint32_t i = 0; i < m_SliceCount; ++i)
 		{
-			BufferStream* buffer = m_SliceBuffers[i];
-
-			if (buffer == nullptr)
-				continue;
+			BufferStream* buffer = &m_SliceBuffers[i];
 
 			length += buffer->GetSize();
 		}
@@ -137,22 +114,11 @@ namespace GameFramework::Networking
 
 		for (uint32_t i = 0; i < count; ++i)
 		{
-			BufferStream& sliceBuffer = *GetSliceBuffer(i);
-			buffer.WriteBytes(sliceBuffer.GetBuffer(), buffer.GetSize());
+			BufferStream& sliceBuffer = GetSliceBuffer(i);
+			buffer.WriteBytes(sliceBuffer.GetBuffer(), 0, buffer.GetSize());
 		}
 
 		return buffer;
-	}
-
-	bool IncomingUDPPacket::GetIsCompleted(void)
-	{
-		uint32_t count = GetSliceCount();
-
-		for (uint32_t i = 0; i < count; ++i)
-			if (GetSliceBuffer(i) == nullptr)
-				return false;
-
-		return true;
 	}
 
 	OutgoingUDPPacket::OutgoingUDPPacket(uint64_t ID, uint32_t SliceCount) :
@@ -160,7 +126,7 @@ namespace GameFramework::Networking
 	{
 	}
 
-	OutgoingUDPPacket OutgoingUDPPacket::CreateOutgoingBufferStream(OutgoingUDPPacketsHolder& OutgoingHolder, IncomingUDPPacketsHolder& IncomingHolder, byte* const Buffer, uint32_t Index, uint32_t Length, uint32_t MTU, bool IsReliable)
+	OutgoingUDPPacket* OutgoingUDPPacket::CreateOutgoingBufferStream(OutgoingUDPPacketsHolder& OutgoingHolder, IncomingUDPPacketsHolder& IncomingHolder, byte* const Buffer, uint32_t Index, uint32_t Length, uint32_t MTU, bool IsReliable)
 	{
 		if (Constants::UDP::PACKET_HEADER_SIZE >= MTU)
 			throw exception(("PACKET_HEADER_SIZE [" + std::to_string(Constants::UDP::PACKET_HEADER_SIZE) + "] is greater than or equal to MTU [" + std::to_string(MTU) + "]").c_str());
@@ -173,7 +139,7 @@ namespace GameFramework::Networking
 
 		uint16_t sliceCount = (uint16_t)ceil(Length / (float)mtu);
 
-		OutgoingUDPPacket packet(id, sliceCount);
+		OutgoingUDPPacket* packet = new OutgoingUDPPacket(id, sliceCount);
 
 		uint32_t ackMask = IncomingUDPPacketsHolder::GetAckMask(IncomingHolder, OutgoingHolder.GetAckMask());
 
@@ -191,7 +157,7 @@ namespace GameFramework::Networking
 			buffer.WriteUInt16(i);
 			buffer.WriteBytes(Buffer, index, length);
 
-			packet.SetSliceBuffer(i, buffer);
+			packet->SetSliceBuffer(i, buffer);
 		}
 
 		OutgoingHolder.AddPacket(packet);
@@ -238,7 +204,7 @@ namespace GameFramework::Networking
 		return AckMask;
 	}
 
-	void IncomingUDPPacketsHolder::ProcessReliablePackets(IncomingUDPPacketsHolder Holder, std::function<void(BufferStream)> HandleReceivedBuffer)
+	void IncomingUDPPacketsHolder::ProcessReliablePackets(IncomingUDPPacketsHolder Holder, HandleReceivedBufferCallback HandleReceivedBuffer)
 	{
 		List<uint64_t> completedIDs;
 
@@ -273,29 +239,14 @@ namespace GameFramework::Networking
 			Holder.GetPacketsMap().erase(completedIDs[i]);
 	}
 
-	void IncomingUDPPacketsHolder::ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, std::function<void(BufferStream)> HandleReceivedBuffer)
+	void IncomingUDPPacketsHolder::ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, HandleReceivedBufferCallback HandleReceivedBuffer)
 	{
 		HandleReceivedBuffer(Packet.Combine());
 
 		Holder.GetPacketsMap().erase(Packet.GetID());
 	}
 
-	void IncomingUDPPacketsHolder::SetLastID(uint64_t Value)
-	{
-		UDPPacketsHolder::SetLastID(Value);
-	}
-
-	uint64_t IncomingUDPPacketsHolder::GetPrevID(void) const
-	{
-		return m_PrevID;
-	}
-
-	void IncomingUDPPacketsHolder::SetPrevID(uint64_t Value)
-	{
-		m_PrevID = Value;
-	}
-
-	void OutgoingUDPPacketsHolder::ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket)
+	void OutgoingUDPPacketsHolder::ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket)
 	{
 		uint64_t lastAckID = Holder.GetLastAckID();
 
@@ -324,33 +275,8 @@ namespace GameFramework::Networking
 		}
 	}
 
-	void OutgoingUDPPacketsHolder::ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket)
+	void OutgoingUDPPacketsHolder::ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket)
 	{
 		ProcessReliablePackets(Holder, SendPacket);
-	}
-
-	void OutgoingUDPPacketsHolder::IncreaseLastID(void)
-	{
-		SetLastID(GetLastID() + 1);
-	}
-
-	uint64_t OutgoingUDPPacketsHolder::GetLastAckID(void) const
-	{
-		return m_LastAckID;
-	}
-
-	void OutgoingUDPPacketsHolder::SetLastAckID(uint64_t Value)
-	{
-		m_LastAckID = Value;
-	}
-
-	uint32_t OutgoingUDPPacketsHolder::GetAckMask(void) const
-	{
-		return m_AckMask;
-	}
-
-	void OutgoingUDPPacketsHolder::SetAckMask(uint32_t Value)
-	{
-		m_AckMask = Value;
 	}
 }

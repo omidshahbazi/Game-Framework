@@ -5,6 +5,7 @@
 #define TCP_CLIENT_SOCKET_H
 
 #include "ClientSocket.h"
+#include "Packet.h"
 
 namespace GameFramework::Networking
 {
@@ -24,12 +25,11 @@ namespace GameFramework::Networking
 
 		virtual void HandleIncomingBuffer(BufferStream& Buffer) override;
 
-		void ProcessReceivedBuffer(const BufferStream& Buffer) override;
+		void ProcessReceivedBuffer(BufferStream& Buffer) override;
 
-		virtual BufferStream GetPingPacket(void) override
-		{
-			return BufferStream(0);
-		}
+		virtual void HandlePingPacketPayload(BufferStream& Buffer) override;
+
+		virtual BufferStream GetPingPacket(void) override;
 
 		uint32_t GetMTU(void) const
 		{
@@ -37,7 +37,20 @@ namespace GameFramework::Networking
 		}
 
 	private:
+		void SendPacket(OutgoingUDPPacket* Packet);
+
+		void ProcessIncomingReliablePackets(void);
+		void ProcessIncomingNonReliablePacket(IncomingUDPPacket Packet);
+		void ProcessOutgoingReliablePackets(void);
+		void ProcessOutgoingNonReliablePackets(void);
+
+	private:
 		uint32_t m_MTU;
+
+		IncomingUDPPacketsHolder m_IncomingReliablePacketHolder;
+		IncomingUDPPacketsHolder m_IncomingNonReliablePacketHolder;
+		OutgoingUDPPacketsHolder m_OutgoingReliablePacketHolder;
+		OutgoingUDPPacketsHolder m_OutgoingNonReliablePacketHolder;
 	};
 }
 
