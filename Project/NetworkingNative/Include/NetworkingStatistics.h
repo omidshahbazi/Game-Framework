@@ -33,6 +33,11 @@ namespace GameFramework::Networking
 			m_Latency = Latency;
 		}
 
+		uint32_t GetReceivedPacketFromLastSecond(void) const
+		{
+			return m_ReceivedPacketFromLastSecond;
+		}
+
 		void AddReceivedPacketFromLastSecond(void)
 		{
 			++m_ReceivedPacketFromLastSecond;
@@ -43,14 +48,34 @@ namespace GameFramework::Networking
 			m_ReceivedPacketFromLastSecond = 0;
 		}
 
+		uint64_t GetBandwidthIn(void) const
+		{
+			return m_BandwidthIn;
+		}
+
 		void AddBandwidthIn(uint32_t Size)
 		{
 			m_BandwidthIn += Size;
 		}
 
+		uint64_t GetBandwidthOut(void) const
+		{
+			return m_BandwidthOut;
+		}
+
 		void AddBandwidthOut(uint32_t Size)
 		{
 			m_BandwidthOut += Size;
+		}
+
+		uint32_t GetPacketCountRate(void) const
+		{
+			return m_PacketCountRate;
+		}
+
+		void SetPacketCountRate(uint32_t PacketCountRate)
+		{
+			m_PacketCountRate = PacketCountRate;
 		}
 
 	private:
@@ -59,6 +84,7 @@ namespace GameFramework::Networking
 		uint32_t m_ReceivedPacketFromLastSecond;
 		uint64_t m_BandwidthIn;
 		uint64_t m_BandwidthOut;
+		uint32_t m_PacketCountRate;
 	};
 }
 

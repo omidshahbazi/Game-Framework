@@ -13,7 +13,8 @@ namespace GameFramework::Networking
 		m_Latency(0),
 		m_ReceivedPacketFromLastSecond(0),
 		m_BandwidthIn(0),
-		m_BandwidthOut(0)
+		m_BandwidthOut(0),
+		m_PacketCountRate(0)
 	{
 	}
 }

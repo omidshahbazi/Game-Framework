@@ -65,6 +65,7 @@ namespace GameFramework::Networking
 			if (SocketUtilities::Accept(GetSocket(), clientSocket, endPoint))
 			{
 				TCPClient* client = new TCPClient(clientSocket, endPoint);
+				client->GetStatistics().SetPacketCountRate(GetPacketCountRate());
 
 				{
 					WAIT_FOR_BOOL(m_ClientsLock);

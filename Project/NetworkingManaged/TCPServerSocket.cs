@@ -114,6 +114,7 @@ namespace GameFramework.Networking
 				Socket clientSocket = Socket.Accept();
 
 				TCPClient client = new TCPClient(clientSocket);
+				client.Statistics.SetPacketCountRate(PacketCountRate);
 
 				lock (clients)
 					clients.Add(client);

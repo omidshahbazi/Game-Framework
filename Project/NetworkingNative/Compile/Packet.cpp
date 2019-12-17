@@ -30,6 +30,32 @@ namespace GameFramework::Networking
 		return BufferStream(Buffer, HEADER_SIZE, (uint32_t)(Length - HEADER_SIZE));
 	}
 
+	BufferStream Packet::CreateHandshakeBufferStream(uint32_t MTU)
+	{
+		uint32_t length = HEADER_SIZE + sizeof(uint32_t);
+
+		BufferStream buffer(PACKET_SIZE_SIZE + length);
+		buffer.ResetWrite();
+		buffer.WriteUInt32(length);
+		buffer.WriteBytes(Constants::Control::HANDSHAKE);
+		buffer.WriteUInt32(MTU);
+
+		return buffer;
+	}
+
+	BufferStream Packet::CreateHandshakeBackBufferStream(uint32_t PacketCountRate)
+	{
+		uint32_t length = HEADER_SIZE + sizeof(uint32_t);
+
+		BufferStream buffer(PACKET_SIZE_SIZE + length);
+		buffer.ResetWrite();
+		buffer.WriteUInt32(length);
+		buffer.WriteBytes(Constants::Control::HANDSHAKE);
+		buffer.WriteUInt32(PacketCountRate);
+
+		return buffer;
+	}
+
 	BufferStream Packet::CreatePingBufferStream(uint32_t PayloadSize)
 	{
 		uint32_t length = (PING_SIZE - PACKET_SIZE_SIZE) + PayloadSize;

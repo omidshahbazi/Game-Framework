@@ -63,7 +63,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		private long lastBandwidthInCheck = 0;
+		private long lastPacketCountRateCheck = 0;
 
 		public delegate void ConnectionEventHandler(Client Client);
 		public delegate void BufferReceivedEventHandler(Client Sender, BufferStream Buffer);
@@ -95,7 +95,7 @@ namespace GameFramework.Networking
 
 		public ServerSocket(Protocols Type) : base(Type)
 		{
-			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
+			lastPacketCountRateCheck = (long)Time.CurrentEpochTime;
 
 			PacketCountRate = Constants.DEFAULT_PACKET_COUNT_RATE;
 		}
@@ -238,7 +238,7 @@ namespace GameFramework.Networking
 
 		private void CheckClientsFlow()
 		{
-			if (Time.CurrentEpochTime - lastBandwidthInCheck < 1)
+			if (Time.CurrentEpochTime - lastPacketCountRateCheck < 1)
 				return;
 
 			Client[] clients = Clients;
@@ -247,7 +247,7 @@ namespace GameFramework.Networking
 			{
 				Client client = clients[i];
 
-				if (client.Statistics.ReceivedPacketFromLastSecond <= PacketCountRate)
+				if (client.Statistics.ReceivedPacketFromLastSecond <= client.Statistics.PacketCountRate)
 				{
 					client.Statistics.ResetReceivedPacketFromLastSecond();
 
@@ -262,7 +262,7 @@ namespace GameFramework.Networking
 				//HandleClientDisconnection(client);
 			}
 
-			lastBandwidthInCheck = (long)Time.CurrentEpochTime;
+			lastPacketCountRateCheck = (long)Time.CurrentEpochTime;
 		}
 	}
 }

@@ -35,6 +35,12 @@ namespace GameFramework.Networking
 			protected set;
 		}
 
+		public uint PacketCountRate
+		{
+			get;
+			private set;
+		}
+
 		public NetworkingStatistics()
 		{
 			LastTouchTime = Time.CurrentEpochTime;
@@ -68,6 +74,11 @@ namespace GameFramework.Networking
 		public void AddBandwidthOut(uint Size)
 		{
 			BandwidthOut += Size;
+		}
+
+		public void SetPacketCountRate(uint PacketCountRate)
+		{
+			this.PacketCountRate = PacketCountRate;
 		}
 	}
 }

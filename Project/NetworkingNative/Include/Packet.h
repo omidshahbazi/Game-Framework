@@ -26,6 +26,10 @@ namespace GameFramework::Networking
 
 		static BufferStream CreateIncomingBufferStream(std::byte* const Buffer, uint32_t Length);
 
+		static BufferStream CreateHandshakeBufferStream(uint32_t MTU);
+
+		static BufferStream CreateHandshakeBackBufferStream(uint32_t PacketCountRate);
+
 		static BufferStream CreatePingBufferStream(uint32_t PayloadSize = 0);
 	};
 }

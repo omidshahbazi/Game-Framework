@@ -167,7 +167,7 @@ namespace GameFramework.Networking
 				lock (clients)
 					clients.Add(client);
 
-				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(PacketCountRate);
+				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(client.Statistics.PacketCountRate);
 
 				SendInternal(Client, buffer);
 			}
@@ -377,6 +377,7 @@ namespace GameFramework.Networking
 				return clientsMap[hash];
 
 			UDPClient client = new UDPClient(EndPoint);
+			client.Statistics.SetPacketCountRate(PacketCountRate);
 
 			clientsMap[hash] = client;
 

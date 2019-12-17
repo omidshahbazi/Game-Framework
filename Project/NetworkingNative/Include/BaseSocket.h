@@ -109,11 +109,11 @@ namespace GameFramework::Networking
 			return m_ReceiveBuffer;
 		}
 
+	public:
 		virtual bool GetIsReady(void) const = 0;
 
 		virtual double GetTimestamp(void) const = 0;
 
-	public:
 		NetworkingStatistics& GetStatistics(void)
 		{
 			return m_Statistics;

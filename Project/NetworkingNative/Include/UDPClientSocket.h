@@ -14,9 +14,11 @@ namespace GameFramework::Networking
 		UDPClientSocket(void);
 
 	protected:
+		virtual void SendInternal(BufferStream &Buffer);
+
 		void ConnectInternal(const IPEndPoint& EndPoint) override;
 
-		void ProcessReceivedBuffer(const BufferStream &Buffer) override;
+		void ProcessReceivedBuffer(const BufferStream& Buffer) override;
 
 		virtual void HandleIncomingBuffer(BufferStream& Buffer) override
 		{
@@ -27,6 +29,14 @@ namespace GameFramework::Networking
 		{
 			return BufferStream(0);
 		}
+
+		uint32_t GetMTU(void) const
+		{
+			return m_MTU;
+		}
+
+	private:
+		uint32_t m_MTU;
 	};
 }
 

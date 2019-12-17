@@ -72,6 +72,16 @@ namespace GameFramework::Networking
 		void CloseClientConnection(Client* Client) override;
 
 	public:
+		const Client* GetClients(void) const override
+		{
+			return reinterpret_cast<const Client*>(m_Clients.data());
+		}
+
+		uint32_t GetClientCount(void) const override
+		{
+			return m_Clients.size();
+		}
+
 		uint32_t GetMaxConnection(void) const
 		{
 			return m_MaxConnection;

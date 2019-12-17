@@ -1,7 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
 using GameFramework.Common.Timing;
-using System.Collections.Generic;
 using System.Net;
 
 namespace GameFramework.Networking
@@ -15,12 +14,6 @@ namespace GameFramework.Networking
 		private OutgoingUDPPacketsHolder outgoingNonReliablePacketHolder = null;
 
 		public uint MTU
-		{
-			get;
-			private set;
-		}
-
-		public uint PacketRate
 		{
 			get;
 			private set;
@@ -86,7 +79,7 @@ namespace GameFramework.Networking
 			}
 			else if (control == Constants.Control.HANDSHAKE_BACK)
 			{
-				PacketRate = Buffer.ReadUInt32();
+				Statistics.SetPacketCountRate(Buffer.ReadUInt32());
 
 				IsConnected = true;
 

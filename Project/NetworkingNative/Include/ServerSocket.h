@@ -121,12 +121,21 @@ namespace GameFramework::Networking
 
 		void RaiseOnClientConnected(Client* Client);
 
+	public:
 		virtual bool GetIsReady(void) const override
 		{
 			return m_IsBound;
 		}
 
 		virtual double GetTimestamp(void) const override;
+
+		virtual const Client* GetClients(void) const = 0;
+		virtual uint32_t GetClientCount(void) const = 0;
+
+		uint32_t GetPacketCountRate(void) const
+		{
+			return m_PacketCountRate;
+		}
 
 	public:
 		Event<const Client*> OnClientConnected;
@@ -135,7 +144,7 @@ namespace GameFramework::Networking
 
 	private:
 		bool m_IsBound;
-
+		uint32_t m_PacketCountRate;
 	};
 }
 

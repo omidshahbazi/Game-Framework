@@ -12,7 +12,8 @@ namespace GameFramework::Networking
 {
 	ServerSocket::ServerSocket(PlatformNetwork::IPProtocols Type) :
 		BaseSocket(Type),
-		m_IsBound(false)
+		m_IsBound(false),
+		m_PacketCountRate(Constants::DEFAULT_PACKET_COUNT_RATE)
 	{
 	}
 
