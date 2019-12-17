@@ -77,6 +77,13 @@ namespace GameFramework::BinarySerializer
 		return value.Value;
 	}
 
+	uint16_t BufferStream::ReadUInt16(void)
+	{
+		BytesOf<uint16_t> value = ReadBytesOf<uint16_t>(m_Buffer, m_ReadIndex);
+
+		return value.Value;
+	}
+
 	uint32_t BufferStream::ReadUInt32(void)
 	{
 		BytesOf<uint32_t> value = ReadBytesOf<uint32_t>(m_Buffer, m_ReadIndex);
@@ -141,6 +148,11 @@ namespace GameFramework::BinarySerializer
 	}
 
 	void BufferStream::WriteInt64(int64_t Value)
+	{
+		WriteBytesOf(Value);
+	}
+
+	void BufferStream::WriteUInt16(uint16_t Value)
 	{
 		WriteBytesOf(Value);
 	}

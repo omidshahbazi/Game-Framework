@@ -13,17 +13,18 @@ namespace GameFramework::Networking
 	public:
 		UDPClientSocket(void);
 
+		virtual void Send(byte* const Buffer, uint32_t Length, bool Reliable = true);
+
+		virtual void Send(byte* const Buffer, uint32_t Index, uint32_t Length, bool Reliable = true);
+
 	protected:
-		virtual void SendInternal(BufferStream &Buffer);
+		virtual void SendInternal(BufferStream& Buffer);
 
 		void ConnectInternal(const IPEndPoint& EndPoint) override;
 
+		virtual void HandleIncomingBuffer(BufferStream& Buffer) override;
+
 		void ProcessReceivedBuffer(const BufferStream& Buffer) override;
-
-		virtual void HandleIncomingBuffer(BufferStream& Buffer) override
-		{
-
-		}
 
 		virtual BufferStream GetPingPacket(void) override
 		{

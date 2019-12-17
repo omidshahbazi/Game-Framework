@@ -2,6 +2,9 @@
 #include "..\Include\UDPClientSocket.h"
 #include "..\Include\Packet.h"
 #include "..\Include\Constants.h"
+#include <Timing\Time.h>
+
+using namespace GameFramework::Common::Timing;
 
 namespace GameFramework::Networking
 {
@@ -9,6 +12,20 @@ namespace GameFramework::Networking
 		ClientSocket(PlatformNetwork::IPProtocols::UDP),
 		m_MTU(0)
 	{
+	}
+
+	void UDPClientSocket::Send(byte* const Buffer, uint32_t Length, bool Reliable)
+	{
+		Send(Buffer, 0, Length, Reliable);
+	}
+
+	void UDPClientSocket::Send(byte* const Buffer, uint32_t Index, uint32_t Length, bool Reliable)
+	{
+		//BufferStream buffer = Packet::CreateOutgoingBufferStream(Length);
+
+		//buffer.WriteBytes(Buffer, Index, Length);
+
+		//SendInternal(buffer);
 	}
 
 	void UDPClientSocket::SendInternal(BufferStream& Buffer)
@@ -27,6 +44,32 @@ namespace GameFramework::Networking
 
 		RunReceiveThread();
 		RunSenndThread();
+	}
+
+	void UDPClientSocket::HandleIncomingBuffer(BufferStream& Buffer)
+	{
+		GetStatistics().SetLastTouchTime(Time::GetCurrentEpochTime());
+
+		byte control = Buffer.ReadByte();
+
+		if (control == Constants::Control::BUFFER)
+		{
+			BufferStream buffer = Packet::CreateIncomingBufferStream(Buffer.GetBuffer(), Buffer.GetSize());
+
+			ProcessReceivedBuffer(buffer);
+		}
+		else if (control == Constants::Control::HANDSHAKE_BACK)
+		{
+			GetStatistics().SetPacketCountRate(Buffer.ReadUInt32());
+
+			SetIsConnected(true);
+
+			RaiseOnConnectedEvent();
+		}
+		else if (control == Constants::Control::PING)
+		{
+			HandlePingPacket(Buffer);
+		}
 	}
 
 	void UDPClientSocket::ProcessReceivedBuffer(const BufferStream& Buffer)

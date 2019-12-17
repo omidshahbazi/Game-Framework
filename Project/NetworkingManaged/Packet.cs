@@ -105,24 +105,11 @@ namespace GameFramework.Networking
 			}
 		}
 
-		public bool IsReliable
-		{
-			get;
-			private set;
-		}
-
-		public abstract bool IsCompleted
-		{
-			get;
-		}
-
-		public UDPPacket(ulong ID, uint SliceCount, bool IsReliable)
+		public UDPPacket(ulong ID, uint SliceCount)
 		{
 			this.ID = ID;
 
 			SliceBuffers = new BufferStream[SliceCount];
-
-			this.IsReliable = IsReliable;
 		}
 
 		public void SetSliceBuffer(uint Index, BufferStream Buffer)
@@ -168,36 +155,11 @@ namespace GameFramework.Networking
 		{
 			PacketsMap[Packet.ID] = Packet;
 		}
-
-		public static uint GetAckMask(UDPPacketsHolder<T> IncomingHolder, uint AckMask)
-		{
-			AckMask <<= 1;
-
-			ushort bitCount = Constants.UDP.ACK_MASK_SIZE * 8;
-
-			for (ushort i = 0; i < bitCount; ++i)
-			{
-				ushort offset = (ushort)(i + 1);
-
-				if (offset >= IncomingHolder.LastID)
-					break;
-
-				ulong packetID = IncomingHolder.LastID - offset;
-
-				T packet = null;
-				IncomingHolder.PacketsMap.TryGetValue(packetID, out packet);
-
-				if (packet == null || packet.IsCompleted)
-					AckMask = BitwiseHelper.Enable(AckMask, (ushort)(bitCount - offset));
-			}
-
-			return AckMask;
-		}
 	}
 
 	class IncomingUDPPacket : UDPPacket
 	{
-		public override bool IsCompleted
+		public bool IsCompleted
 		{
 			get
 			{
@@ -209,7 +171,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		public IncomingUDPPacket(ulong ID, uint SliceCount, bool IsReliable) : base(ID, SliceCount, IsReliable)
+		public IncomingUDPPacket(ulong ID, uint SliceCount) : base(ID, SliceCount)
 		{
 		}
 
@@ -226,21 +188,8 @@ namespace GameFramework.Networking
 
 	class OutgoingUDPPacket : UDPPacket
 	{
-		public override bool IsCompleted
+		public OutgoingUDPPacket(ulong ID, ushort SliceCount) : base(ID, SliceCount)
 		{
-			get { return false; }
-		}
-
-		public OutgoingUDPPacket(ulong ID, ushort SliceCount, bool IsReliable) : base(ID, SliceCount, IsReliable)
-		{
-		}
-
-		public void SetSliceBuffer(ushort Index, BufferStream Buffer)
-		{
-			if (SliceBuffers[Index] != null)
-				return;
-
-			SliceBuffers[Index] = Buffer;
 		}
 
 		public static OutgoingUDPPacket CreateOutgoingBufferStream(OutgoingUDPPacketsHolder OutgoingHolder, IncomingUDPPacketsHolder IncomingHolder, byte[] Buffer, uint Index, uint Length, uint MTU, bool IsReliable)
@@ -256,9 +205,9 @@ namespace GameFramework.Networking
 
 			ushort sliceCount = (ushort)Math.Ceiling(Length / (float)mtu);
 
-			OutgoingUDPPacket packet = new OutgoingUDPPacket(id, sliceCount, IsReliable);
+			OutgoingUDPPacket packet = new OutgoingUDPPacket(id, sliceCount);
 
-			uint ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(IncomingHolder, OutgoingHolder.AckMask);
+			uint ackMask = IncomingUDPPacketsHolder.GetAckMask(IncomingHolder, OutgoingHolder.AckMask);
 
 			for (ushort i = 0; i < sliceCount; ++i)
 			{
@@ -286,11 +235,11 @@ namespace GameFramework.Networking
 		{
 			BufferStream buffer = Packet.CreatePingBufferStream((Constants.UDP.LAST_ACK_ID_SIZE + Constants.UDP.ACK_MASK_SIZE) * 2);
 
-			uint ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(ReliableIncomingHolder, ReliableOutgoingHolder.AckMask);
+			uint ackMask = IncomingUDPPacketsHolder.GetAckMask(ReliableIncomingHolder, ReliableOutgoingHolder.AckMask);
 			buffer.WriteUInt64(ReliableIncomingHolder.LastID);
 			buffer.WriteUInt32(ackMask);
 
-			ackMask = UDPPacketsHolder<IncomingUDPPacket>.GetAckMask(NonReliableIncomingHolder, NonReliableOutgoingHolder.AckMask);
+			ackMask = IncomingUDPPacketsHolder.GetAckMask(NonReliableIncomingHolder, NonReliableOutgoingHolder.AckMask);
 			buffer.WriteUInt64(NonReliableIncomingHolder.LastID);
 			buffer.WriteUInt32(ackMask);
 
@@ -316,6 +265,31 @@ namespace GameFramework.Networking
 			PrevID = Value;
 		}
 
+		public static uint GetAckMask(IncomingUDPPacketsHolder IncomingHolder, uint AckMask)
+		{
+			AckMask <<= 1;
+
+			ushort bitCount = Constants.UDP.ACK_MASK_SIZE * 8;
+
+			for (ushort i = 0; i < bitCount; ++i)
+			{
+				ushort offset = (ushort)(i + 1);
+
+				if (offset >= IncomingHolder.LastID)
+					break;
+
+				ulong packetID = IncomingHolder.LastID - offset;
+
+				IncomingUDPPacket packet = null;
+				IncomingHolder.PacketsMap.TryGetValue(packetID, out packet);
+
+				if (packet == null || packet.IsCompleted)
+					AckMask = BitwiseHelper.Enable(AckMask, (ushort)(bitCount - offset));
+			}
+
+			return AckMask;
+		}
+
 		public static void ProcessReliablePackets(IncomingUDPPacketsHolder Holder, Action<BufferStream> HandleReceivedBuffer)
 		{
 			List<ulong> completedIDs = new List<ulong>();
@@ -326,7 +300,7 @@ namespace GameFramework.Networking
 				ulong id = it.Current.Key;
 				IncomingUDPPacket packet = it.Current.Value;
 
-				if (!it.Current.Value.IsCompleted)
+				if (!packet.IsCompleted)
 					break;
 
 				if (id < Holder.PrevID)

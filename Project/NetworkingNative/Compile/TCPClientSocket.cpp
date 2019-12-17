@@ -66,9 +66,7 @@ namespace GameFramework::Networking
 
 	void TCPClientSocket::HandleIncomingBuffer(BufferStream& Buffer)
 	{
-		double time = Time::GetCurrentEpochTime();
-
-		GetStatistics().SetLastTouchTime(time);
+		GetStatistics().SetLastTouchTime(Time::GetCurrentEpochTime());
 
 		byte control = Buffer.ReadByte();
 

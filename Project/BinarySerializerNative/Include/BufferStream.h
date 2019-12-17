@@ -39,6 +39,8 @@ namespace GameFramework::BinarySerializer
 
 		int64_t ReadInt64(void);
 
+		int16_t ReadUInt16(void);
+
 		uint32_t ReadUInt32(void);
 
 		uint64_t ReadUInt64(void);
@@ -58,6 +60,8 @@ namespace GameFramework::BinarySerializer
 		void WriteInt32(int32_t Value);
 
 		void WriteInt64(int64_t Value);
+
+		void WriteUInt16(uint16_t Value);
 
 		void WriteUInt32(uint32_t Value);
 

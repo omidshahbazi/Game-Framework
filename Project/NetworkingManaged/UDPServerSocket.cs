@@ -229,7 +229,7 @@ namespace GameFramework.Networking
 			IncomingUDPPacket packet = incomingHolder.GetPacket(packetID);
 			if (packet == null)
 			{
-				packet = new IncomingUDPPacket(packetID, sliceCount, isReliable);
+				packet = new IncomingUDPPacket(packetID, sliceCount);
 				incomingHolder.AddPacket(packet);
 			}
 
