@@ -68,4 +68,289 @@ namespace GameFramework::Networking
 
 		return buffer;
 	}
+
+	UDPPacket::UDPPacket(uint64_t ID, uint32_t SliceCount) :
+		m_ID(ID),
+		m_SliceCount(m_SliceCount),
+		m_SliceBuffers(nullptr)
+	{
+		uint32_t size = m_SliceCount * sizeof(BufferStream*);
+		m_SliceBuffers = reinterpret_cast<BufferStream * *>(malloc(size));
+		memset(m_SliceBuffers, 0, size);
+	}
+
+	UDPPacket::	~UDPPacket(void)
+	{
+		free(m_SliceBuffers);
+	}
+
+	uint64_t UDPPacket::GetID(void) const
+	{
+		return m_ID;
+	}
+
+	BufferStream* UDPPacket::GetSliceBuffer(uint32_t Index)
+	{
+		return m_SliceBuffers[Index];
+	}
+
+	void UDPPacket::SetScliceBuffer(uint32_t Index, BufferStream* Buffer)
+	{
+		if (m_SliceBuffers[Index] != nullptr)
+			return;
+
+		m_SliceBuffers[Index] = Buffer;
+	}
+
+	uint32_t UDPPacket::GetSliceCount(void) const
+	{
+		return m_SliceCount;
+	}
+
+	uint32_t UDPPacket::GetLength(void) const
+	{
+		uint32_t length = 0;
+
+		for (uint32_t i = 0; i < m_SliceCount; ++i)
+		{
+			BufferStream* buffer = m_SliceBuffers[i];
+
+			if (buffer == nullptr)
+				continue;
+
+			length += buffer->GetSize();
+		}
+
+		return length;
+	}
+
+	IncomingUDPPacket::IncomingUDPPacket(uint64_t ID, uint32_t SliceCount) :
+		UDPPacket(ID, SliceCount)
+	{
+	}
+
+	BufferStream IncomingUDPPacket::Combine(void)
+	{
+		BufferStream buffer(GetLength());
+
+		uint32_t count = GetSliceCount();
+
+		for (uint32_t i = 0; i < count; ++i)
+		{
+			BufferStream& sliceBuffer = *GetSliceBuffer(i);
+			buffer.WriteBytes(sliceBuffer.GetBuffer(), buffer.GetSize());
+		}
+
+		return buffer;
+	}
+
+	bool IncomingUDPPacket::GetIsCompleted(void)
+	{
+		uint32_t count = GetSliceCount();
+
+		for (uint32_t i = 0; i < count; ++i)
+			if (GetSliceBuffer(i) == nullptr)
+				return false;
+
+		return true;
+	}
+
+	OutgoingUDPPacket::OutgoingUDPPacket(uint64_t ID, uint32_t SliceCount) :
+		UDPPacket(ID, SliceCount)
+	{
+	}
+
+	OutgoingUDPPacket OutgoingUDPPacket::CreateOutgoingBufferStream(OutgoingUDPPacketsHolder& OutgoingHolder, IncomingUDPPacketsHolder& IncomingHolder, byte* const Buffer, uint32_t Index, uint32_t Length, uint32_t MTU, bool IsReliable)
+	{
+		if (Constants::UDP::PACKET_HEADER_SIZE >= MTU)
+			throw exception(("PACKET_HEADER_SIZE [" + std::to_string(Constants::UDP::PACKET_HEADER_SIZE) + "] is greater than or equal to MTU [" + std::to_string(MTU) + "]").c_str());
+
+		OutgoingHolder.IncreaseLastID();
+
+		uint64_t id = OutgoingHolder.GetLastID();
+
+		uint32_t mtu = MTU - Constants::UDP::PACKET_HEADER_SIZE;
+
+		uint16_t sliceCount = (uint16_t)ceil(Length / (float)mtu);
+
+		OutgoingUDPPacket packet(id, sliceCount);
+
+		uint32_t ackMask = IncomingUDPPacketsHolder::GetAckMask(IncomingHolder, OutgoingHolder.GetAckMask());
+
+		for (uint16_t i = 0; i < sliceCount; ++i)
+		{
+			uint32_t index = Index + (i * mtu);
+			uint32_t length = fmin(mtu, Length - (i * mtu));
+
+			BufferStream buffer = Packet::CreateOutgoingBufferStream(Constants::UDP::PACKET_HEADER_SIZE + length);
+			buffer.WriteUInt64(IncomingHolder.GetLastID());
+			buffer.WriteUInt32(ackMask);
+			buffer.WriteBool(IsReliable);
+			buffer.WriteUInt64(id);
+			buffer.WriteUInt16(sliceCount);
+			buffer.WriteUInt16(i);
+			buffer.WriteBytes(Buffer, index, length);
+
+			packet.SetSliceBuffer(i, buffer);
+		}
+
+		OutgoingHolder.AddPacket(packet);
+
+		return packet;
+	}
+
+	BufferStream OutgoingUDPPacket::CreatePingBufferStream(OutgoingUDPPacketsHolder& ReliableOutgoingHolder, IncomingUDPPacketsHolder& ReliableIncomingHolder, OutgoingUDPPacketsHolder& NonReliableOutgoingHolder, IncomingUDPPacketsHolder& NonReliableIncomingHolder)
+	{
+		BufferStream buffer = Packet::CreatePingBufferStream((Constants::UDP::LAST_ACK_ID_SIZE + Constants::UDP::ACK_MASK_SIZE) * 2);
+
+		uint32_t ackMask = IncomingUDPPacketsHolder::GetAckMask(ReliableIncomingHolder, ReliableOutgoingHolder.GetAckMask());
+		buffer.WriteUInt64(ReliableIncomingHolder.GetLastID());
+		buffer.WriteUInt32(ackMask);
+
+		ackMask = IncomingUDPPacketsHolder::GetAckMask(NonReliableIncomingHolder, NonReliableOutgoingHolder.GetAckMask());
+		buffer.WriteUInt64(NonReliableIncomingHolder.GetLastID());
+		buffer.WriteUInt32(ackMask);
+
+		return buffer;
+	}
+
+	uint32_t IncomingUDPPacketsHolder::GetAckMask(IncomingUDPPacketsHolder& IncomingHolder, uint32_t AckMask)
+	{
+		AckMask <<= 1;
+
+		uint16_t bitCount = Constants::UDP::ACK_MASK_SIZE * 8;
+
+		for (uint16_t i = 0; i < bitCount; ++i)
+		{
+			uint16_t offset = i + 1;
+
+			if (offset >= IncomingHolder.GetLastID())
+				break;
+
+			uint64_t packetID = IncomingHolder.GetLastID() - offset;
+
+			IncomingUDPPacket* packet = IncomingHolder.GetPacketsMap()[packetID];
+
+			if (packet == nullptr || packet->GetIsCompleted())
+				AckMask = BitwiseHelper::Enable(AckMask, bitCount - offset);
+		}
+
+		return AckMask;
+	}
+
+	void IncomingUDPPacketsHolder::ProcessReliablePackets(IncomingUDPPacketsHolder Holder, std::function<void(BufferStream)> HandleReceivedBuffer)
+	{
+		List<uint64_t> completedIDs;
+
+		auto& packetMap = Holder.GetPacketsMap();
+		auto it = packetMap.begin();
+		auto end = packetMap.end();
+		for (; it != end; ++it)
+		{
+			uint64_t id = (*it).first;
+			IncomingUDPPacket* packet = (*it).second;
+
+			if (!packet->GetIsCompleted())
+				break;
+
+			if (id < Holder.GetPrevID())
+			{
+				completedIDs.push_back(id);
+				continue;
+			}
+
+			if (id - Holder.GetPrevID() > 1)
+				break;
+
+			HandleReceivedBuffer(packet->Combine());
+
+			Holder.SetPrevID(id);
+
+			completedIDs.push_back(id);
+		}
+
+		for (uint32_t i = 0; i < completedIDs.size(); ++i)
+			Holder.GetPacketsMap().erase(completedIDs[i]);
+	}
+
+	void IncomingUDPPacketsHolder::ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, std::function<void(BufferStream)> HandleReceivedBuffer)
+	{
+		HandleReceivedBuffer(Packet.Combine());
+
+		Holder.GetPacketsMap().erase(Packet.GetID());
+	}
+
+	void IncomingUDPPacketsHolder::SetLastID(uint64_t Value)
+	{
+		UDPPacketsHolder::SetLastID(Value);
+	}
+
+	uint64_t IncomingUDPPacketsHolder::GetPrevID(void) const
+	{
+		return m_PrevID;
+	}
+
+	void IncomingUDPPacketsHolder::SetPrevID(uint64_t Value)
+	{
+		m_PrevID = Value;
+	}
+
+	void OutgoingUDPPacketsHolder::ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket)
+	{
+		uint64_t lastAckID = Holder.GetLastAckID();
+
+		if (lastAckID == 0)
+			return;
+
+		uint16_t bitCount = Constants::UDP::ACK_MASK_SIZE * 8;
+
+		uint16_t count = fmin(lastAckID - 1, bitCount);
+
+		for (short i = (short)count; i >= 0; --i)
+		{
+			uint64_t id = lastAckID - i;
+
+			bool acked = (BitwiseHelper::IsEnabled(Holder.GetAckMask(), bitCount - i) || id == lastAckID);
+
+			if (acked)
+			{
+				Holder.GetPacketsMap().erase(id);
+				continue;
+			}
+
+			OutgoingUDPPacket* packet = Holder.GetPacket(id);
+
+			SendPacket(packet);
+		}
+	}
+
+	void OutgoingUDPPacketsHolder::ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, std::function<void(OutgoingUDPPacket*)> SendPacket)
+	{
+		ProcessReliablePackets(Holder, SendPacket);
+	}
+
+	void OutgoingUDPPacketsHolder::IncreaseLastID(void)
+	{
+		SetLastID(GetLastID() + 1);
+	}
+
+	uint64_t OutgoingUDPPacketsHolder::GetLastAckID(void) const
+	{
+		return m_LastAckID;
+	}
+
+	void OutgoingUDPPacketsHolder::SetLastAckID(uint64_t Value)
+	{
+		m_LastAckID = Value;
+	}
+
+	uint32_t OutgoingUDPPacketsHolder::GetAckMask(void) const
+	{
+		return m_AckMask;
+	}
+
+	void OutgoingUDPPacketsHolder::SetAckMask(uint32_t Value)
+	{
+		m_AckMask = Value;
+	}
 }
