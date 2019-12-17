@@ -30,6 +30,7 @@ namespace GameFramework::Networking
 		static class UDP
 		{
 		public:
+			static const uint32_t MAX_MTU;
 			static const uint16_t LAST_ACK_ID_SIZE;
 			static const uint16_t ACK_MASK_SIZE;
 			static const uint16_t IS_RELIABLE_SIZE;
@@ -48,8 +49,6 @@ namespace GameFramework::Networking
 		// https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.ttl?view=netframework-4.8#System_Net_Sockets_Socket_Ttl
 		static const uint16_t TIME_TO_LIVE;
 		static const float PING_TIME;
-
-		static const uint32_t UDP_MAX_MTU;
 
 		static const uint32_t DEFAULT_PACKET_COUNT_RATE;
 

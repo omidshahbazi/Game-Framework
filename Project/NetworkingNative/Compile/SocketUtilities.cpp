@@ -161,13 +161,33 @@ namespace GameFramework::Networking
 
 	uint32_t SocketUtilities::FindOptimumMTU(IPAddress IP, uint32_t Timeout, uint32_t MaxMTU)
 	{
-		std::byte data[100];
+		IP = ResolveDomain(IP.GetIP());
+
+		std::vector<std::byte> buffer(MaxMTU);
+		for (uint32_t i = 0; i < MaxMTU; ++i)
+			buffer.push_back((std::byte)(i % 255));
 
 		PlatformNetwork::PingOptions options;
 		options.DontFragment = true;
 
-		PlatformNetwork::PingReply reply = PlatformNetwork::Ping(IP.GetAddressFamily(), IP.GetIP(), Timeout, data, sizeof(data), options);
+		PlatformNetwork::PingReply reply;
+		uint32_t size = MaxMTU;
+		do
+		{
+			reply = PlatformNetwork::Ping(IP.GetAddressFamily(), IP.GetIP(), Timeout, const_cast<std::byte*>(buffer.data()), size, options);
 
-		return 0;
+			if (reply.Status == PlatformNetwork::PingStatus::Success)
+				break;
+
+			--size;
+
+			if (reply.Status == PlatformNetwork::PingStatus::PacketTooBig)
+				continue;
+
+			throw PlatformNetwork::SocketException("Finding optimum MTU failed with error");
+
+		} while (size != 0);
+
+		return size;
 	}
 }

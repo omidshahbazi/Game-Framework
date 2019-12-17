@@ -63,7 +63,7 @@ namespace GameFramework.Networking
 		{
 			Socket.Connect(EndPoint);
 
-			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, 1000, Constants.UDP_MAX_MTU);
+			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, 1000, Constants.UDP.MAX_MTU);
 
 			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
 			SendInternal(buffer);

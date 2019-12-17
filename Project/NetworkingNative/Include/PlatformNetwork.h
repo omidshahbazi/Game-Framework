@@ -286,6 +286,12 @@ namespace GameFramework::Networking
 		struct PingReply
 		{
 		public:
+			PingReply() :
+				Status(PingStatus::Unknown),
+				RoundTripTime(0)
+			{
+			}
+
 			PingReply(PingStatus Status, uint64_t RoundTripTime) :
 				Status(Status),
 				RoundTripTime(RoundTripTime)

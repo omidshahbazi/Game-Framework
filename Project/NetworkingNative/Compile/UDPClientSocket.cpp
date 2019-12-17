@@ -1,5 +1,6 @@
 // Copyright 2019. All Rights Reserved.
 #include "..\Include\UDPClientSocket.h"
+#include "..\Include\Constants.h"
 
 namespace GameFramework::Networking
 {
@@ -10,8 +11,7 @@ namespace GameFramework::Networking
 
 	void UDPClientSocket::ConnectInternal(const IPEndPoint& EndPoint)
 	{
-		SocketUtilities::FindOptimumMTU(IPAddress(PlatformNetwork::AddressFamilies::InterNetwork, "8.8.8.8"), 1000, 1500);
-		//SocketUtilities::FindOptimumMTU(EndPoint.GetAddress(), 1000, 1500);
+		uint32_t mtu = SocketUtilities::FindOptimumMTU(EndPoint.GetAddress(), 1000, Constants::UDP::MAX_MTU);
 	}
 
 	void UDPClientSocket::ProcessReceivedBuffer(const BufferStream& Buffer)
