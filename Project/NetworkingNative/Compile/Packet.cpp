@@ -115,7 +115,7 @@ namespace GameFramework::Networking
 		for (uint32_t i = 0; i < count; ++i)
 		{
 			BufferStream& sliceBuffer = GetSliceBuffer(i);
-			buffer.WriteBytes(sliceBuffer.GetBuffer(), 0, buffer.GetSize());
+			buffer.WriteBytes(sliceBuffer.GetBuffer(), 0, sliceBuffer.GetSize());
 		}
 
 		return buffer;
