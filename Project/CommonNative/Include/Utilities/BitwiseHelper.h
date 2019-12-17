@@ -26,7 +26,7 @@ namespace GameFramework::Common::Utilities
 		}
 		static long Disable(int64_t Mask, int64_t BitIndex)
 		{
-			return (Mask ^ (1 << BitIndex));
+			return (Mask & (1 << BitIndex));
 		}
 
 		static int32_t Toggle(int32_t Mask, int32_t BitIndex)
