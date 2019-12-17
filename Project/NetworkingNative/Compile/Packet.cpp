@@ -72,7 +72,7 @@ namespace GameFramework::Networking
 
 	UDPPacket::UDPPacket(uint64_t ID, uint32_t SliceCount) :
 		m_ID(ID),
-		m_SliceCount(m_SliceCount),
+		m_SliceCount(SliceCount),
 		m_SliceBuffers(nullptr)
 	{
 		uint32_t size = m_SliceCount * sizeof(BufferStream);
