@@ -211,6 +211,33 @@ namespace GameFramework::Networking
 			Checksum
 		};
 
+		enum class PingStatus
+		{
+			Unknown,
+			Success,
+			DestinationNetworkUnreachable,
+			DestinationHostUnreachable,
+			DestinationProtocolUnreachable,
+			DestinationPortUnreachable,
+			NoResources,
+			BadOption,
+			HardwareError,
+			PacketTooBig,
+			TimedOut,
+			BadRoute,
+			TTLExpired,
+			TTLReassemblyTimeExceeded,
+			ParameterProblem,
+			SourceQuench,
+			BadDestination,
+			DestinationUnreachable,
+			TimeExceeded,
+			BadHeader,
+			UnrecognizedNextHeader,
+			ICMPError,
+			DestinationScopeMismatch
+		};
+
 		class SocketException : public std::exception
 		{
 		public:
@@ -238,6 +265,36 @@ namespace GameFramework::Networking
 		private:
 			Errors m_Error;
 			std::string m_Message;
+		};
+
+		struct PingOptions
+		{
+		public:
+			PingOptions(void) :
+				TTL(128),
+				Reverse(false),
+				DontFragment(false)
+			{
+			}
+
+		public:
+			uint16_t TTL;
+			bool Reverse;
+			bool DontFragment;
+		};
+
+		struct PingReply
+		{
+		public:
+			PingReply(PingStatus Status, uint64_t RoundTripTime) :
+				Status(Status),
+				RoundTripTime(RoundTripTime)
+			{
+			}
+
+		public:
+			PingStatus Status;
+			uint64_t RoundTripTime;
 		};
 
 		typedef uint32_t Handle;
@@ -276,7 +333,7 @@ namespace GameFramework::Networking
 
 		static Errors GetLastError(void);
 
-		static void Ping(AddressFamilies AddressFamily, const std::string& Address, uint32_t Timeout, std::byte* Buffer, uint32_t BufferLength, bool DontFragment);
+		static PingReply Ping(AddressFamilies AddressFamily, const std::string& Address, uint32_t Timeout, std::byte* Buffer, uint32_t BufferLength, const PingOptions& Options);
 	};
 }
 

@@ -382,6 +382,37 @@ namespace GameFramework::Networking
 		}
 	}
 
+	PlatformNetwork::PingStatus GetPingStatus(int32_t ErrorCode)
+	{
+		switch (ErrorCode)
+		{
+		case IP_SUCCESS: return PlatformNetwork::PingStatus::Success;
+		case IP_DEST_NET_UNREACHABLE: return PlatformNetwork::PingStatus::DestinationNetworkUnreachable;
+		case IP_DEST_HOST_UNREACHABLE: return PlatformNetwork::PingStatus::DestinationHostUnreachable;
+		case IP_DEST_PROT_UNREACHABLE: return PlatformNetwork::PingStatus::DestinationProtocolUnreachable;
+		case IP_DEST_PORT_UNREACHABLE: return PlatformNetwork::PingStatus::DestinationPortUnreachable;
+		case IP_NO_RESOURCES: return PlatformNetwork::PingStatus::DestinationPortUnreachable;
+		case IP_BAD_OPTION: return PlatformNetwork::PingStatus::BadOption;
+		case IP_HW_ERROR: return PlatformNetwork::PingStatus::HardwareError;
+		case IP_PACKET_TOO_BIG: return PlatformNetwork::PingStatus::PacketTooBig;
+		case IP_REQ_TIMED_OUT: return PlatformNetwork::PingStatus::TimedOut;
+		case IP_BAD_ROUTE: return PlatformNetwork::PingStatus::BadRoute;
+		case IP_TTL_EXPIRED_TRANSIT: return PlatformNetwork::PingStatus::TTLExpired;
+		case IP_TTL_EXPIRED_REASSEM: return PlatformNetwork::PingStatus::TTLReassemblyTimeExceeded;
+		case IP_PARAM_PROBLEM: return PlatformNetwork::PingStatus::ParameterProblem;
+		case IP_SOURCE_QUENCH: return PlatformNetwork::PingStatus::SourceQuench;
+		case IP_BAD_DESTINATION: return PlatformNetwork::PingStatus::BadDestination;
+		case IP_DEST_UNREACHABLE: return PlatformNetwork::PingStatus::DestinationUnreachable;
+		case IP_TIME_EXCEEDED: return PlatformNetwork::PingStatus::TimeExceeded;
+		case IP_BAD_HEADER: return PlatformNetwork::PingStatus::BadHeader;
+		case IP_UNRECOGNIZED_NEXT_HEADER: return PlatformNetwork::PingStatus::UnrecognizedNextHeader;
+		case IP_ICMP_ERROR: return PlatformNetwork::PingStatus::ICMPError;
+		case IP_DEST_SCOPE_MISMATCH: return PlatformNetwork::PingStatus::DestinationScopeMismatch;
+		}
+
+		return PlatformNetwork::PingStatus::Unknown;
+	}
+
 	void PlatformNetwork::Initialize(void)
 	{
 		WSADATA data;
@@ -657,24 +688,26 @@ namespace GameFramework::Networking
 		return GetError(WSAGetLastError());
 	}
 
-	void PlatformNetwork::Ping(AddressFamilies AddressFamily, const std::string& Address, uint32_t Timeout, std::byte* Buffer, uint32_t BufferLength, bool DontFragment)
+	PlatformNetwork::PingReply PlatformNetwork::Ping(AddressFamilies AddressFamily, const std::string& Address, uint32_t Timeout, std::byte* Buffer, uint32_t BufferLength, const PingOptions& Options)
 	{
 		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), 0);
 
-		uint32_t replySize = 0;
+		int32_t payloadSize = BufferLength;
 		if (AddressFamily == AddressFamilies::InterNetwork)
-			replySize = sizeof(ICMP_ECHO_REPLY);
+			payloadSize -= sizeof(ICMP_ECHO_REPLY);
 		else
-			replySize = sizeof(ICMPV6_ECHO_REPLY) + sizeof(uint64_t);
-		replySize += BufferLength;
+			payloadSize -= sizeof(ICMPV6_ECHO_REPLY) + sizeof(uint64_t);
 
-		void* replyBuffer = malloc(replySize);
+		if (payloadSize <= 0)
+			throw SocketException(Errors::InsufficientBuffer);
 
 		IP_OPTION_INFORMATION options;
 		ZeroMemory(&options, sizeof(IP_OPTION_INFORMATION));
-		options.Ttl = 255;
-		if (DontFragment)
+		options.Ttl = Options.TTL;
+		if (Options.DontFragment)
 			options.Flags |= IP_FLAG_DF;
+		if (Options.Reverse)
+			options.Flags |= IP_FLAG_REVERSE;
 
 		uint32_t result = 0;
 		if (AddressFamily == AddressFamilies::InterNetwork)
@@ -683,38 +716,28 @@ namespace GameFramework::Networking
 			if (handle == INVALID_HANDLE_VALUE)
 				throw SocketException(GetLastError());
 
-			result = IcmpSendEcho(handle, addressV4.sin_addr.S_un.S_addr, reinterpret_cast<void*>(Buffer), BufferLength, &options, replyBuffer, replySize, Timeout);
+			result = IcmpSendEcho(handle, addressV4.sin_addr.S_un.S_addr, reinterpret_cast<void*>(Buffer), payloadSize, &options, reinterpret_cast<void*>(Buffer), BufferLength, Timeout);
 
-			if (result == 0)
-				throw SocketException(GetLastError());
-
-			ICMP_ECHO_REPLY* reply = reinterpret_cast<ICMP_ECHO_REPLY*>(replyBuffer);
+			ICMP_ECHO_REPLY* reply = reinterpret_cast<ICMP_ECHO_REPLY*>(Buffer);
 
 			IcmpCloseHandle(handle);
+
+			return PingReply(GetPingStatus(reply->Status), reply->RoundTripTime);
 		}
 		else
 		{
-			sockaddr_in6 sourceAddress;
-			sourceAddress.sin6_family = GetAddressFamiliy(AddressFamily);
-			sourceAddress.sin6_port = 0;
-			sourceAddress.sin6_scope_id = 0;
-			sourceAddress.sin6_addr = in6addr_any;
-
 			HANDLE handle = Icmp6CreateFile();
 			if (handle == INVALID_HANDLE_VALUE)
 				throw SocketException(GetLastError());
 
-			result = Icmp6SendEcho2(handle, nullptr, nullptr, nullptr, &sourceAddress, &addressV6, reinterpret_cast<void*>(Buffer), BufferLength, &options, replyBuffer, replySize, Timeout);
+			result = Icmp6SendEcho2(handle, nullptr, nullptr, nullptr, &addressV6, &addressV6, reinterpret_cast<void*>(Buffer), payloadSize, &options, reinterpret_cast<void*>(Buffer), BufferLength, Timeout);
 
-			if (result == 0)
-				throw SocketException(GetLastError());
-
-			ICMPV6_ECHO_REPLY* reply = reinterpret_cast<ICMPV6_ECHO_REPLY*>(replyBuffer);
+			ICMPV6_ECHO_REPLY* reply = reinterpret_cast<ICMPV6_ECHO_REPLY*>(Buffer);
 
 			IcmpCloseHandle(handle);
-		}
 
-		free(replyBuffer);
+			return PingReply(GetPingStatus(reply->Status), reply->RoundTripTime);
+		}
 	}
 }
 #endif
