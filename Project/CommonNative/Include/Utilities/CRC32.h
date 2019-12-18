@@ -6,6 +6,7 @@
 
 #include "..\Common.h"
 #include <stdint.h>
+#include <cstddef>
 
 namespace GameFramework::Common::Utilities
 {
@@ -14,12 +15,12 @@ namespace GameFramework::Common::Utilities
 	private:
 		CRC32(void);
 
-		uint32_t Calculate(const char* const Data, uint32_t Count);
+		uint32_t Calculate(const std::byte* const Data, uint32_t Count);
 
 		void InitializeTable(void);
 
 	public:
-		static uint32_t CalculateHash(const char* const Data, uint32_t Count);
+		static uint32_t CalculateHash(const std::byte* const Data, uint32_t Count);
 
 	private:
 		uint32_t* m_Table;

@@ -59,9 +59,9 @@ namespace GameFramework::Networking
 	protected:
 		virtual void AddSendCommand(Client* Target, const BufferStream& Buffer);
 
-		virtual void AcceptClients(void);
+		virtual void AcceptClients(void) override;
 
-		virtual void ReadFromClients(void);
+		virtual void ReadFromClients(void) override;
 
 		void HandleIncomingBuffer(Client* Client, BufferStream& Buffer);
 

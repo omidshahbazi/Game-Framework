@@ -8,13 +8,13 @@ namespace GameFramework::Common::Utilities
 		InitializeTable();
 	}
 
-	uint32_t CRC32::Calculate(const char* const Data, uint32_t Count)
+	uint32_t CRC32::Calculate(const std::byte* const Data, uint32_t Count)
 	{
 		unsigned int crc32 = 0xffffffff;
 
 		for (unsigned int i = 0; i < Count; ++i)
 		{
-			unsigned int index = (crc32 ^ Data[i]) & 0xFF;
+			unsigned int index = (crc32 ^ (char)Data[i]) & 0xFF;
 			crc32 = (crc32 >> 8) ^ m_Table[index];
 		}
 
@@ -46,7 +46,7 @@ namespace GameFramework::Common::Utilities
 		}
 	}
 
-	uint32_t CRC32::CalculateHash(const char* const Data, uint32_t Count)
+	uint32_t CRC32::CalculateHash(const std::byte* const Data, uint32_t Count)
 	{
 		static CRC32 crc;
 
