@@ -204,7 +204,7 @@ namespace GameFramework::Networking
 		return AckMask;
 	}
 
-	void IncomingUDPPacketsHolder::ProcessReliablePackets(IncomingUDPPacketsHolder Holder, HandleReceivedBufferCallback HandleReceivedBuffer)
+	void IncomingUDPPacketsHolder::ProcessReliablePackets(IncomingUDPPacketsHolder& Holder, HandleReceivedBufferCallback HandleReceivedBuffer)
 	{
 		List<uint64_t> completedIDs;
 
@@ -228,6 +228,8 @@ namespace GameFramework::Networking
 			if (id - Holder.GetPrevID() > 1)
 				break;
 
+			printf("%i\n", id);
+
 			HandleReceivedBuffer(packet->Combine());
 
 			Holder.SetPrevID(id);
@@ -239,14 +241,14 @@ namespace GameFramework::Networking
 			Holder.GetPacketsMap().erase(completedIDs[i]);
 	}
 
-	void IncomingUDPPacketsHolder::ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, HandleReceivedBufferCallback HandleReceivedBuffer)
+	void IncomingUDPPacketsHolder::ProcessNonReliablePacket(IncomingUDPPacketsHolder& Holder, IncomingUDPPacket& Packet, HandleReceivedBufferCallback HandleReceivedBuffer)
 	{
 		HandleReceivedBuffer(Packet.Combine());
 
 		Holder.GetPacketsMap().erase(Packet.GetID());
 	}
 
-	void OutgoingUDPPacketsHolder::ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket)
+	void OutgoingUDPPacketsHolder::ProcessReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket)
 	{
 		uint64_t lastAckID = Holder.GetLastAckID();
 
@@ -275,7 +277,7 @@ namespace GameFramework::Networking
 		}
 	}
 
-	void OutgoingUDPPacketsHolder::ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket)
+	void OutgoingUDPPacketsHolder::ProcessNonReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket)
 	{
 		ProcessReliablePackets(Holder, SendPacket);
 	}

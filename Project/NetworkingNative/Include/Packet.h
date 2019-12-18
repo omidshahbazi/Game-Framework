@@ -159,9 +159,9 @@ namespace GameFramework::Networking
 	public:
 		static uint32_t GetAckMask(IncomingUDPPacketsHolder& IncomingHolder, uint32_t AckMask);
 
-		static void ProcessReliablePackets(IncomingUDPPacketsHolder Holder, HandleReceivedBufferCallback HandleReceivedBuffer);
+		static void ProcessReliablePackets(IncomingUDPPacketsHolder& Holder, HandleReceivedBufferCallback HandleReceivedBuffer);
 
-		static void ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, HandleReceivedBufferCallback HandleReceivedBuffer);
+		static void ProcessNonReliablePacket(IncomingUDPPacketsHolder& Holder, IncomingUDPPacket& Packet, HandleReceivedBufferCallback HandleReceivedBuffer);
 
 		void SetLastID(uint64_t Value)
 		{
@@ -188,9 +188,9 @@ namespace GameFramework::Networking
 		typedef std::function<void(OutgoingUDPPacket*)> SendPacketCallback;
 
 	public:
-		static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket);
+		static void ProcessReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket);
 
-		static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket);
+		static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket);
 
 		void IncreaseLastID(void)
 		{

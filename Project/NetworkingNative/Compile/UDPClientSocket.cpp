@@ -91,6 +91,8 @@ namespace GameFramework::Networking
 		{
 			packet = new IncomingUDPPacket(packetID, sliceCount);
 			incomingHolder.AddPacket(packet);
+
+			printf("%i\n", packet->GetID());
 		}
 
 		packet->SetSliceBuffer(sliceIndex, buffer);
