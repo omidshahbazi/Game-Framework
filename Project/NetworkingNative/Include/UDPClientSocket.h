@@ -9,6 +9,7 @@
 
 namespace GameFramework::Networking
 {
+	//Unexpected disconnection doesn't work
 	class NETWORKING_API UDPClientSocket : public ClientSocket
 	{
 	public:

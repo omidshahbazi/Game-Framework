@@ -106,7 +106,7 @@ namespace GameFramework::Networking
 				ProcessIncomingNonReliablePacket(*packet);
 		}
 
-		OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? m_OutgoingReliablePacketHolder : m_OutgoingNonReliablePacketHolder);
+		OutgoingUDPPacketsHolder& outgoingHolder = (isReliable ? m_OutgoingReliablePacketHolder : m_OutgoingNonReliablePacketHolder);
 		outgoingHolder.SetLastAckID(lastAckID);
 		outgoingHolder.SetAckMask(ackMask);
 
