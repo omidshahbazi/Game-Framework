@@ -98,6 +98,11 @@ namespace GameFramework::Networking
 			m_PacketsMap[Packet->GetID()] = Packet;
 		}
 
+		void RemovePacket(uint64_t ID)
+		{
+			m_PacketsMap.erase(ID);
+		}
+
 		PacketMap& GetPacketsMap(void)
 		{
 			return m_PacketsMap;
