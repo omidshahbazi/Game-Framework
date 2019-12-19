@@ -10,10 +10,12 @@ namespace GameFramework.Common.FileLayer
 
 		public LogManager(string Path, string FileName)
 		{
-			string filePath = Path + (Path.EndsWith("\\") || Path.EndsWith("/") ? "" : "/") + FileName;
+			string filePath = Path + (Path.EndsWith("\\") || Path.EndsWith("/") ? "" : "/");
 
 			if (!FileSystem.DirectoryExists(filePath))
 				FileSystem.CreateDirectory(filePath);
+
+			filePath += FileName;
 
 			if (FileSystem.FileExists(filePath))
 				try
