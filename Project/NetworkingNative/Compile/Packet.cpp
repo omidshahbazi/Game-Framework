@@ -82,7 +82,7 @@ namespace GameFramework::Networking
 			new (&m_SliceBuffers[i]) BufferStream(0);
 	}
 
-	UDPPacket::	~UDPPacket(void)
+	UDPPacket::~UDPPacket(void)
 	{
 		free(m_SliceBuffers);
 	}
@@ -195,7 +195,7 @@ namespace GameFramework::Networking
 
 			uint64_t packetID = IncomingHolder.GetLastID() - offset;
 
-			IncomingUDPPacket* packet = IncomingHolder.GetPacketsMap()[packetID];
+			IncomingUDPPacket* packet = IncomingHolder.GetPacket(packetID);
 
 			if (packet == nullptr || packet->GetIsCompleted())
 				AckMask = BitwiseHelper::Enable(AckMask, bitCount - offset);
@@ -204,9 +204,9 @@ namespace GameFramework::Networking
 		return AckMask;
 	}
 
-	void IncomingUDPPacketsHolder::ProcessReliablePackets(IncomingUDPPacketsHolder Holder, HandleReceivedBufferCallback HandleReceivedBuffer)
+	void IncomingUDPPacketsHolder::ProcessReliablePackets(IncomingUDPPacketsHolder& Holder, HandleReceivedBufferCallback HandleReceivedBuffer)
 	{
-		List<uint64_t> completedIDs;
+		List<IncomingUDPPacket*> completed;
 
 		auto& packetMap = Holder.GetPacketsMap();
 		auto it = packetMap.begin();
@@ -221,7 +221,7 @@ namespace GameFramework::Networking
 
 			if (id < Holder.GetPrevID())
 			{
-				completedIDs.push_back(id);
+				completed.push_back(packet);
 				continue;
 			}
 
@@ -232,21 +232,21 @@ namespace GameFramework::Networking
 
 			Holder.SetPrevID(id);
 
-			completedIDs.push_back(id);
+			completed.push_back(packet);
 		}
 
-		for (uint32_t i = 0; i < completedIDs.size(); ++i)
-			Holder.GetPacketsMap().erase(completedIDs[i]);
+		for (uint32_t i = 0; i < completed.size(); ++i)
+			Holder.RemovePacket(completed[i]);
 	}
 
-	void IncomingUDPPacketsHolder::ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, HandleReceivedBufferCallback HandleReceivedBuffer)
+	void IncomingUDPPacketsHolder::ProcessNonReliablePacket(IncomingUDPPacketsHolder& Holder, IncomingUDPPacket& Packet, HandleReceivedBufferCallback HandleReceivedBuffer)
 	{
 		HandleReceivedBuffer(Packet.Combine());
 
-		Holder.GetPacketsMap().erase(Packet.GetID());
+		Holder.RemovePacket(&Packet);
 	}
 
-	void OutgoingUDPPacketsHolder::ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket)
+	void OutgoingUDPPacketsHolder::ProcessReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket)
 	{
 		uint64_t lastAckID = Holder.GetLastAckID();
 
@@ -265,7 +265,7 @@ namespace GameFramework::Networking
 
 			if (acked)
 			{
-				Holder.GetPacketsMap().erase(id);
+				Holder.RemovePacket(id);
 				continue;
 			}
 
@@ -275,7 +275,7 @@ namespace GameFramework::Networking
 		}
 	}
 
-	void OutgoingUDPPacketsHolder::ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket)
+	void OutgoingUDPPacketsHolder::ProcessNonReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket)
 	{
 		ProcessReliablePackets(Holder, SendPacket);
 	}

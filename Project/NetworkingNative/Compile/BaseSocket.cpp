@@ -191,6 +191,8 @@ namespace GameFramework::Networking
 			m_SendCommands.erase(m_SendCommands.begin() + i);
 
 			i--;
+
+			delete command;
 		}
 	}
 }

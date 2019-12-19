@@ -98,6 +98,24 @@ namespace GameFramework::Networking
 			m_PacketsMap[Packet->GetID()] = Packet;
 		}
 
+		void RemovePacket(T* Packet)
+		{
+			m_PacketsMap.erase(Packet->GetID());
+
+			delete Packet;
+		}
+
+		void RemovePacket(uint64_t ID)
+		{
+			T* packet = GetPacket(ID);
+			if (packet == nullptr)
+				return;
+
+			m_PacketsMap.erase(ID);
+
+			delete packet;
+		}
+
 		PacketMap& GetPacketsMap(void)
 		{
 			return m_PacketsMap;
@@ -159,9 +177,9 @@ namespace GameFramework::Networking
 	public:
 		static uint32_t GetAckMask(IncomingUDPPacketsHolder& IncomingHolder, uint32_t AckMask);
 
-		static void ProcessReliablePackets(IncomingUDPPacketsHolder Holder, HandleReceivedBufferCallback HandleReceivedBuffer);
+		static void ProcessReliablePackets(IncomingUDPPacketsHolder& Holder, HandleReceivedBufferCallback HandleReceivedBuffer);
 
-		static void ProcessNonReliablePacket(IncomingUDPPacketsHolder Holder, IncomingUDPPacket Packet, HandleReceivedBufferCallback HandleReceivedBuffer);
+		static void ProcessNonReliablePacket(IncomingUDPPacketsHolder& Holder, IncomingUDPPacket& Packet, HandleReceivedBufferCallback HandleReceivedBuffer);
 
 		void SetLastID(uint64_t Value)
 		{
@@ -188,9 +206,9 @@ namespace GameFramework::Networking
 		typedef std::function<void(OutgoingUDPPacket*)> SendPacketCallback;
 
 	public:
-		static void ProcessReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket);
+		static void ProcessReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket);
 
-		static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder Holder, SendPacketCallback SendPacket);
+		static void ProcessNonReliablePackets(OutgoingUDPPacketsHolder& Holder, SendPacketCallback SendPacket);
 
 		void IncreaseLastID(void)
 		{

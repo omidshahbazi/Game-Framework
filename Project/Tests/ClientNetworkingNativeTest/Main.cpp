@@ -9,8 +9,8 @@ void Server_OnConnected(void)
 {
 	std::cout << "Server_OnConnected " << std::endl;
 
-	byte data[3] = { (byte)10, (byte)22, (byte)16 };
-	client.Send(data, 3);
+	byte data[6000];
+	client.Send(data, 6000);
 }
 
 void Server_OnConnectionFailed(void)

@@ -9,6 +9,8 @@
 
 namespace GameFramework::Networking
 {
+	//Unexpected disconnection doesn't work
+	//Memory leak still remains
 	class NETWORKING_API UDPClientSocket : public ClientSocket
 	{
 	public:
