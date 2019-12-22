@@ -635,8 +635,7 @@ namespace GameFramework::Networking
 
 	bool PlatformNetwork::ReceiveFrom(Handle Handle, std::byte* Buffer, uint32_t& Length, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
 	{
-		sockaddr_in address;
-		int32_t addressSize = sizeof(sockaddr_in);
+		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
 		Length = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
 
@@ -646,7 +645,7 @@ namespace GameFramework::Networking
 		if (Length != 0)
 		{
 			//Address = ntohl(address.sin_addr.s_addr); ????????????????????????????????????????????????
-			Port = ntohs(address.sin_port);
+			Port = ntohs(addressV4.sin_port);
 		}
 
 		return (Length != 0);
