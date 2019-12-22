@@ -81,6 +81,8 @@ namespace GameFramework::Networking
 
 		virtual void SendOverSocket(Socket Target, const BufferStream& Buffer);
 
+		virtual void SendOverSocket(const IPEndPoint& EndPoint, const BufferStream& Buffer);
+
 		virtual bool HandleSendCommand(SendCommand* Command) = 0;
 
 		virtual void ProcessEvent(EventBase* Event) = 0;

@@ -106,15 +106,15 @@ namespace GameFramework::Networking
 
 	bool UDPServerSocket::HandleSendCommand(SendCommand* Command)
 	{
-		ServerSendCommand sendCommand = (ServerSendCommand)Command;
-		UDPClient client = (UDPClient)sendCommand.Client;
+		ServerSendCommand* sendCommand = reinterpret_cast<ServerSendCommand*>(Command);
+		UDPClient* client = reinterpret_cast<UDPClient*>(sendCommand->GetClient());
 
-		if (!client.IsReady)
+		if (!client->GetIsReady())
 			return false;
 
-		client.Statistics.AddBandwidthOut(Command.Buffer.Size);
+		client->GetStatistics().AddBandwidthOut(Command->GetBuffer().GetSize());
 
-		SendOverSocket(client.EndPoint, Command.Buffer);
+		SendOverSocket(client->GetEndPoint(), Command->GetBuffer());
 
 		return true;
 	}

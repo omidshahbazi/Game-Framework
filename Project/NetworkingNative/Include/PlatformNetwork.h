@@ -85,7 +85,7 @@ namespace GameFramework::Networking
 			NetworkDown,
 			NetworkUnreachable,
 			NetworkReset,
-			ConnectionAbort,
+			ConnectionAborted,
 			ConnectionReset,
 			NoBuffer,
 			IsConnected,

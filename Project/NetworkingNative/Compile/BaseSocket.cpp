@@ -124,6 +124,30 @@ namespace GameFramework::Networking
 		}
 		catch (PlatformNetwork::SocketException e)
 		{
+			if (e.GetError() == PlatformNetwork::Errors::ConnectionReset ||
+				e.GetError() == PlatformNetwork::Errors::ConnectionAborted ||
+				e.GetError() == PlatformNetwork::Errors::ConnectionRefused)
+			{
+				HandleDisconnection(Target);
+
+				return;
+			}
+
+			throw e;
+		}
+	}
+
+	void BaseSocket::SendOverSocket(const IPEndPoint& EndPoint, const BufferStream& Buffer)
+	{
+		try
+		{
+			if (m_PacketLossSimulation == 0 || Constants::Random.NextDouble() > m_PacketLossSimulation)
+				SocketUtilities::SendTo(Target, Buffer.GetBuffer(), Buffer.GetSize());
+
+			m_Statistics.AddBandwidthOut(Buffer.GetSize());
+		}
+		catch (PlatformNetwork::SocketException e)
+		{
 			if (e.GetError() == PlatformNetwork::Errors::ConnectionReset)
 			{
 				HandleDisconnection(Target);
