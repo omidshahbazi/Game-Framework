@@ -635,17 +635,42 @@ namespace GameFramework::Networking
 
 	bool PlatformNetwork::ReceiveFrom(Handle Handle, std::byte* Buffer, uint32_t& Length, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
 	{
-		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
+		sockaddr* address = nullptr;
+		int32_t size = 0;
 
-		Length = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
+		sockaddr_in ipv4;
+		sockaddr_in6 ipv6;
+
+		if (AddressFamily == PlatformNetwork::AddressFamilies::InterNetwork)
+		{
+			address = reinterpret_cast<sockaddr*>(&ipv4);
+			size = sizeof(sockaddr_in);
+		}
+		else
+		{
+			address = reinterpret_cast<sockaddr*>(&ipv6);
+			size = sizeof(sockaddr_in6);
+		}
+
+		Length = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &size);
 
 		if (Length == SOCKET_ERROR)
 			throw SocketException(GetLastError());
 
 		if (Length != 0)
 		{
-			//Address = ntohl(address.sin_addr.s_addr); ????????????????????????????????????????????????
-			Port = ntohs(addressV4.sin_port);
+			if (size == sizeof(sockaddr_in))
+			{
+				Address = AddressToString(AddressFamily, &ipv4.sin_addr);
+				Port = ntohs(ipv4.sin_port);
+			}
+			else if (size == sizeof(sockaddr_in6))
+			{
+				Address = AddressToString(AddressFamily, &ipv6.sin6_addr);
+				Port = ntohs(ipv6.sin6_port);
+			}
+			else
+				throw SocketException(Errors::InvalidArguments);
 		}
 
 		return (Length != 0);
