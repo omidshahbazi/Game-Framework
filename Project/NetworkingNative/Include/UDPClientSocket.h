@@ -42,7 +42,7 @@ namespace GameFramework::Networking
 		void SendPacket(OutgoingUDPPacket* Packet);
 
 		void ProcessIncomingReliablePackets(void);
-		void ProcessIncomingNonReliablePacket(IncomingUDPPacket Packet);
+		void ProcessIncomingNonReliablePacket(IncomingUDPPacket &Packet);
 		void ProcessOutgoingReliablePackets(void);
 		void ProcessOutgoingNonReliablePackets(void);
 

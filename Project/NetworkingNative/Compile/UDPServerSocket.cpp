@@ -81,7 +81,7 @@ namespace GameFramework::Networking
 		}
 		else if (control == Constants::Control::PING)
 		{
-			if (!client->GetIsConnected)
+			if (!client->GetIsConnected())
 				return;
 
 			double sendTime = Buffer.ReadFloat64();
@@ -119,42 +119,42 @@ namespace GameFramework::Networking
 		return true;
 	}
 
-	void UDPServerSocket::ProcessReceivedBuffer(Client* Sender, const BufferStream& Buffer)
+	void UDPServerSocket::ProcessReceivedBuffer(Client* Sender, BufferStream& Buffer)
 	{
-		ulong lastAckID = Buffer.ReadUInt64();
-		uint ackMask = Buffer.ReadUInt32();
+		uint64_t lastAckID = Buffer.ReadUInt64();
+		uint32_t ackMask = Buffer.ReadUInt32();
 		bool isReliable = Buffer.ReadBool();
-		ulong packetID = Buffer.ReadUInt64();
-		ushort sliceCount = Buffer.ReadUInt16();
-		ushort sliceIndex = Buffer.ReadUInt16();
+		uint64_t packetID = Buffer.ReadUInt64();
+		uint16_t sliceCount = Buffer.ReadUInt16();
+		uint16_t sliceIndex = Buffer.ReadUInt16();
 
-		BufferStream buffer = new BufferStream(Buffer.Buffer, Constants.UDP.PACKET_HEADER_SIZE, Buffer.Size - Constants.UDP.PACKET_HEADER_SIZE);
+		BufferStream buffer(Buffer.GetBuffer(), Constants::UDP::PACKET_HEADER_SIZE, Buffer.GetSize() - Constants::UDP::PACKET_HEADER_SIZE);
 
-		UDPClient client = (UDPClient)Sender;
+		UDPClient* client = reinterpret_cast<UDPClient*>(Sender);
 
-		IncomingUDPPacketsHolder incomingHolder = (isReliable ? client.IncomingReliablePacketHolder : client.IncomingNonReliablePacketHolder);
+		IncomingUDPPacketsHolder& incomingHolder = (isReliable ? client->GetIncomingReliablePacketHolder() : client->GetIncomingNonReliablePacketHolder());
 
-		IncomingUDPPacket packet = incomingHolder.GetPacket(packetID);
-		if (packet == null)
+		IncomingUDPPacket* packet = incomingHolder.GetPacket(packetID);
+		if (packet == nullptr)
 		{
 			packet = new IncomingUDPPacket(packetID, sliceCount);
 			incomingHolder.AddPacket(packet);
 		}
 
-		packet.SetSliceBuffer(sliceIndex, buffer);
+		packet->SetSliceBuffer(sliceIndex, buffer);
 
-		if (packet.IsCompleted)
+		if (packet->GetIsCompleted())
 		{
-			if (incomingHolder.LastID < packet.ID)
-				incomingHolder.SetLastID(packet.ID);
+			if (incomingHolder.GetLastID() < packet->GetID())
+				incomingHolder.SetLastID(packet->GetID());
 
 			if (isReliable)
 				ProcessIncomingReliablePackets(client);
 			else
-				ProcessIncomingNonReliablePacket(client, packet);
+				ProcessIncomingNonReliablePacket(client, *packet);
 		}
 
-		OutgoingUDPPacketsHolder outgoingHolder = (isReliable ? client.OutgoingReliablePacketHolder : client.OutgoingNonReliablePacketHolder);
+		OutgoingUDPPacketsHolder& outgoingHolder = (isReliable ? client->GetOutgoingReliablePacketHolder() : client->GetOutgoingNonReliablePacketHolder());
 		outgoingHolder.SetLastAckID(lastAckID);
 		outgoingHolder.SetAckMask(ackMask);
 
@@ -166,46 +166,44 @@ namespace GameFramework::Networking
 
 	void UDPServerSocket::ReadFromSocket(void)
 	{
-		IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+		IPEndPoint ipEndPoint(IPAddress::AnyV6, 0);
 
 		try
 		{
-			int size = 0;
-			EndPoint endPoint = ipEndPoint;
+			uint32_t size = Constants::RECEIVE_BUFFER_SIZE;
 
-			lock(Socket)
+			//lock(Socket)
 			{
-				if (Socket.Available == 0)
+				if (SocketUtilities::GetAvailableBytes(GetSocket()) == 0)
 					return;
 
-				size = Socket.ReceiveFrom(ReceiveBuffer, ref endPoint);
-
-				ipEndPoint = (IPEndPoint)endPoint;
+				if (!SocketUtilities::ReceiveFrom(GetReceiveBuffer(), size, ipEndPoint))
+					return;
 			}
 
-			UDPClient client = GetOrAddClient(ipEndPoint);
+			UDPClient* client = GetOrAddClient(ipEndPoint);
 
-			client.Statistics.AddReceivedPacketFromLastSecond();
+			client->GetStatistics().AddReceivedPacketFromLastSecond();
 
-			ProcessReceivedBuffer(client, (uint)size);
+			ServerSocket::ProcessReceivedBuffer(client, size);
 		}
 		catch (PlatformNetwork::SocketException e)
 		{
-			if (e.SocketErrorCode == SocketError.WouldBlock)
+			if (e.GetError() == PlatformNetwork::Errors::WouldBlock)
 				return;
-			else if (e.SocketErrorCode == SocketError.ConnectionReset)
+			else if (e.GetError() == PlatformNetwork::Errors::ConnectionReset)
 			{
-				if (ipEndPoint.Address == IPAddress.IPv6Any)
+				if (ipEndPoint.GetAddress() == IPAddress::AnyV6)
 					return;
 
 				int hash = GetIPEndPointHash(ipEndPoint);
 
-				lock(clients)
+				//lock(clients)
 				{
-					UDPClient client = GetOrAddClient(ipEndPoint);
+					UDPClient* client = GetOrAddClient(ipEndPoint);
 
-					clients.Remove(client);
-					clientsMap.Remove(hash);
+					m_Clients.remove(client);
+					m_ClientsMap.erase(hash);
 
 					HandleClientDisconnection(client);
 				}
@@ -241,31 +239,36 @@ namespace GameFramework::Networking
 
 	void UDPServerSocket::SendPacket(Client* Client, OutgoingUDPPacket* Packet)
 	{
-		for (ushort i = 0; i < Packet.SliceBuffers.Length; ++i)
-			SendInternal(Target, Packet.SliceBuffers[i]);
+		for (uint16_t i = 0; i < Packet->GetSliceCount(); ++i)
+			SendInternal(Client, Packet->GetSliceBuffer(i));
 	}
 
 	void UDPServerSocket::ProcessIncomingReliablePackets(UDPClient* Sender)
 	{
-		IncomingUDPPacketsHolder::ProcessReliablePackets(Sender->GetIncomingReliablePacketHolder(), [&](BufferStream& Buffer)
-			{
-				HandleReceivedBuffer(Sender, Buffer);
-			});
+		//IncomingUDPPacketsHolder::ProcessReliablePackets(Sender->GetIncomingReliablePacketHolder(), [&](BufferStream& Buffer)
+		//	{
+		//		HandleReceivedBuffer(Sender, Buffer);
+		//	});
 	}
 
-	void UDPServerSocket::ProcessIncomingNonReliablePacket(UDPClient* Sender, IncomingUDPPacket Packet)
+	void UDPServerSocket::ProcessIncomingNonReliablePacket(UDPClient* Sender, IncomingUDPPacket& Packet)
 	{
-		IncomingUDPPacketsHolder::ProcessNonReliablePacket(Sender->GetIncomingNonReliablePacketHolder(), Packet, std::bind(&UDPServerSocket::HandleReceivedBuffer, this, std::placeholders::_1));
+		auto callback = [this, Sender](BufferStream& Buffer)
+		{
+			HandleReceivedBuffer(Sender, Buffer);
+		};
+
+		//IncomingUDPPacketsHolder::ProcessNonReliablePacket(Sender->GetIncomingNonReliablePacketHolder(), Packet, std::bind(&callback, this, std::placeholders::_1));
 	}
 
 	void UDPServerSocket::ProcessOutgoingReliablePackets(UDPClient* Target)
 	{
-		OutgoingUDPPacketsHolder::ProcessReliablePackets(Target->GetOutgoingReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, std::placeholders::_1));
+		//OutgoingUDPPacketsHolder::ProcessReliablePackets(Target->GetOutgoingReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, std::placeholders::_1));
 	}
 
 	void UDPServerSocket::ProcessOutgoingNonReliablePackets(UDPClient* Target)
 	{
-		OutgoingUDPPacketsHolder::ProcessNonReliablePackets(Target->GetOutgoingNonReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, std::placeholders::_1));
+		//OutgoingUDPPacketsHolder::ProcessNonReliablePackets(Target->GetOutgoingNonReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, std::placeholders::_1));
 	}
 
 	UDPServerSocket::UDPClient* UDPServerSocket::GetOrAddClient(const IPEndPoint& EndPoint)

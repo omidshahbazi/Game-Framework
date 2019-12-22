@@ -114,21 +114,7 @@ namespace GameFramework::Networking
 				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
 					continue;
 
-				GetStatistics().AddBandwidthIn(size);
-
-				uint32_t index = 0;
-				while (index != size)
-				{
-					uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
-
-					index += Packet::PACKET_SIZE_SIZE;
-
-					BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
-
-					HandleIncomingBuffer(client, buffer);
-
-					index += packetSize;
-				}
+				ServerSocket::ProcessReceivedBuffer(client, size);
 			}
 			catch (PlatformNetwork::SocketException e)
 			{
@@ -198,7 +184,7 @@ namespace GameFramework::Networking
 		return true;
 	}
 
-	void TCPServerSocket::ProcessReceivedBuffer(Client* Sender, const BufferStream& Buffer)
+	void TCPServerSocket::ProcessReceivedBuffer(Client* Sender, BufferStream& Buffer)
 	{
 		HandleReceivedBuffer(Sender, Buffer);
 	}

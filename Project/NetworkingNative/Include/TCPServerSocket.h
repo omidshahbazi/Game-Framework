@@ -67,7 +67,7 @@ namespace GameFramework::Networking
 
 		bool HandleSendCommand(SendCommand* Command) override;
 
-		void ProcessReceivedBuffer(Client* Sender, const BufferStream& Buffer) override;
+		void ProcessReceivedBuffer(Client* Sender, BufferStream& Buffer) override;
 
 		void CloseClientConnection(Client* Client) override;
 

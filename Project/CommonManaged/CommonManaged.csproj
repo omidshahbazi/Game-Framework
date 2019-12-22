@@ -44,7 +44,6 @@
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="FileManagement\FileSystem.cs" />
-    <Compile Include="Utilities\MathUtilities.cs" />
     <Compile Include="MemoryManagement\Singleton.cs" />
     <Compile Include="Pool\DefaultObjectHolder.cs" />
     <Compile Include="Pool\IObject.cs" />

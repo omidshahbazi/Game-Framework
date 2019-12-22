@@ -2,6 +2,7 @@
 #include "..\Include\ServerSocket.h"
 #include "..\Include\Constants.h"
 #include "..\Include\CallbackUtilities.h"
+#include "..\Include\Packet.h"
 #include <Timing\Time.h>
 #include <Utilities\TypeHelper.h>
 
@@ -61,6 +62,28 @@ namespace GameFramework::Networking
 		AcceptClients();
 
 		ReadFromClients();
+	}
+
+	void ServerSocket::ProcessReceivedBuffer(Client* Client, uint32_t Size)
+	{
+		std::byte* receiveBuffer = GetReceiveBuffer();
+
+		GetStatistics().AddBandwidthIn(Size);
+		Client->GetStatistics().AddBandwidthIn(Size);
+
+		uint32_t index = 0;
+		while (index < Size)
+		{
+			uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
+
+			index += Packet::PACKET_SIZE_SIZE;
+
+			BufferStream buffer = BufferStream(receiveBuffer, index, packetSize);
+
+			HandleIncomingBuffer(Client, buffer);
+
+			index += packetSize;
+		}
 	}
 
 	void ServerSocket::ProcessEvent(EventBase* Event)

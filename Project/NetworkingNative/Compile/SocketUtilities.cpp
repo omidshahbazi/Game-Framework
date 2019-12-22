@@ -127,6 +127,12 @@ namespace GameFramework::Networking
 		return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
 	}
 
+	uint32_t SocketUtilities::SendTo(const IPEndPoint& EndPoint, const std::byte* Buffer, uint32_t Length)
+	{
+		//return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
+		return 0;
+	}
+
 	bool SocketUtilities::Select(Socket Socket, PlatformNetwork::SelectModes Mode, uint32_t Timeout)
 	{
 		return PlatformNetwork::Select(Socket, Mode, Timeout);
@@ -140,6 +146,12 @@ namespace GameFramework::Networking
 	bool SocketUtilities::Receive(Socket Socket, std::byte* Buffer, uint32_t& Length)
 	{
 		return PlatformNetwork::Receive(Socket, Buffer, Length, PlatformNetwork::ReceiveModes::None);
+	}
+
+	bool SocketUtilities::ReceiveFrom(std::byte* Buffer, uint32_t& Length, IPEndPoint &EndPoint)
+	{
+		//return PlatformNetwork::Receive(Socket, Buffer, Length, PlatformNetwork::ReceiveModes::None);
+		return false;
 	}
 
 	IPAddress SocketUtilities::ResolveDomain(const string& Domain)

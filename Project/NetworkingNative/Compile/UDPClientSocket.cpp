@@ -147,7 +147,7 @@ namespace GameFramework::Networking
 		IncomingUDPPacketsHolder::ProcessReliablePackets(m_IncomingReliablePacketHolder, std::bind(&UDPClientSocket::HandleReceivedBuffer, this, std::placeholders::_1));
 	}
 
-	void UDPClientSocket::ProcessIncomingNonReliablePacket(IncomingUDPPacket Packet)
+	void UDPClientSocket::ProcessIncomingNonReliablePacket(IncomingUDPPacket &Packet)
 	{
 		IncomingUDPPacketsHolder::ProcessNonReliablePacket(m_IncomingNonReliablePacketHolder, Packet, std::bind(&UDPClientSocket::HandleReceivedBuffer, this, std::placeholders::_1));
 	}

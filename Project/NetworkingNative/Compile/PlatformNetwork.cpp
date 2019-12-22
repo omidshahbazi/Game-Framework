@@ -184,7 +184,7 @@ namespace GameFramework::Networking
 		case WSAENETDOWN: return PlatformNetwork::Errors::NetworkDown;
 		case WSAENETUNREACH: return PlatformNetwork::Errors::NetworkUnreachable;
 		case WSAENETRESET: return PlatformNetwork::Errors::NetworkReset;
-		case WSAECONNABORTED: return PlatformNetwork::Errors::ConnectionAbort;
+		case WSAECONNABORTED: return PlatformNetwork::Errors::ConnectionAborted;
 		case WSAECONNRESET: return PlatformNetwork::Errors::ConnectionReset;
 		case WSAENOBUFS: return PlatformNetwork::Errors::NoBuffer;
 		case WSAEISCONN: return PlatformNetwork::Errors::IsConnected;
