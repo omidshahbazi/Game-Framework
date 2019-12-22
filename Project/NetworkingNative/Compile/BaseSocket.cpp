@@ -142,7 +142,7 @@ namespace GameFramework::Networking
 		try
 		{
 			if (m_PacketLossSimulation == 0 || Constants::Random.NextDouble() > m_PacketLossSimulation)
-				SocketUtilities::SendTo(EndPoint, Buffer.GetBuffer(), Buffer.GetSize());
+				SocketUtilities::SendTo(m_Socket, EndPoint, Buffer.GetBuffer(), Buffer.GetSize());
 
 			m_Statistics.AddBandwidthOut(Buffer.GetSize());
 		}

@@ -325,7 +325,7 @@ namespace GameFramework::Networking
 		static bool Connect(Handle Handle, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port);
 
 		static uint32_t Send(Handle Handle, const std::byte* Buffer, uint32_t Length, SendModes Mode);
-		//static bool SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
+		static uint32_t SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode);
 
 		static bool Poll(Handle Handle, uint32_t Timeout, SelectModes Mode);
 
@@ -333,7 +333,7 @@ namespace GameFramework::Networking
 
 		static uint64_t GetAvailableBytes(Handle Handle);
 		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t& Length, ReceiveModes Mode);
-		//static bool ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode);
+		static bool ReceiveFrom(Handle Handle, std::byte* Buffer, uint32_t& Length, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode);
 
 		static void ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address);
 

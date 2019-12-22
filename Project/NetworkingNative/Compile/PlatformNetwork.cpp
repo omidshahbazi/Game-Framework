@@ -550,12 +550,17 @@ namespace GameFramework::Networking
 		return result;
 	}
 
-	//void PlatformNetwork::SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
-	//{
-	//	BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
+	uint32_t PlatformNetwork::SendTo(Handle Handle, const std::byte* Buffer, uint32_t Length, AddressFamilies AddressFamily, const std::string& Address, uint16_t Port, SendModes Mode)
+	{
+		BUILD_SOCKET_ADDRESS(AddressFamily, Address.c_str(), Port);
 
-	//	return (sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), address, addressSize) == Length);
-	//}
+		int32_t result = sendto(Handle, reinterpret_cast<const char*>(Buffer), Length, GetSendFlags(Mode), address, addressSize);
+
+		if (result == SOCKET_ERROR)
+			throw SocketException(GetLastError());
+
+		return result;
+	}
 
 	bool PlatformNetwork::Poll(Handle Handle, uint32_t Timeout, SelectModes Mode)
 	{
@@ -622,35 +627,30 @@ namespace GameFramework::Networking
 	{
 		int32_t result = recv(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode));
 
-		if (result > 0)
-		{
-			Length = result;
-			return true;
-		}
+		if (Length == SOCKET_ERROR)
+			throw SocketException(GetLastError());
 
-		return false;
+		return (Length != 0);
 	}
 
-	//void PlatformNetwork::ReceiveFromm(Handle Handle, std::byte* Buffer, uint32_t Length, uint32_t& ReceivedLength, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
-	//{
-	//	sockaddr_in address;
-	//	int32_t addressSize = sizeof(sockaddr_in);
+	bool PlatformNetwork::ReceiveFrom(Handle Handle, std::byte* Buffer, uint32_t& Length, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode)
+	{
+		sockaddr_in address;
+		int32_t addressSize = sizeof(sockaddr_in);
 
-	//	int32_t receivedLength = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
+		Length = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &addressSize);
 
-	//	if (receivedLength == SOCKET_ERROR)
-	//		return false;
+		if (Length == SOCKET_ERROR)
+			throw SocketException(GetLastError());
 
-	//	if (receivedLength != 0)
-	//	{
-	//		//Address = ntohl(address.sin_addr.s_addr); ????????????????????????????????????????????????
-	//		Port = ntohs(address.sin_port);
-	//	}
+		if (Length != 0)
+		{
+			//Address = ntohl(address.sin_addr.s_addr); ????????????????????????????????????????????????
+			Port = ntohs(address.sin_port);
+		}
 
-	//	ReceivedLength = receivedLength;
-
-	//	return true;
-	//}
+		return (Length != 0);
+	}
 
 	void PlatformNetwork::ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address)
 	{

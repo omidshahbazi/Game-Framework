@@ -177,7 +177,7 @@ namespace GameFramework::Networking
 				if (SocketUtilities::GetAvailableBytes(GetSocket()) == 0)
 					return;
 
-				if (!SocketUtilities::ReceiveFrom(GetReceiveBuffer(), size, ipEndPoint))
+				if (!SocketUtilities::ReceiveFrom(GetSocket(), GetReceiveBuffer(), size, ipEndPoint))
 					return;
 			}
 

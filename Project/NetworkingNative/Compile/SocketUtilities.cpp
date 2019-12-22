@@ -127,10 +127,9 @@ namespace GameFramework::Networking
 		return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
 	}
 
-	uint32_t SocketUtilities::SendTo(const IPEndPoint& EndPoint, const std::byte* Buffer, uint32_t Length)
+	uint32_t SocketUtilities::SendTo(Socket Socket, const IPEndPoint& EndPoint, const std::byte* Buffer, uint32_t Length)
 	{
-		//return PlatformNetwork::Send(Socket, Buffer, Length, PlatformNetwork::SendModes::None);
-		return 0;
+		return PlatformNetwork::SendTo(Socket, Buffer, Length, EndPoint.GetAddress().GetAddressFamily(), EndPoint.GetAddress().GetIP(), EndPoint.GetPort(), PlatformNetwork::SendModes::None);
 	}
 
 	bool SocketUtilities::Select(Socket Socket, PlatformNetwork::SelectModes Mode, uint32_t Timeout)
@@ -148,10 +147,17 @@ namespace GameFramework::Networking
 		return PlatformNetwork::Receive(Socket, Buffer, Length, PlatformNetwork::ReceiveModes::None);
 	}
 
-	bool SocketUtilities::ReceiveFrom(std::byte* Buffer, uint32_t& Length, IPEndPoint &EndPoint)
+	bool SocketUtilities::ReceiveFrom(Socket Socket, std::byte* Buffer, uint32_t& Length, IPEndPoint& EndPoint)
 	{
-		//return PlatformNetwork::Receive(Socket, Buffer, Length, PlatformNetwork::ReceiveModes::None);
-		return false;
+		std::string address;
+		uint16_t port;
+
+		bool result = PlatformNetwork::ReceiveFrom(Socket, Buffer, Length, EndPoint.GetAddress().GetAddressFamily(), address, port, PlatformNetwork::ReceiveModes::None);
+
+		if (result)
+			EndPoint = IPEndPoint(IPAddress(EndPoint.GetAddress().GetAddressFamily(), address), port);
+
+		return result;
 	}
 
 	IPAddress SocketUtilities::ResolveDomain(const string& Domain)

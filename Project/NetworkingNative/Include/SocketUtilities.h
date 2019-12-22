@@ -145,7 +145,7 @@ namespace GameFramework::Networking
 
 		static uint32_t Send(Socket Socket, const std::byte* Buffer, uint32_t Length);
 
-		static uint32_t SendTo(const IPEndPoint& EndPoint, const std::byte* Buffer, uint32_t Length);
+		static uint32_t SendTo(Socket Socket, const IPEndPoint& EndPoint, const std::byte* Buffer, uint32_t Length);
 
 		static bool Select(Socket Socket, PlatformNetwork::SelectModes Mode, uint32_t Timeout);
 
@@ -153,7 +153,7 @@ namespace GameFramework::Networking
 
 		static bool Receive(Socket Socket, std::byte* Buffer, uint32_t& Length);
 
-		static bool ReceiveFrom(std::byte* Buffer, uint32_t& Length, IPEndPoint& EndPoint);
+		static bool ReceiveFrom(Socket Socket, std::byte* Buffer, uint32_t& Length, IPEndPoint& EndPoint);
 
 		static IPAddress ResolveDomain(const std::string& Domain);
 
