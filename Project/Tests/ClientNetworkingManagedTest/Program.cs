@@ -8,8 +8,6 @@ namespace ClientNetworkingManagedTest
 	{
 		private static TCPClientSocket client = null;
 
-		private static int sentCount = 0;
-
 		static void Main(string[] args)
 		{
 			client = new TCPClientSocket();
@@ -27,7 +25,7 @@ namespace ClientNetworkingManagedTest
 			client.OnBufferReceived += Client_OnBufferReceived;
 
 			Console.WriteLine("Client started connecting");
-			client.Connect("::1", 80);
+			client.Connect("::1", 81);
 
 			while (true)
 			{
@@ -41,7 +39,7 @@ namespace ClientNetworkingManagedTest
 		{
 			Console.WriteLine("Client_OnConnected");
 
-			//client.Send(System.Text.Encoding.ASCII.GetBytes("asdadjaijijijanciojh82y3	[ncc9n0009u18u24cu4839cyur98ybuc4yc-1nhc1bc3uc127bcn187cb-81c7nc1u-8n147ncb87c4b431-7c17c3n7c13-987c189cn7c17c-81347nc1432n7"), true);
+			client.Send(System.Text.Encoding.ASCII.GetBytes("asdadjaijijijanciojh82y3	[ncc9n0009u18u24cu4839cyur98ybuc4yc-1nhc1bc3uc127bcn187cb-81c7nc1u-8n147ncb87c4b431-7c17c3n7c13-987c189cn7c17c-81347nc1432n7"));
 			//client.Send(new byte[] { 1, 2, 3 }, true);
 		}
 
@@ -63,7 +61,7 @@ namespace ClientNetworkingManagedTest
 			client.Send(Buffer.Buffer);
 
 			//client.PacketLossSimulation = 0;
-			//client.Send(Buffer.Buffer, true);
+			//client.Send(Buffer.Buffer);
 		}
 	}
 }
