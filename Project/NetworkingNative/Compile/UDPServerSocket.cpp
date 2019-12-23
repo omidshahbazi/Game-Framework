@@ -245,30 +245,22 @@ namespace GameFramework::Networking
 
 	void UDPServerSocket::ProcessIncomingReliablePackets(UDPClient* Sender)
 	{
-		//IncomingUDPPacketsHolder::ProcessReliablePackets(Sender->GetIncomingReliablePacketHolder(), [&](BufferStream& Buffer)
-		//	{
-		//		HandleReceivedBuffer(Sender, Buffer);
-		//	});
+		IncomingUDPPacketsHolder::ProcessReliablePackets(Sender->GetIncomingReliablePacketHolder(), std::bind(&UDPServerSocket::HandleReceivedBuffer, this, Sender, std::placeholders::_1));
 	}
 
 	void UDPServerSocket::ProcessIncomingNonReliablePacket(UDPClient* Sender, IncomingUDPPacket& Packet)
 	{
-		auto callback = [this, Sender](BufferStream& Buffer)
-		{
-			HandleReceivedBuffer(Sender, Buffer);
-		};
-
-		//IncomingUDPPacketsHolder::ProcessNonReliablePacket(Sender->GetIncomingNonReliablePacketHolder(), Packet, std::bind(&callback, this, std::placeholders::_1));
+		IncomingUDPPacketsHolder::ProcessNonReliablePacket(Sender->GetIncomingNonReliablePacketHolder(), Packet, std::bind(&UDPServerSocket::HandleReceivedBuffer, this, Sender, std::placeholders::_1));
 	}
 
 	void UDPServerSocket::ProcessOutgoingReliablePackets(UDPClient* Target)
 	{
-		//OutgoingUDPPacketsHolder::ProcessReliablePackets(Target->GetOutgoingReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, std::placeholders::_1));
+		OutgoingUDPPacketsHolder::ProcessReliablePackets(Target->GetOutgoingReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, Target, std::placeholders::_1));
 	}
 
 	void UDPServerSocket::ProcessOutgoingNonReliablePackets(UDPClient* Target)
 	{
-		//OutgoingUDPPacketsHolder::ProcessNonReliablePackets(Target->GetOutgoingNonReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, std::placeholders::_1));
+		OutgoingUDPPacketsHolder::ProcessNonReliablePackets(Target->GetOutgoingNonReliablePacketHolder(), std::bind(&UDPServerSocket::SendPacket, this, Target, std::placeholders::_1));
 	}
 
 	UDPServerSocket::UDPClient* UDPServerSocket::GetOrAddClient(const IPEndPoint& EndPoint)
@@ -288,6 +280,8 @@ namespace GameFramework::Networking
 
 	uint32_t GameFramework::Networking::UDPServerSocket::GetIPEndPointHash(const IPEndPoint& EndPoint)
 	{
-		return CRC32::CalculateHash(reinterpret_cast<const byte*>(&EndPoint), sizeof(IPEndPoint));
+		uint16_t port = EndPoint.GetPort();
+
+		return CRC32::CalculateHash(reinterpret_cast<const byte*>(EndPoint.GetAddress().GetIP().c_str()), EndPoint.GetAddress().GetIP().size()) + CRC32::CalculateHash(reinterpret_cast<const byte*>(&port), sizeof(uint16_t));
 	}
 }

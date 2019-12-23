@@ -27,7 +27,7 @@ namespace ClientNetworkingManagedTest
 			client.OnBufferReceived += Client_OnBufferReceived;
 
 			Console.WriteLine("Client started connecting");
-			client.Connect("::1", 80);
+			client.Connect("127.0.0.1", 80);
 
 			while (true)
 			{

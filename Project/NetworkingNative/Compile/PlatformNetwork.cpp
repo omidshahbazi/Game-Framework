@@ -644,15 +644,15 @@ namespace GameFramework::Networking
 		if (AddressFamily == PlatformNetwork::AddressFamilies::InterNetwork)
 		{
 			address = reinterpret_cast<sockaddr*>(&ipv4);
-			size = sizeof(sockaddr_in);
+			size = sizeof(ipv4);
 		}
 		else
 		{
 			address = reinterpret_cast<sockaddr*>(&ipv6);
-			size = sizeof(sockaddr_in6);
+			size = sizeof(ipv6);
 		}
 
-		Length = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(&address), &size);
+		Length = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(address), &size);
 
 		if (Length == SOCKET_ERROR)
 			throw SocketException(GetLastError());
@@ -661,12 +661,12 @@ namespace GameFramework::Networking
 		{
 			if (size == sizeof(sockaddr_in))
 			{
-				Address = AddressToString(AddressFamily, &ipv4.sin_addr);
+				Address = AddressToString(PlatformNetwork::AddressFamilies::InterNetwork, &ipv4.sin_addr);
 				Port = ntohs(ipv4.sin_port);
 			}
 			else if (size == sizeof(sockaddr_in6))
 			{
-				Address = AddressToString(AddressFamily, &ipv6.sin6_addr);
+				Address = AddressToString(PlatformNetwork::AddressFamilies::InterNetworkV6, &ipv6.sin6_addr);
 				Port = ntohs(ipv6.sin6_port);
 			}
 			else

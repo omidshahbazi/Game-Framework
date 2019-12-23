@@ -133,6 +133,9 @@ namespace GameFramework.Networking
 				{
 					uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
+					if (packetSize > size)
+						throw new Exception("Incoming packet is invalid");
+
 					index += Packet.PACKET_SIZE_SIZE;
 
 					HandleIncomingBuffer(new BufferStream(ReceiveBuffer, index, packetSize));
