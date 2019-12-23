@@ -627,8 +627,10 @@ namespace GameFramework::Networking
 	{
 		int32_t result = recv(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode));
 
-		if (Length == SOCKET_ERROR)
+		if (result == SOCKET_ERROR)
 			throw SocketException(GetLastError());
+
+		Length = result;
 
 		return (Length != 0);
 	}
