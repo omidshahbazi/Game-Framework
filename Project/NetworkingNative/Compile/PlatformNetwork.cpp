@@ -646,12 +646,12 @@ namespace GameFramework::Networking
 		if (AddressFamily == PlatformNetwork::AddressFamilies::InterNetwork)
 		{
 			address = reinterpret_cast<sockaddr*>(&ipv4);
-			size = sizeof(ipv4);
+			size = sizeof(sockaddr_in);
 		}
 		else
 		{
 			address = reinterpret_cast<sockaddr*>(&ipv6);
-			size = sizeof(ipv6);
+			size = sizeof(sockaddr_in6);
 		}
 
 		Length = recvfrom(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode), reinterpret_cast<sockaddr*>(address), &size);
