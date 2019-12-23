@@ -78,6 +78,8 @@ namespace GameFramework::Networking
 			BufferStream buffer = Packet::CreateHandshakeBackBufferStream(client->GetStatistics().GetPacketCountRate());
 
 			SendInternal(Client, buffer);
+
+			RaiseOnClientConnected(client);
 		}
 		else if (control == Constants::Control::PING)
 		{

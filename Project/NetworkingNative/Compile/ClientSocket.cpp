@@ -212,7 +212,7 @@ namespace GameFramework::Networking
 
 		m_TimeOffset = ((t1 - t0) + (t2 - t3)) / 2;
 
-		uint32_t payloadSize = Buffer.GetSize() - Packet::PING_SIZE; //TODO: CHeck this ? ?Packet::PACKET_SIZE_SIZE
+		uint32_t payloadSize = Buffer.GetSize() - Packet::PING_SIZE;
 		if (payloadSize != 0)
 		{
 			BufferStream buffer(Buffer.GetBuffer(), Packet::PING_SIZE - Packet::PACKET_SIZE_SIZE, payloadSize);

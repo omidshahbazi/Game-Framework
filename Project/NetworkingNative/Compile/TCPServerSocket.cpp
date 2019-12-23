@@ -28,8 +28,6 @@ namespace GameFramework::Networking
 		m_Clients.remove(reinterpret_cast<TCPClient*>(Client));
 
 		ServerSocket::DisconnectClient(Client);
-
-		delete Client;
 	}
 
 	void TCPServerSocket::Listen(void)
@@ -140,8 +138,6 @@ namespace GameFramework::Networking
 			m_Clients.remove(client);
 
 			HandleClientDisconnection(client);
-
-			delete client;
 		}
 	}
 

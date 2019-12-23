@@ -1,9 +1,9 @@
-#include <UDPServerSocket.h>
+#include <TCPServerSocket.h>
 #include <iostream>
 
 using namespace GameFramework::Networking;
 
-UDPServerSocket server;
+TCPServerSocket server;
 
 void Server_OnClientConnected(const Client* Client)
 {

@@ -12,7 +12,7 @@ namespace GameFramework.Networking
 		public const ushort PACKET_SIZE_SIZE = sizeof(uint);
 		public const ushort HEADER_SIZE = Constants.Control.SIZE;
 
-		public const ushort PING_SIZE = PACKET_SIZE_SIZE + HEADER_SIZE + sizeof(double);
+		public const ushort PING_SIZE = HEADER_SIZE + sizeof(double);
 
 		public static BufferStream CreateOutgoingBufferStream(uint Length)
 		{
@@ -59,9 +59,9 @@ namespace GameFramework.Networking
 
 		public static BufferStream CreatePingBufferStream(uint PayloadSize = 0)
 		{
-			uint length = (PING_SIZE - PACKET_SIZE_SIZE) + PayloadSize;
+			uint length = PING_SIZE + PayloadSize;
 
-			BufferStream buffer = new BufferStream(new byte[PING_SIZE + PayloadSize]);
+			BufferStream buffer = new BufferStream(new byte[PACKET_SIZE_SIZE + length]);
 			buffer.ResetWrite();
 			buffer.WriteUInt32(length);
 			buffer.WriteBytes(Constants.Control.PING);

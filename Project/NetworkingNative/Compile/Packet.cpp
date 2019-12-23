@@ -12,7 +12,7 @@ namespace GameFramework::Networking
 	const uint16_t Packet::PACKET_SIZE_SIZE = sizeof(uint32_t);
 	const uint16_t Packet::HEADER_SIZE = Constants::Control::SIZE;
 
-	const uint16_t Packet::PING_SIZE = Packet::PACKET_SIZE_SIZE + Packet::HEADER_SIZE + sizeof(double);
+	const uint16_t Packet::PING_SIZE = Packet::HEADER_SIZE + sizeof(double);
 
 	BufferStream Packet::CreateOutgoingBufferStream(uint32_t Length)
 	{
@@ -59,7 +59,7 @@ namespace GameFramework::Networking
 
 	BufferStream Packet::CreatePingBufferStream(uint32_t PayloadSize)
 	{
-		uint32_t length = (PING_SIZE - PACKET_SIZE_SIZE) + PayloadSize;
+		uint32_t length = PING_SIZE + PayloadSize;
 
 		BufferStream buffer(PACKET_SIZE_SIZE + length);
 		buffer.ResetWrite();

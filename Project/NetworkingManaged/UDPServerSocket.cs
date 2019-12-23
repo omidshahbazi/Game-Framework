@@ -170,6 +170,8 @@ namespace GameFramework.Networking
 				BufferStream buffer = Packet.CreateHandshakeBackBufferStream(client.Statistics.PacketCountRate);
 
 				SendInternal(Client, buffer);
+
+				RaiseOnClientConnected(client);
 			}
 			else if (control == Constants.Control.PING)
 			{

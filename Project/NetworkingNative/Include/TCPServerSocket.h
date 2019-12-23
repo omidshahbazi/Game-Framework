@@ -44,7 +44,7 @@ namespace GameFramework::Networking
 		typedef List<TCPClient*> TCPClientList;
 
 	public:
-		TCPServerSocket(uint32_t MaxConnection);
+		TCPServerSocket(uint32_t MaxConnection = 32);
 
 		void UnBind(void) override;
 

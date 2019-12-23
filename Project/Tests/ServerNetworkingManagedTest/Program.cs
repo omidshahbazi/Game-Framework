@@ -6,11 +6,11 @@ namespace ServerNetworkingManagedTest
 {
 	class Program
 	{
-		private static UDPServerSocket server = null;
+		private static TCPServerSocket server = null;
 
 		static void Main(string[] args)
 		{
-			server = new UDPServerSocket();
+			server = new TCPServerSocket();
 			Console.WriteLine("Server created");
 
 			server.MultithreadedCallbacks = true;
