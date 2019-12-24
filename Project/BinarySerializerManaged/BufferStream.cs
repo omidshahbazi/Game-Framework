@@ -1,6 +1,8 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using GameFramework.Common.Utilities;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace GameFramework.BinarySerializer
@@ -120,10 +122,13 @@ namespace GameFramework.BinarySerializer
 
 		public string ReadString()
 		{
-			uint bufferLen = ReadUInt32();
+			int bufferLen = ReadInt32();
+
+			if (bufferLen == -1)
+				return null;
 
 			byte[] data = new byte[bufferLen];
-			ReadBytes(data, 0, bufferLen);
+			ReadBytes(data, 0, (uint)bufferLen);
 
 			return Encoding.UTF8.GetString(data, 0, (int)bufferLen);
 		}
@@ -180,9 +185,19 @@ namespace GameFramework.BinarySerializer
 
 		public void WriteString(string Value)
 		{
-			byte[] buffer = Encoding.UTF8.GetBytes(Value);
-			WriteInt32(buffer.Length);
-			WriteBytes(buffer);
+			int size = -1;
+			byte[] buffer = null;
+
+			if (Value != null)
+			{
+				buffer = Encoding.UTF8.GetBytes(Value);
+				size = buffer.Length;
+			}
+
+			WriteInt32(size);
+
+			if (buffer != null)
+				WriteBytes(buffer);
 		}
 
 		public void WriteBytes(params byte[] Buffer)

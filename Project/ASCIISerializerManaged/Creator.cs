@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.ASCIISerializer.JSONSerializer;
+using GameFramework.Common.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -112,11 +113,9 @@ namespace GameFramework.ASCIISerializer
 			{
 				object obj = Activator.CreateInstance(Type);
 
-				List<MemberInfo> members = new List<MemberInfo>();
-				members.AddRange(Type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
-				members.AddRange(Type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+				MemberInfo[] members = Type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
 
-				for (int i = 0; i < members.Count; ++i)
+				for (int i = 0; i < members.Length; ++i)
 				{
 					MemberInfo member = members[i];
 
@@ -183,17 +182,11 @@ namespace GameFramework.ASCIISerializer
 
 				Type type = Instance.GetType();
 
-				List<MemberInfo> members = new List<MemberInfo>();
-				members.AddRange(type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
-				members.AddRange(type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+				MemberInfo[] members = type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
 
-				for (int i = 0; i < members.Count; ++i)
+				for (int i = 0; i < members.Length; ++i)
 				{
 					MemberInfo member = members[i];
-
-					object[] attribs = member.GetCustomAttributes(typeof(CompilerGeneratedAttribute), true);
-					if (attribs != null && attribs.Length != 0)
-						continue;
 
 					string name = member.Name;
 					object value = null;
