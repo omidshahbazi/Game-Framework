@@ -76,18 +76,9 @@ namespace GameFramework.BinarySerializer
 				//Buffer.BeginWriteArray()
 			}
 
-			private static unsafe void WritePrimitive(BufferStream Buffer, object Value, Type Type)
+			private static void WritePrimitive(BufferStream Buffer, object Value, Type Type)
 			{
-				int size = (int)Type.GetSizeOf();
-				byte[] buffer = new byte[size];
-
-				TypedReference valueRef = __makeref(Value);
-				byte* valuePtr = (byte*)*((IntPtr*)(&valueRef));
-
-				for (int i = 0; i < size; ++i)
-					buffer[i] = valuePtr[i];
-
-				Buffer.WriteBytes(buffer);
+				Buffer.WriteBytes(BitwiseHelper.GetBytes(Value, Type));
 			}
 		}
 
@@ -133,7 +124,7 @@ namespace GameFramework.BinarySerializer
 					else if (valueType.IsEnum)
 					{
 						string name = Buffer.ReadString();
-						value = Enum.Parse(Type, name.ToString());
+						value = Enum.Parse(valueType, name.ToString());
 					}
 					else if (valueType == typeof(string))
 					{
@@ -158,16 +149,13 @@ namespace GameFramework.BinarySerializer
 				return null;
 			}
 
-			private static unsafe object ReadPrimitive(BufferStream Buffer, Type Type)
+			private static object ReadPrimitive(BufferStream Buffer, Type Type)
 			{
 				uint size = Type.GetSizeOf();
-
 				byte[] buffer = new byte[size];
 				Buffer.ReadBytes(buffer, 0, size);
 
-				var rf = __makeref(buffer);
-				**(int**)(&rf) += 8;
-				return GCHandle.Alloc(buffer).Target;
+				return BitwiseHelper.GetObject(Type, buffer);
 			}
 		}
 

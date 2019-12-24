@@ -1,4 +1,6 @@
 // Copyright 2019. All Rights Reserved.
+using System;
+
 namespace GameFramework.Common.Utilities
 {
 	public static class BitwiseHelper
@@ -64,6 +66,39 @@ namespace GameFramework.Common.Utilities
 				result[i] = (byte)((Value & (1L << i)) == 0 ? 0 : 1);
 
 			return result;
+		}
+
+		public static unsafe byte[] GetBytes(object Value, Type Type)
+		{
+			int size = (int)Type.GetSizeOf();
+			byte[] buffer = new byte[size];
+
+			TypedReference valueRef = __makeref(Value);
+			byte* valuePtr = (byte*)*((IntPtr*)(&valueRef));
+
+			for (int i = 0; i < size; ++i)
+				buffer[i] = valuePtr[i];
+
+			return buffer;
+		}
+
+		public static T GetObject<T>(byte[] Buffer)
+		{
+			return (T)GetObject(typeof(T), Buffer);
+		}
+
+		public static unsafe object GetObject(Type Type, byte[] Buffer)
+		{
+			uint size = Type.GetSizeOf();
+			object value = Activator.CreateInstance(Type);
+
+			TypedReference valueRef = __makeref(value);
+			byte* valuePtr = (byte*)*((IntPtr*)(&valueRef));
+
+			for (int i = 0; i < size; ++i)
+				valuePtr[i] = Buffer[i];
+
+			return value;
 		}
 	}
 }
