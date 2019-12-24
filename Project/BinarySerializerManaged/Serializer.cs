@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -75,18 +76,16 @@ namespace GameFramework.BinarySerializer
 				//Buffer.BeginWriteArray()
 			}
 
-			private static void WritePrimitive(BufferStream Buffer, object Value, Type Type)
+			private static unsafe void WritePrimitive(BufferStream Buffer, object Value, Type Type)
 			{
 				int size = (int)Type.GetSizeOf();
-
 				byte[] buffer = new byte[size];
 
-				unsafe
-				{
-					TypedReference valueRef = __makeref(Value);
-					IntPtr valuePtr = **(IntPtr**)(&valueRef);
-					Marshal.Copy(valuePtr, buffer, 0, size);
-				}
+				TypedReference valueRef = __makeref(Value);
+				byte* valuePtr = (byte*)*((IntPtr*)(&valueRef));
+
+				for (int i = 0; i < size; ++i)
+					buffer[i] = valuePtr[i];
 
 				Buffer.WriteBytes(buffer);
 			}
@@ -159,21 +158,16 @@ namespace GameFramework.BinarySerializer
 				return null;
 			}
 
-			private static object ReadPrimitive(BufferStream Buffer, Type Type)
+			private static unsafe object ReadPrimitive(BufferStream Buffer, Type Type)
 			{
 				uint size = Type.GetSizeOf();
 
 				byte[] buffer = new byte[size];
 				Buffer.ReadBytes(buffer, 0, size);
 
-				unsafe
-				{
-					TypedReference valueRef = __makeref(Value);
-					IntPtr valuePtr = **(IntPtr**)(&valueRef);
-					Marshal.Copy(valuePtr, buffer, 0, size);
-				}
-
-				Buffer.WriteBytes(buffer);
+				var rf = __makeref(buffer);
+				**(int**)(&rf) += 8;
+				return GCHandle.Alloc(buffer).Target;
 			}
 		}
 

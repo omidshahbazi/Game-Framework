@@ -12,7 +12,7 @@ namespace BinarySerializerManagedTest
 
 		class test
 		{
-			public int a = 340;
+			public int a = 1;
 			public string value = null;
 			public en e;
 
