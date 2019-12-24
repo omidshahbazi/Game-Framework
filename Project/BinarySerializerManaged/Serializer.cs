@@ -11,6 +11,11 @@ namespace GameFramework.BinarySerializer
 {
 	public static class Serializer
 	{
+		private const byte OBJECT_VALUE_TYPE = 1;
+		private const byte ARRAY_VALUE_TYPE = 2;
+		private const byte COMPLEX_VALUE_NOT_NULL_STATUS = 0;
+		private const byte COMPLEX_VALUE_NULL_STATUS = 1;
+
 		private class TypeMap : Dictionary<uint, Type>
 		{ }
 
@@ -55,8 +60,14 @@ namespace GameFramework.BinarySerializer
 
 		private static bool SerializeObject(object Instance, BufferStream Buffer)
 		{
-			if (Instance == null || Buffer == null)
+			if (Buffer == null)
 				return false;
+
+			Buffer.WriteBytes(OBJECT_VALUE_TYPE);
+			Buffer.WriteBytes(Instance == null ? COMPLEX_VALUE_NULL_STATUS : COMPLEX_VALUE_NOT_NULL_STATUS);
+
+			if (Instance == null)
+				return true;
 
 			Type type = Instance.GetType();
 
@@ -86,34 +97,26 @@ namespace GameFramework.BinarySerializer
 					valueType = propertyInfo.PropertyType;
 				}
 
-				if (valueType == typeof(string))
+				if (valueType.IsArray)
+				{
+					if (!SerializeArray(value, Buffer))
+						return false;
+				}
+				else if (valueType.IsPrimitive)
+				{
+					WriteBytes(Buffer, value, valueType);
+				}
+				else if (valueType.IsEnum)
+				{
+					Buffer.WriteString(value.ToString());
+				}
+				else if (valueType == typeof(string))
 				{
 					Buffer.WriteString((string)value);
 				}
-				else if (value == null)
-				{
-					WriteBytes(Buffer, null, valueType);
-				}
 				else
 				{
-					if (valueType.IsArray)
-					{
-						if (!SerializeArray(value, Buffer))
-							return false;
-					}
-					else if (valueType.IsPrimitive)
-					{
-						WriteBytes(Buffer, value, valueType);
-					}
-					else if (valueType.IsEnum)
-					{
-						Buffer.WriteString(value.ToString());
-					}
-					else
-					{
-						if (!SerializeObject(value, Buffer))
-							return false;
-					}
+					SerializeObject(value, Buffer);
 				}
 			}
 
@@ -140,7 +143,7 @@ namespace GameFramework.BinarySerializer
 
 		private static void WriteBytes(BufferStream Buffer, object Value, Type Type)
 		{
-			int size = (Type.IsClass ? (int)Type.GetSizeOf();
+			int size = (int)Type.GetSizeOf();
 
 			byte[] buffer = new byte[size];
 
