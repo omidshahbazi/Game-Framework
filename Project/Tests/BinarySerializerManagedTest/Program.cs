@@ -18,7 +18,7 @@ namespace BinarySerializerManagedTest
 		class test
 		{
 			public int a = 1;
-			public string value = null;
+			//public string value = null;
 			public en e;
 
 			public test1 child;
@@ -29,7 +29,7 @@ namespace BinarySerializerManagedTest
 			//Serializer.RegisterType<test>();
 
 			test t = new test();
-			t.value = "hellow world!";
+			//t.value = "hellow world!";
 			t.e = en.a2;
 
 			t.child = new test1();

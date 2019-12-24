@@ -37,12 +37,40 @@ namespace MathParserTest
 			obj1[] vals;
 		}
 
+
+
+		enum en
+		{
+			a1,
+			a2
+		}
+
+		class test1
+		{
+			float xx = 23.5F;
+		}
+
+		class test
+		{
+			public int a = 1;
+			//public string value = null;
+			public en e;
+
+			public test1 child;
+		}
+
 		static void Main(string[] args)
 		{
 			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":null,\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}], \"Info\":\"element2\"}");
 			int[] b = Creator.Create<int[]>("[1, 3, 5]");
 
 			ISerializeObject d = Creator.Serialize<ISerializeObject>(obj);
+
+
+			test t = new test();
+			t.child = new test1();
+
+			ISerializeObject d1 = Creator.Serialize<ISerializeObject>(t);
 
 			FileSystem.DataPath = "D:\\";
 			if (!FileSystem.DirectoryExists("omid"))
