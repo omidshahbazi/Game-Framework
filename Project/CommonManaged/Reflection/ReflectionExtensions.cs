@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace GameFramework.Common.Utilities
 {
@@ -86,5 +87,19 @@ namespace GameFramework.Common.Utilities
 
 			return 0;
 		}
+
+		public static uint MakeHash<T>()
+		{
+			return typeof(T).MakeHash();
+		}
+
+		public static uint MakeHash(this Type Type)
+		{
+			if (Type == null)
+				return 0;
+
+			return CRC32.CalculateHash(Encoding.ASCII.GetBytes(Type.FullName));
+		}
+
 	}
 }

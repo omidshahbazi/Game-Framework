@@ -21,7 +21,7 @@ namespace BinarySerializerManagedTest
 
 		static void Main(string[] args)
 		{
-			Serializer.RegisterType<test>();
+			//Serializer.RegisterType<test>();
 
 			test t = new test();
 			t.value = "hellow world!";
@@ -29,7 +29,11 @@ namespace BinarySerializerManagedTest
 
 			BufferStream buffer = Serializer.Serialize(t);
 
+			buffer.ResetRead();
+			test t1 = Serializer.Deserialize<test>(buffer);
 
+
+			System.Console.ReadLine();
 
 
 			//byte[] bytes = new byte[50 * 1024];

@@ -2,9 +2,7 @@
 using GameFramework.ASCIISerializer.JSONSerializer;
 using GameFramework.Common.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace GameFramework.ASCIISerializer
 {

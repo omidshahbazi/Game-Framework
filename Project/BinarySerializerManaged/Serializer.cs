@@ -11,150 +11,213 @@ namespace GameFramework.BinarySerializer
 {
 	public static class Serializer
 	{
-		private const byte OBJECT_VALUE_TYPE = 1;
-		private const byte ARRAY_VALUE_TYPE = 2;
 		private const byte COMPLEX_VALUE_NOT_NULL_STATUS = 0;
 		private const byte COMPLEX_VALUE_NULL_STATUS = 1;
 
+		private static class Dumper
+		{
+			public static void SerializeObject(object Instance, BufferStream Buffer)
+			{
+				Buffer.WriteBytes(Instance == null ? COMPLEX_VALUE_NULL_STATUS : COMPLEX_VALUE_NOT_NULL_STATUS);
+
+				if (Instance == null)
+					return;
+
+				Type type = Instance.GetType();
+
+				MemberInfo[] members = type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
+
+				for (int i = 0; i < members.Length; ++i)
+				{
+					MemberInfo member = members[i];
+
+					object value = null;
+					Type valueType = null;
+
+					if (member is FieldInfo)
+					{
+						FieldInfo fieldInfo = (FieldInfo)member;
+						value = fieldInfo.GetValue(Instance);
+						valueType = fieldInfo.FieldType;
+					}
+					else if (member is PropertyInfo)
+					{
+						PropertyInfo propertyInfo = (PropertyInfo)member;
+						value = propertyInfo.GetValue(Instance, null);
+						valueType = propertyInfo.PropertyType;
+					}
+
+					if (valueType.IsArray)
+					{
+						SerializeArray(value, Buffer);
+					}
+					else if (valueType.IsPrimitive)
+					{
+						WritePrimitive(Buffer, value, valueType);
+					}
+					else if (valueType.IsEnum)
+					{
+						Buffer.WriteString(value.ToString());
+					}
+					else if (valueType == typeof(string))
+					{
+						Buffer.WriteString((string)value);
+					}
+					else
+					{
+						SerializeObject(value, Buffer);
+					}
+				}
+			}
+
+			public static void SerializeArray(object Instance, BufferStream Buffer)
+			{
+				//Buffer.BeginWriteArray()
+			}
+
+			private static void WritePrimitive(BufferStream Buffer, object Value, Type Type)
+			{
+				int size = (int)Type.GetSizeOf();
+
+				byte[] buffer = new byte[size];
+
+				unsafe
+				{
+					TypedReference valueRef = __makeref(Value);
+					IntPtr valuePtr = **(IntPtr**)(&valueRef);
+					Marshal.Copy(valuePtr, buffer, 0, size);
+				}
+
+				Buffer.WriteBytes(buffer);
+			}
+		}
+
+		private static class Binder
+		{
+			public static object DeserializeObject(Type Type, BufferStream Buffer)
+			{
+				byte valueStatus = Buffer.ReadByte();
+				if (valueStatus == COMPLEX_VALUE_NULL_STATUS)
+					return null;
+
+				object instance = Activator.CreateInstance(Type);
+
+				MemberInfo[] members = Type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
+
+				for (int i = 0; i < members.Length; ++i)
+				{
+					MemberInfo member = members[i];
+
+					Type valueType = null;
+
+					if (member is FieldInfo)
+					{
+						FieldInfo fieldInfo = (FieldInfo)member;
+						valueType = fieldInfo.FieldType;
+					}
+					else if (member is PropertyInfo)
+					{
+						PropertyInfo propertyInfo = (PropertyInfo)member;
+						valueType = propertyInfo.PropertyType;
+					}
+
+					object value = null;
+
+					if (valueType.IsArray)
+					{
+						value = DeserializeArray(valueType, Buffer);
+					}
+					else if (valueType.IsPrimitive)
+					{
+						value = ReadPrimitive(Buffer, valueType);
+					}
+					else if (valueType.IsEnum)
+					{
+						string name = Buffer.ReadString();
+						value = Enum.Parse(Type, name.ToString());
+					}
+					else if (valueType == typeof(string))
+					{
+						value = Buffer.ReadString();
+					}
+					else
+					{
+						value = DeserializeObject(valueType, Buffer);
+					}
+
+					if (member is FieldInfo)
+						((FieldInfo)member).SetValue(instance, value);
+					else if (member is PropertyInfo)
+						((PropertyInfo)member).SetValue(instance, value, null);
+				}
+
+				return instance;
+			}
+
+			public static object DeserializeArray(Type Type, BufferStream Buffer)
+			{
+				return null;
+			}
+
+			private static object ReadPrimitive(BufferStream Buffer, Type Type)
+			{
+				uint size = Type.GetSizeOf();
+
+				byte[] buffer = new byte[size];
+				Buffer.ReadBytes(buffer, 0, size);
+
+				unsafe
+				{
+					TypedReference valueRef = __makeref(Value);
+					IntPtr valuePtr = **(IntPtr**)(&valueRef);
+					Marshal.Copy(valuePtr, buffer, 0, size);
+				}
+
+				Buffer.WriteBytes(buffer);
+			}
+		}
+
 		private class TypeMap : Dictionary<uint, Type>
 		{ }
-
-		private static TypeMap types;
-
-		static Serializer()
-		{
-			types = new TypeMap();
-		}
-
-		public static void RegisterType<T>()
-		{
-			RegisterType(typeof(T));
-		}
-
-		public static bool RegisterType(Type Type)
-		{
-			if (Type == null)
-				return false;
-
-			uint hash = MakeHash(Type);
-
-			types[hash] = Type;
-
-			return true;
-		}
 
 		public static BufferStream Serialize(object Instance)
 		{
 			BufferStream buffer = new BufferStream(new MemoryStream());
 
-			if (!Serialize(Instance, buffer))
-				return null;
+			Serialize(Instance, buffer);
 
 			return buffer;
 		}
 
-		public static bool Serialize(object Instance, BufferStream Buffer)
+		public static void Serialize(object Instance, BufferStream Buffer)
 		{
-			return SerializeObject(Instance, Buffer);
-		}
-
-		private static bool SerializeObject(object Instance, BufferStream Buffer)
-		{
-			if (Buffer == null)
-				return false;
-
-			Buffer.WriteBytes(OBJECT_VALUE_TYPE);
-			Buffer.WriteBytes(Instance == null ? COMPLEX_VALUE_NULL_STATUS : COMPLEX_VALUE_NOT_NULL_STATUS);
-
 			if (Instance == null)
-				return true;
+				throw new NullReferenceException("Instance cannot be null");
+
+			if (Buffer == null)
+				throw new NullReferenceException("Buffer cannot be null");
 
 			Type type = Instance.GetType();
 
-			uint hash = MakeHash(type);
-			if (!types.ContainsKey(hash))
-				return false;
+			if (type.IsArray)
+				Dumper.SerializeArray(Instance, Buffer);
 
-			MemberInfo[] members = type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
-
-			for (int i = 0; i < members.Length; ++i)
-			{
-				MemberInfo member = members[i];
-
-				object value = null;
-				Type valueType = null;
-
-				if (member is FieldInfo)
-				{
-					FieldInfo fieldInfo = (FieldInfo)member;
-					value = fieldInfo.GetValue(Instance);
-					valueType = fieldInfo.FieldType;
-				}
-				else if (member is PropertyInfo)
-				{
-					PropertyInfo propertyInfo = (PropertyInfo)member;
-					value = propertyInfo.GetValue(Instance, null);
-					valueType = propertyInfo.PropertyType;
-				}
-
-				if (valueType.IsArray)
-				{
-					if (!SerializeArray(value, Buffer))
-						return false;
-				}
-				else if (valueType.IsPrimitive)
-				{
-					WriteBytes(Buffer, value, valueType);
-				}
-				else if (valueType.IsEnum)
-				{
-					Buffer.WriteString(value.ToString());
-				}
-				else if (valueType == typeof(string))
-				{
-					Buffer.WriteString((string)value);
-				}
-				else
-				{
-					SerializeObject(value, Buffer);
-				}
-			}
-
-			return true;
+			Dumper.SerializeObject(Instance, Buffer);
 		}
 
-		private static bool SerializeArray(object Instance, BufferStream Buffer)
+		public static T Deserialize<T>(BufferStream Buffer)
 		{
-			return true;
+			return (T)Deserialize(typeof(T), Buffer);
 		}
 
-		public static uint MakeHash<T>()
+		public static object Deserialize(Type Type, BufferStream Buffer)
 		{
-			return MakeHash(typeof(T));
-		}
+			Type elementType = (Type.IsArray ? Type.GetElementType() : Type);
 
-		public static uint MakeHash(Type Type)
-		{
-			if (Type == null)
-				return 0;
+			if (Type.IsArray)
+				return Binder.DeserializeArray(elementType, Buffer);
 
-			return CRC32.CalculateHash(Encoding.ASCII.GetBytes(Type.FullName));
-		}
-
-		private static void WriteBytes(BufferStream Buffer, object Value, Type Type)
-		{
-			int size = (int)Type.GetSizeOf();
-
-			byte[] buffer = new byte[size];
-
-			unsafe
-			{
-				TypedReference valueRef = __makeref(Value);
-				IntPtr valuePtr = **(IntPtr**)(&valueRef);
-				Marshal.Copy(valuePtr, buffer, 0, size);
-			}
-
-			Buffer.WriteBytes(buffer);
+			return Binder.DeserializeObject(Type, Buffer);
 		}
 	}
 }

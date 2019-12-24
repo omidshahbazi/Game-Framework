@@ -47,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonManaged\CommonManaged.csproj">
-      <Project>{26568521-9093-4208-9bac-10f5b123bffb}</Project>
+      <Project>{26568521-9093-4208-9BAC-10F5B123BFFB}</Project>
       <Name>CommonManaged</Name>
     </ProjectReference>
   </ItemGroup>
