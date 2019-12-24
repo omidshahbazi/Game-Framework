@@ -10,13 +10,18 @@ namespace BinarySerializerManagedTest
 			a2
 		}
 
+		class test1
+		{
+			float xx = 23.5F;
+		}
+
 		class test
 		{
 			public int a = 1;
 			public string value = null;
 			public en e;
 
-			public test child;
+			public test1 child;
 		}
 
 		static void Main(string[] args)
@@ -26,6 +31,9 @@ namespace BinarySerializerManagedTest
 			test t = new test();
 			t.value = "hellow world!";
 			t.e = en.a2;
+
+			t.child = new test1();
+
 
 			BufferStream buffer = Serializer.Serialize(t);
 
