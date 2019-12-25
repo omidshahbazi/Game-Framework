@@ -124,6 +124,11 @@ namespace GameFramework::Networking
 		void RaiseOnClientConnected(Client* Client);
 
 	public:
+		const IPEndPoint& GetLocalEndPoint(void) const
+		{
+			return m_LocalEndPoint;
+		}
+
 		virtual bool GetIsReady(void) const override
 		{
 			return m_IsBound;
@@ -145,6 +150,7 @@ namespace GameFramework::Networking
 		Event<const Client*, BufferStream> OnBufferReceived;
 
 	private:
+		IPEndPoint m_LocalEndPoint;
 		bool m_IsBound;
 		uint32_t m_PacketCountRate;
 	};

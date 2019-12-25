@@ -68,6 +68,12 @@ namespace GameFramework.Networking
 		public delegate void ConnectionEventHandler(Client Client);
 		public delegate void BufferReceivedEventHandler(Client Sender, BufferStream Buffer);
 
+		public IPEndPoint LocalEndPoint
+		{
+			get;
+			private set;
+		}
+
 		public override bool IsReady
 		{
 			get { return Socket.IsBound; }
@@ -114,6 +120,8 @@ namespace GameFramework.Networking
 		{
 			if (EndPoint.AddressFamily == AddressFamily.InterNetwork)
 				EndPoint.Address = SocketUtilities.MapIPv4ToIPv6(EndPoint.Address);
+
+			LocalEndPoint = EndPoint;
 
 			Socket.Bind(EndPoint);
 		}

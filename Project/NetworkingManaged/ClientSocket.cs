@@ -45,6 +45,12 @@ namespace GameFramework.Networking
 		private double lastPingTime = 0;
 		private double timeOffset = 0;
 
+		public IPEndPoint RemoteEndPoint
+		{
+			get;
+			private set;
+		}
+
 		public bool IsConnected
 		{
 			get;
@@ -96,6 +102,8 @@ namespace GameFramework.Networking
 		{
 			if (EndPoint.AddressFamily == AddressFamily.InterNetwork)
 				EndPoint.Address = SocketUtilities.MapIPv4ToIPv6(EndPoint.Address);
+
+			RemoteEndPoint = EndPoint;
 
 			ConnectInternal(EndPoint);
 		}

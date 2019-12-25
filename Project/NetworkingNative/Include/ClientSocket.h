@@ -105,6 +105,11 @@ namespace GameFramework::Networking
 		}
 
 	public:
+		const IPEndPoint& GetRemoteEndPoint(void) const
+		{
+			return m_RemoteEndPoint;
+		}
+
 		virtual bool GetIsReady(void) const override
 		{
 			return SocketUtilities::GetIsReady(GetSocket());
@@ -135,6 +140,7 @@ namespace GameFramework::Networking
 		Event<BufferStream> OnBufferReceived;
 
 	private:
+		IPEndPoint m_RemoteEndPoint;
 		bool m_IsConnected;
 		double m_LastPingTime;
 		double m_TimeOffset;

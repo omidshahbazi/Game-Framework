@@ -30,12 +30,12 @@ namespace GameFramework::Networking
 
 	void ServerSocket::Bind(const IPEndPoint& EndPoint)
 	{
-		IPEndPoint endPoint = EndPoint;
+		m_LocalEndPoint = EndPoint;
 
-		if (endPoint.GetAddress().GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
-			endPoint.SetAddress(SocketUtilities::MapIPv4ToIPv6(endPoint.GetAddress()));
+		if (m_LocalEndPoint.GetAddress().GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
+			m_LocalEndPoint.SetAddress(SocketUtilities::MapIPv4ToIPv6(m_LocalEndPoint.GetAddress()));
 
-		SocketUtilities::Bind(GetSocket(), endPoint);
+		SocketUtilities::Bind(GetSocket(), m_LocalEndPoint);
 		m_IsBound = true;
 	}
 

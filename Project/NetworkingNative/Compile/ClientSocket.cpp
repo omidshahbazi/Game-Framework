@@ -43,12 +43,12 @@ namespace GameFramework::Networking
 
 	void ClientSocket::Connect(const IPEndPoint& EndPoint)
 	{
-		IPEndPoint endPoint = EndPoint;
+		m_RemoteEndPoint = EndPoint;
 
-		if (endPoint.GetAddress().GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
-			endPoint.SetAddress(SocketUtilities::MapIPv4ToIPv6(endPoint.GetAddress()));
+		if (m_RemoteEndPoint.GetAddress().GetAddressFamily() == PlatformNetwork::AddressFamilies::InterNetwork)
+			m_RemoteEndPoint.SetAddress(SocketUtilities::MapIPv4ToIPv6(m_RemoteEndPoint.GetAddress()));
 
-		ConnectInternal(EndPoint);
+		ConnectInternal(m_RemoteEndPoint);
 	}
 
 	void ClientSocket::Disconnect(void)
