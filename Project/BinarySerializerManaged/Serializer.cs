@@ -4,9 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace GameFramework.BinarySerializer
 {
@@ -48,37 +45,59 @@ namespace GameFramework.BinarySerializer
 						valueType = propertyInfo.PropertyType;
 					}
 
-					if (valueType.IsArray)
-					{
-						SerializeArray(value, Buffer);
-					}
-					else if (valueType.IsPrimitive)
-					{
-						WritePrimitive(Buffer, value, valueType);
-					}
-					else if (valueType.IsEnum)
-					{
-						Buffer.WriteString(value.ToString());
-					}
-					else if (valueType == typeof(string))
-					{
-						Buffer.WriteString((string)value);
-					}
-					else
-					{
-						SerializeObject(value, Buffer);
-					}
+					WriteValue(Buffer, value, valueType);
 				}
 			}
 
 			public static void SerializeArray(object Instance, BufferStream Buffer)
 			{
-				//Buffer.BeginWriteArray()
+				Buffer.WriteBytes(Instance == null ? COMPLEX_VALUE_NULL_STATUS : COMPLEX_VALUE_NOT_NULL_STATUS);
+
+				if (Instance == null)
+					return;
+
+				Type elementType = Instance.GetType().GetElementType();
+
+				Array array = (Array)Instance;
+
+				Buffer.BeginWriteArray((uint)array.Length);
+
+				for (int i = 0; i < array.Length; ++i)
+				{
+					Buffer.BeginWriteArrayElement();
+
+					object value = array.GetValue(i);
+
+					WriteValue(Buffer, value, elementType);
+
+					Buffer.EndWriteArrayElement();
+				}
+
+				Buffer.EndWriteArray();
 			}
 
-			private static void WritePrimitive(BufferStream Buffer, object Value, Type Type)
+			private static void WriteValue(BufferStream Buffer, object Value, Type Type)
 			{
-				Buffer.WriteBytes(BitwiseHelper.GetBytes(Value, Type));
+				if (Type.IsArray)
+				{
+					SerializeArray(Value, Buffer);
+				}
+				else if (Type.IsPrimitive)
+				{
+					Buffer.WriteBytes(BitwiseHelper.GetBytes(Value, Type));
+				}
+				else if (Type.IsEnum)
+				{
+					Buffer.WriteString(Value.ToString());
+				}
+				else if (Type == typeof(string))
+				{
+					Buffer.WriteString((string)Value);
+				}
+				else
+				{
+					SerializeObject(Value, Buffer);
+				}
 			}
 		}
 
@@ -111,29 +130,7 @@ namespace GameFramework.BinarySerializer
 						valueType = propertyInfo.PropertyType;
 					}
 
-					object value = null;
-
-					if (valueType.IsArray)
-					{
-						value = DeserializeArray(valueType, Buffer);
-					}
-					else if (valueType.IsPrimitive)
-					{
-						value = ReadPrimitive(Buffer, valueType);
-					}
-					else if (valueType.IsEnum)
-					{
-						string name = Buffer.ReadString();
-						value = Enum.Parse(valueType, name.ToString());
-					}
-					else if (valueType == typeof(string))
-					{
-						value = Buffer.ReadString();
-					}
-					else
-					{
-						value = DeserializeObject(valueType, Buffer);
-					}
+					object value = ReadValue(Buffer, valueType);
 
 					if (member is FieldInfo)
 						((FieldInfo)member).SetValue(instance, value);
@@ -146,7 +143,49 @@ namespace GameFramework.BinarySerializer
 
 			public static object DeserializeArray(Type Type, BufferStream Buffer)
 			{
-				return null;
+				byte valueStatus = Buffer.ReadByte();
+				if (valueStatus == COMPLEX_VALUE_NULL_STATUS)
+					return null;
+
+				Type elementType = Type.GetElementType();
+
+				uint count = Buffer.BeginReadArray();
+
+				Array arr = (Array)Activator.CreateInstance(Type, (int)count);
+
+				for (uint i = 0; i < arr.Length; ++i)
+					arr.SetValue(ReadValue(Buffer, elementType), i);
+
+				return arr;
+			}
+
+			private static object ReadValue(BufferStream Buffer, Type Type)
+			{
+				object value = null;
+
+				if (Type.IsArray)
+				{
+					value = DeserializeArray(Type, Buffer);
+				}
+				else if (Type.IsPrimitive)
+				{
+					value = ReadPrimitive(Buffer, Type);
+				}
+				else if (Type.IsEnum)
+				{
+					string name = Buffer.ReadString();
+					value = Enum.Parse(Type, name.ToString());
+				}
+				else if (Type == typeof(string))
+				{
+					value = Buffer.ReadString();
+				}
+				else
+				{
+					value = DeserializeObject(Type, Buffer);
+				}
+
+				return value;
 			}
 
 			private static object ReadPrimitive(BufferStream Buffer, Type Type)

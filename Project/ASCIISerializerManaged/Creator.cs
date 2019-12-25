@@ -139,12 +139,12 @@ namespace GameFramework.ASCIISerializer
 
 			private static object Bind(ISerializeArray Array, Type Type)
 			{
-				Array obj = (Array)Activator.CreateInstance(Type, (int)Array.Count);
+				Array arr = (Array)Activator.CreateInstance(Type, (int)Array.Count);
 
 				for (uint i = 0; i < Array.Count; ++i)
-					obj.SetValue(Cast(Array.Get<object>(i), Type.GetElementType()), i);
+					arr.SetValue(Cast(Array.Get<object>(i), Type.GetElementType()), i);
 
-				return obj;
+				return arr;
 			}
 
 			private static object Cast(object Value, Type Type)
