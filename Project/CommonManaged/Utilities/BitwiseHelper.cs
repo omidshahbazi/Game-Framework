@@ -73,6 +73,9 @@ namespace GameFramework.Common.Utilities
 			if (Type == typeof(bool))
 				return BitConverter.GetBytes((bool)Value);
 
+			if (Type == typeof(byte))
+				return new byte[] { (byte)Value };
+
 			if (Type == typeof(char))
 				return BitConverter.GetBytes((char)Value);
 
@@ -126,6 +129,9 @@ namespace GameFramework.Common.Utilities
 		{
 			if (Type == typeof(bool))
 				return BitConverter.ToBoolean(Buffer, 0);
+
+			if (Type == typeof(byte))
+				return Buffer[0];
 
 			if (Type == typeof(char))
 				return BitConverter.ToChar(Buffer, 0);
