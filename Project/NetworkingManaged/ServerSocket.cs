@@ -204,9 +204,10 @@ namespace GameFramework.Networking
 
 		protected void HandleReceivedBuffer(Client Sender, BufferStream Buffer)
 		{
-			if (OnBufferReceived != null)
+			if (MultithreadedCallbacks)
 			{
-				CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Sender, Buffer);
+				if (OnBufferReceived != null)
+					CallbackUtilities.InvokeCallback(OnBufferReceived.Invoke, Sender, Buffer);
 			}
 			else
 			{
