@@ -101,7 +101,11 @@ namespace GameFramework.Common.FileLayer
 			string fullPath = DataPath + Path;
 
 			if (System.IO.Path.HasExtension(fullPath))
+			{
 				Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fullPath));
+
+				return;
+			}
 
 			Directory.CreateDirectory(fullPath);
 		}
