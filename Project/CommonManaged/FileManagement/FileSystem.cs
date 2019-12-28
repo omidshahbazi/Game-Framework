@@ -53,6 +53,9 @@ namespace GameFramework.Common.FileLayer
 
 		public static StreamWriter CreateStreamWriter(string Path)
 		{
+			if (!DirectoryExists(Path))
+				CreateDirectory(Path);
+
 			return new StreamWriter(DataPath + Path);
 		}
 
