@@ -88,14 +88,14 @@ namespace GameFramework.ASCIISerializer
 		{
 			public static T Bind<T>(ISerializeData Data)
 			{
-				if (Data == null)
-					throw new NullReferenceException("Data cannot be null");
-
 				return (T)Bind(Data, typeof(T));
 			}
 
 			public static object Bind(ISerializeData Data, Type Type)
 			{
+				if (Data == null)
+					throw new NullReferenceException("Data cannot be null");
+
 				if (Type.IsArray != (Data is ISerializeArray))
 					throw new ArgumentException("Type [" + Type + "] and [" + Data.GetType() + "] are not same");
 
@@ -269,12 +269,15 @@ namespace GameFramework.ASCIISerializer
 
 		public static T Bind<T>(ISerializeData Data)
 		{
-			Type type = typeof(T);
+			return (T)Bind(typeof(T), Data);
+		}
 
-			if (Data is T)
-				return (T)Data;
+		public static object Bind(Type Type, ISerializeData Data)
+		{
+			if (Data.GetType() == Type)
+				return Data;
 
-			return ObjectBinder.Bind<T>(Data);
+			return ObjectBinder.Bind(Data, Type);
 		}
 
 		public static T Serialize<T>(object Instance) where T : ISerializeData

@@ -11,15 +11,26 @@ namespace GameFramework.DatabaseManaged
 		private string connectionString;
 
 		public MySQLDatabase(string Host, string Username, string Password) :
-			this(Host, Username, Password, "")
+			this(Host, 3306, Username, Password, "")
 		{
 		}
 
-		public MySQLDatabase(string Host, string Username, string Password, string Name)
+		public MySQLDatabase(string Host, ushort Port, string Username, string Password) :
+			this(Host, Port, Username, Password, "")
+		{
+		}
+
+		public MySQLDatabase(string Host, string Username, string Password, string Name) :
+			this(Host, 3306, Username, Password, Name)
+		{
+		}
+
+		public MySQLDatabase(string Host, ushort Port, string Username, string Password, string Name)
 		{
 			MySqlConnectionStringBuilder conStr = new MySqlConnectionStringBuilder();
 
 			conStr.Server = Host;
+			conStr.Port = Port;
 			conStr.UserID = Username;
 			conStr.Password = Password;
 
