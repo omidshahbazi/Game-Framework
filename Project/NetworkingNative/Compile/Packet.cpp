@@ -118,6 +118,8 @@ namespace GameFramework::Networking
 			buffer.WriteBytes(sliceBuffer.GetBuffer(), 0, sliceBuffer.GetSize());
 		}
 
+		buffer.ResetRead();
+
 		return buffer;
 	}
 

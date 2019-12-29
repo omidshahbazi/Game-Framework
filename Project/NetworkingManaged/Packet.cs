@@ -182,6 +182,8 @@ namespace GameFramework.Networking
 			for (uint i = 0; i < SliceBuffers.Length; ++i)
 				buffer.WriteBytes(SliceBuffers[i].Buffer);
 
+			buffer.ResetRead();
+
 			return buffer;
 		}
 	}
