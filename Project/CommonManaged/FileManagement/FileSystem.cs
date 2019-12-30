@@ -24,7 +24,7 @@ namespace GameFramework.Common.FileLayer
 			if (!FileExists(Path))
 				return string.Empty;
 
-			return File.ReadAllText(DataPath + Path);
+			return File.ReadAllText(GetFullPath(Path));
 		}
 
 		public static byte[] ReadBytes(string Path)
@@ -32,7 +32,7 @@ namespace GameFramework.Common.FileLayer
 			if (!FileExists(Path))
 				return null;
 
-			return File.ReadAllBytes(DataPath + Path);
+			return File.ReadAllBytes(GetFullPath(Path));
 		}
 
 		public static void Write(string Path, string Contents)
@@ -40,7 +40,7 @@ namespace GameFramework.Common.FileLayer
 			if (!DirectoryExists(Path))
 				CreateDirectory(Path);
 
-			File.WriteAllText(DataPath + Path, Contents);
+			File.WriteAllText(GetFullPath(Path), Contents);
 		}
 
 		public static void Write(string Path, byte[] Contents)
@@ -48,7 +48,7 @@ namespace GameFramework.Common.FileLayer
 			if (!DirectoryExists(Path))
 				CreateDirectory(Path);
 
-			File.WriteAllBytes(DataPath + Path, Contents);
+			File.WriteAllBytes(GetFullPath(Path), Contents);
 		}
 
 		public static StreamWriter CreateStreamWriter(string Path)
@@ -56,17 +56,17 @@ namespace GameFramework.Common.FileLayer
 			if (!DirectoryExists(Path))
 				CreateDirectory(Path);
 
-			return new StreamWriter(DataPath + Path);
+			return new StreamWriter(GetFullPath(Path));
 		}
 
 		public static string GetFileName(string Path)
 		{
-			return System.IO.Path.GetFileName(DataPath + Path);
+			return System.IO.Path.GetFileName(GetFullPath(Path));
 		}
 
 		public static string GetFileNameWithoutExtension(string Path)
 		{
-			return System.IO.Path.GetFileNameWithoutExtension(DataPath + Path);
+			return System.IO.Path.GetFileNameWithoutExtension(GetFullPath(Path));
 		}
 
 		public static string GetFileExtension(string Path)
@@ -76,12 +76,12 @@ namespace GameFramework.Common.FileLayer
 
 		public static bool FileExists(string Path)
 		{
-			return File.Exists(DataPath + Path);
+			return File.Exists(GetFullPath(Path));
 		}
 
 		public static void DeleteFile(string Path)
 		{
-			File.Delete(DataPath + Path);
+			File.Delete(GetFullPath(Path));
 		}
 
 		public static string GetDirectoryName(string Path)
@@ -91,7 +91,7 @@ namespace GameFramework.Common.FileLayer
 
 		public static bool DirectoryExists(string Path)
 		{
-			string fullPath = DataPath + Path;
+			string fullPath = GetFullPath(Path);
 
 			if (System.IO.Path.HasExtension(fullPath))
 				return Directory.Exists(System.IO.Path.GetDirectoryName(fullPath));
@@ -101,7 +101,7 @@ namespace GameFramework.Common.FileLayer
 
 		public static void CreateDirectory(string Path)
 		{
-			string fullPath = DataPath + Path;
+			string fullPath = GetFullPath(Path);
 
 			if (System.IO.Path.HasExtension(fullPath))
 			{
@@ -123,7 +123,7 @@ namespace GameFramework.Common.FileLayer
 			if (!DirectoryExists(Path))
 				return null;
 
-			string[] files = Directory.GetFiles(DataPath + Path, SearchPattern, SearchOption);
+			string[] files = Directory.GetFiles(GetFullPath(Path), SearchPattern, SearchOption);
 
 			for (int i = 0; i < files.Length; ++i)
 				files[i] = files[i].Substring(DataPath.Length);
@@ -135,13 +135,13 @@ namespace GameFramework.Common.FileLayer
 		{
 			string oldFileDir = Path.GetDirectoryName(OldFilePath);
 
-			File.Move(DataPath + OldFilePath, DataPath + (string.IsNullOrEmpty(oldFileDir) ? "" : "/") + NewFileName);
+			File.Move(GetFullPath(OldFilePath), GetFullPath((string.IsNullOrEmpty(oldFileDir) ? "" : "/") + NewFileName));
 		}
 
 		public static void CopyAllFiles(string From, string To, bool Overwrite = false)
 		{
-			string from = DataPath + From;
-			string to = DataPath + To;
+			string from = GetFullPath(From);
+			string to = GetFullPath(To);
 
 			if (!Directory.Exists(to))
 				Directory.CreateDirectory(to);
@@ -169,6 +169,11 @@ namespace GameFramework.Common.FileLayer
 		{
 			Directory.Delete(Path, true);
 			Directory.CreateDirectory(Path);
+		}
+
+		public static string GetFullPath(string Path)
+		{
+			return System.IO.Path.Combine(DataPath, Path);
 		}
 	}
 }
