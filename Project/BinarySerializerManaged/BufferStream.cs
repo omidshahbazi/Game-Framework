@@ -24,6 +24,11 @@ namespace GameFramework.BinarySerializer
 			private set;
 		}
 
+		public bool IsEndOfBuffer
+		{
+			get { return stream.Position >= Size; }
+		}
+
 		public BufferStream(uint Capacity)
 		{
 			stream = new MemoryStream((int)Capacity);

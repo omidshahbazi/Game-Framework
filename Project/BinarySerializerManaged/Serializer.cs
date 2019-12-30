@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace GameFramework.BinarySerializer
 {
@@ -24,10 +25,15 @@ namespace GameFramework.BinarySerializer
 				Type type = Instance.GetType();
 
 				MemberInfo[] members = type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
+				Buffer.WriteUInt16((ushort)members.Length);
+
+				BufferStream tempBuffer = new BufferStream(new MemoryStream());
 
 				for (int i = 0; i < members.Length; ++i)
 				{
 					MemberInfo member = members[i];
+
+					uint id = Utilities.GetMemberID(member);
 
 					object value = null;
 					Type valueType = null;
@@ -45,7 +51,12 @@ namespace GameFramework.BinarySerializer
 						valueType = propertyInfo.PropertyType;
 					}
 
-					WriteValue(Buffer, value, valueType);
+					tempBuffer.ResetWrite();
+					WriteValue(tempBuffer, value, valueType);
+
+					Buffer.WriteUInt32(id);
+					Buffer.WriteUInt16((ushort)tempBuffer.Size);
+					Buffer.WriteBytes(tempBuffer.Buffer);
 				}
 			}
 
@@ -111,11 +122,25 @@ namespace GameFramework.BinarySerializer
 
 				object instance = Activator.CreateInstance(Type);
 
-				MemberInfo[] members = Type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
+				ushort memberCount = Buffer.ReadUInt16();
 
-				for (int i = 0; i < members.Length; ++i)
+				MemberInfo[] members = Type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
+				uint[] ids = GetIDs(members);
+
+				for (ushort __i = 0; __i < memberCount; ++__i)
 				{
-					MemberInfo member = members[i];
+					uint id = Buffer.ReadUInt32();
+					ushort size = Buffer.ReadUInt16();
+
+					int index = Array.IndexOf(ids, id);
+					if (index == -1)
+					{
+						byte[] skippedBytes = new byte[size];
+						Buffer.ReadBytes(skippedBytes, 0, size);
+						continue;
+					}
+
+					MemberInfo member = members[index];
 
 					Type valueType = null;
 
@@ -137,6 +162,31 @@ namespace GameFramework.BinarySerializer
 					else if (member is PropertyInfo)
 						((PropertyInfo)member).SetValue(instance, value, null);
 				}
+
+				//for (int i = 0; i < members.Length; ++i)
+				//{
+				//	MemberInfo member = members[i];
+
+				//	Type valueType = null;
+
+				//	if (member is FieldInfo)
+				//	{
+				//		FieldInfo fieldInfo = (FieldInfo)member;
+				//		valueType = fieldInfo.FieldType;
+				//	}
+				//	else if (member is PropertyInfo)
+				//	{
+				//		PropertyInfo propertyInfo = (PropertyInfo)member;
+				//		valueType = propertyInfo.PropertyType;
+				//	}
+
+				//	object value = ReadValue(Buffer, valueType);
+
+				//	if (member is FieldInfo)
+				//		((FieldInfo)member).SetValue(instance, value);
+				//	else if (member is PropertyInfo)
+				//		((PropertyInfo)member).SetValue(instance, value, null);
+				//}
 
 				return instance;
 			}
@@ -196,10 +246,30 @@ namespace GameFramework.BinarySerializer
 
 				return BitwiseHelper.GetObject(Type, buffer);
 			}
+
+			private static uint[] GetIDs(MemberInfo[] Members)
+			{
+				uint[] ids = new uint[Members.Length];
+
+				for (int i = 0; i < Members.Length; ++i)
+					ids[i] = Utilities.GetMemberID(Members[i]);
+
+				return ids;
+			}
 		}
 
-		private class TypeMap : Dictionary<uint, Type>
-		{ }
+		private static class Utilities
+		{
+			public static uint GetMemberID(MemberInfo Member)
+			{
+				KeyAttribute keyAttr = Member.GetAttribute<KeyAttribute>();
+
+				if (keyAttr == null)
+					return CRC32.CalculateHash(Encoding.ASCII.GetBytes(Member.Name));
+
+				return keyAttr.ID;
+			}
+		}
 
 		public static BufferStream Serialize(object Instance)
 		{

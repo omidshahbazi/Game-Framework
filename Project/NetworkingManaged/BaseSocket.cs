@@ -50,6 +50,12 @@ namespace GameFramework.Networking
 		private EventBaseList events = null;
 		private SendCommandList sendCommands = null;
 
+		public Protocols Type
+		{
+			get;
+			private set;
+		}
+
 		protected Socket Socket
 		{
 			get;
@@ -110,6 +116,8 @@ namespace GameFramework.Networking
 
 		public BaseSocket(Protocols Type)
 		{
+			this.Type = Type;
+
 			events = new EventBaseList();
 			sendCommands = new SendCommandList();
 

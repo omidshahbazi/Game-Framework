@@ -101,5 +101,14 @@ namespace GameFramework.Common.Utilities
 			return CRC32.CalculateHash(Encoding.ASCII.GetBytes(Type.FullName));
 		}
 
+		public static T GetAttribute<T>(this ICustomAttributeProvider Provider, bool Inherit = true) where T : Attribute
+		{
+			object[] attribuets = Provider.GetCustomAttributes(typeof(T), Inherit);
+
+			if (attribuets == null || attribuets.Length == 0)
+				return null;
+
+			return (T)attribuets[0];
+		}
 	}
 }

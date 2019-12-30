@@ -54,6 +54,7 @@
     <Compile Include="Pool\ObjectPool.cs" />
     <Compile Include="Timing\Time.cs" />
     <Compile Include="Reflection\ReflectionExtensions.cs" />
+    <Compile Include="Utilities\ArgumentParser.cs" />
     <Compile Include="Utilities\ConsoleHelper.cs" />
     <Compile Include="Utilities\BitwiseHelper.cs" />
     <Compile Include="Utilities\DateTimeHelper.cs" />

@@ -12,15 +12,19 @@ namespace BinarySerializerManagedTest
 
 		class test1
 		{
+			[Key(10)]
 			public float xx = 23.5F;
 		}
 
 		class test
 		{
+			[Key(10)]
 			public int a = 150;
 			//public string value = null;
+			[Key(11)]
 			public en e;
 
+			[Key(12)]
 			public test1[] child;
 		}
 

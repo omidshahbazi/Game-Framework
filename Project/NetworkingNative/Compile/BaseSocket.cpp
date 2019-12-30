@@ -18,6 +18,7 @@ namespace GameFramework::Networking
 		m_ReceiveThread(nullptr),
 		m_SendThread(nullptr),
 		m_EventsLock(0),
+		m_Type(Type),
 		m_Socket(0),
 		m_ReceiveBuffer(nullptr),
 		m_MultithreadedCallbacks(true),
@@ -26,7 +27,7 @@ namespace GameFramework::Networking
 		m_PacketLossSimulation(0),
 		m_LatencySimulation(0)
 	{
-		m_Socket = SocketUtilities::CreateSocket(Type);
+		m_Socket = SocketUtilities::CreateSocket(m_Type);
 		SocketUtilities::SetBlocking(m_Socket, false);
 		SocketUtilities::SetReceiveBufferSize(m_Socket, Constants::RECEIVE_BUFFER_SIZE);
 		SocketUtilities::SetSendBufferSize(m_Socket, Constants::SEND_BUFFER_SIZE);
@@ -36,7 +37,7 @@ namespace GameFramework::Networking
 		SocketUtilities::SetIPv6OnlyEnabled(m_Socket, false);
 		//SocketUtilities::SetChecksumEnabled(m_Socket, false);
 
-		if (Type == PlatformNetwork::IPProtocols::TCP)
+		if (m_Type == PlatformNetwork::IPProtocols::TCP)
 			SocketUtilities::SetNagleAlgorithmEnabled(m_Socket, false);
 
 		m_ReceiveBuffer = new std::byte[Constants::RECEIVE_BUFFER_SIZE];

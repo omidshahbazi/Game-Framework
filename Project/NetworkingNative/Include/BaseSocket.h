@@ -112,6 +112,11 @@ namespace GameFramework::Networking
 		}
 
 	public:
+		PlatformNetwork::IPProtocols GetType(void) const
+		{
+			return m_Type;
+		}
+
 		virtual bool GetIsReady(void) const = 0;
 
 		virtual double GetTimestamp(void) const = 0;
@@ -181,6 +186,7 @@ namespace GameFramework::Networking
 		SendCommandList m_SendCommands;
 		atomic_bool m_SendCommandsLock;
 
+		PlatformNetwork::IPProtocols m_Type;
 		Socket m_Socket;
 
 		std::byte* m_ReceiveBuffer;
