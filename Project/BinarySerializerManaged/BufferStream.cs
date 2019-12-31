@@ -15,7 +15,12 @@ namespace GameFramework.BinarySerializer
 
 		public byte[] Buffer
 		{
-			get { return stream.ToArray(); }
+			get
+			{
+				byte[] data = new byte[Size];
+				Array.Copy(stream.ToArray(), data, data.Length);
+				return data;
+			}
 		}
 
 		public uint Size
@@ -24,10 +29,10 @@ namespace GameFramework.BinarySerializer
 			private set;
 		}
 
-		public bool IsEndOfBuffer
-		{
-			get { return stream.Position >= Size; }
-		}
+		//public bool IsEndOfBuffer
+		//{
+		//	get { return stream.Position >= Size; }
+		//}
 
 		public BufferStream(uint Capacity)
 		{

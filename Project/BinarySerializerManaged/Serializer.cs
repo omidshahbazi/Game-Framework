@@ -27,7 +27,7 @@ namespace GameFramework.BinarySerializer
 				MemberInfo[] members = type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
 				Buffer.WriteUInt16((ushort)members.Length);
 
-				BufferStream tempBuffer = new BufferStream(new MemoryStream());
+				BufferStream tempBuffer = new BufferStream(new MemoryStream(new byte[ushort.MaxValue + 1]));
 
 				for (int i = 0; i < members.Length; ++i)
 				{
@@ -127,6 +127,7 @@ namespace GameFramework.BinarySerializer
 				MemberInfo[] members = Type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
 				uint[] ids = GetIDs(members);
 
+				byte[] skippedBytes = new byte[ushort.MaxValue + 1];
 				for (ushort __i = 0; __i < memberCount; ++__i)
 				{
 					uint id = Buffer.ReadUInt32();
@@ -135,7 +136,6 @@ namespace GameFramework.BinarySerializer
 					int index = Array.IndexOf(ids, id);
 					if (index == -1)
 					{
-						byte[] skippedBytes = new byte[size];
 						Buffer.ReadBytes(skippedBytes, 0, size);
 						continue;
 					}
