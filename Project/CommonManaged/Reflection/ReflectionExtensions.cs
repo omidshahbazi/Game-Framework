@@ -58,6 +58,9 @@ namespace GameFramework.Common.Utilities
 			if (Type == typeof(bool))
 				return sizeof(bool);
 
+			if (Type == typeof(byte))
+				return sizeof(byte);
+
 			if (Type == typeof(char))
 				return sizeof(bool);
 

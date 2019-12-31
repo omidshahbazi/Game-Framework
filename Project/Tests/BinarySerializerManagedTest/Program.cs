@@ -25,7 +25,7 @@ namespace BinarySerializerManagedTest
 			public en e;
 
 			[Key(12)]
-			public test1[] child;
+			public byte[] child;
 		}
 
 		static void Main(string[] args)
@@ -36,7 +36,7 @@ namespace BinarySerializerManagedTest
 			//t.value = "hellow world!";
 			t.e = en.a2;
 
-			t.child = new test1[] { new test1() { xx = 20.1F }, new test1() { xx = 10034.5F } };
+			t.child = new byte[] { 255, 254, 1, 100 };
 
 
 			BufferStream buffer = Serializer.Serialize(t);
