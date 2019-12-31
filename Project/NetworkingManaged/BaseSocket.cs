@@ -221,6 +221,10 @@ namespace GameFramework.Networking
 
 				throw e;
 			}
+			catch(ObjectDisposedException e)
+			{
+				HandleDisconnection(Target);
+			}
 			catch (Exception e)
 			{
 				throw e;
