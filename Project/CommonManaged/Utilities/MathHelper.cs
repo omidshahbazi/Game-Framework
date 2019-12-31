@@ -79,5 +79,25 @@ namespace GameFramework.Common.Utilities
 
 			return max;
 		}
+
+		public static float Average(IEnumerable<float> Collection)
+		{
+			float sum = 0.0F;
+			int count = 0;
+
+			var it = Collection.GetEnumerator();
+
+			while (it.MoveNext())
+			{
+				sum += it.Current;
+
+				++count;
+			}
+
+			if (count == 0)
+				return 0;
+
+			return (sum / count);
+		}
 	}
 }
