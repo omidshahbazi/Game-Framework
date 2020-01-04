@@ -7,6 +7,29 @@ namespace GameFramework.DatabaseManaged
 {
 	public abstract class Database
 	{
+		public struct CreateInfo
+		{
+			public enum CharacterSets
+			{
+				ASCII = 0,
+				UTF8 = 1
+			}
+
+			public string Host;
+			public ushort Port;
+
+			public string Username;
+			public string Password;
+
+			public string Name;
+
+			public CharacterSets CharacterSet;
+
+			public bool PoolingEnabled;
+			public uint MinimumPoolSize;
+			public uint MaximumPoolSize;
+		}
+
 		public abstract void Close();
 
 		public abstract void Execute(string Query, params object[] Parameters);

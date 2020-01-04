@@ -27,20 +27,21 @@ namespace GameFramework.DatabaseManaged
 
 		public MySQLDatabase(string Host, ushort Port, string Username, string Password, string Name)
 		{
-			MySqlConnectionStringBuilder conStr = new MySqlConnectionStringBuilder();
+			CreateInfo info = new CreateInfo();
+			info.Host = Host;
+			info.Port = Port;
+			info.Username = Username;
+			info.Password = Password;
+			info.Name = Name;
+			info.PoolingEnabled = false;
+			info.CharacterSet = CreateInfo.CharacterSets.UTF8;
 
-			conStr.Server = Host;
-			conStr.Port = Port;
-			conStr.UserID = Username;
-			conStr.Password = Password;
+			FillConnectionString(info);
+		}
 
-			conStr.Database = Name;
-
-			conStr.PersistSecurityInfo = true;
-
-			conStr.CharacterSet = "utf8";
-
-			connectionString = conStr.GetConnectionString(true);
+		public MySQLDatabase(CreateInfo Info)
+		{
+			FillConnectionString(Info);
 		}
 
 		public override void Close()
@@ -141,6 +142,28 @@ namespace GameFramework.DatabaseManaged
 					command.Parameters.Add(new MySqlParameter(Parameters[i].ToString(), Parameters[i + 1]));
 
 			return command;
+		}
+
+		private void FillConnectionString(CreateInfo Info)
+		{
+			MySqlConnectionStringBuilder conStr = new MySqlConnectionStringBuilder();
+
+			conStr.Server = Info.Host;
+			conStr.Port = Info.Port;
+			conStr.UserID = Info.Username;
+			conStr.Password = Info.Password;
+
+			conStr.Database = Info.Name;
+
+			conStr.PersistSecurityInfo = true;
+
+			conStr.CharacterSet = Info.CharacterSet.ToString().ToLower();
+
+			conStr.Pooling = Info.PoolingEnabled;
+			conStr.MinimumPoolSize = Info.MinimumPoolSize;
+			conStr.MaximumPoolSize = Info.MaximumPoolSize;
+
+			connectionString = conStr.GetConnectionString(true);
 		}
 	}
 }
