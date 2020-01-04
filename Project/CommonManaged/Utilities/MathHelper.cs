@@ -99,5 +99,16 @@ namespace GameFramework.Common.Utilities
 
 			return (sum / count);
 		}
+
+		public static T Clamp<T>(T Value, T Min, T Max) where T : struct, IComparable<T>
+		{
+			if (Value.CompareTo(Min) < 0)
+				return Min;
+
+			if (Value.CompareTo(Max) > 0)
+				return Max;
+
+			return Value;
+		}
 	}
 }
