@@ -224,7 +224,11 @@ namespace GameFramework.BinarySerializer
 				else if (Type.IsEnum)
 				{
 					string name = Buffer.ReadString();
-					value = Enum.Parse(Type, name.ToString());
+
+					if (Enum.IsDefined(Type, name))
+						value = Enum.Parse(Type, name);
+					else
+						value = 0;
 				}
 				else if (Type == typeof(string))
 				{

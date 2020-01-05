@@ -153,7 +153,14 @@ namespace GameFramework.ASCIISerializer
 					return Bind((ISerializeData)Value, Type);
 
 				if (Type.IsEnum)
-					return Enum.Parse(Type, Value.ToString());
+				{
+					string itemName = Value.ToString();
+
+					if (Enum.IsDefined(Type, itemName))
+						return Enum.Parse(Type, itemName);
+
+					return 0;
+				}
 
 				return Convert.ChangeType(Value, Type);
 			}
