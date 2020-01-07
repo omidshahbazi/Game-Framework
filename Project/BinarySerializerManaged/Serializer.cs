@@ -25,6 +25,9 @@ namespace GameFramework.BinarySerializer
 				Type type = Instance.GetType();
 
 				MemberInfo[] members = type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
+
+				Utilities.CheckForDuplicateID(members);
+
 				Buffer.WriteUInt16((ushort)members.Length);
 
 				BufferStream tempBuffer = new BufferStream(new MemoryStream(new byte[ushort.MaxValue + 1]));
@@ -272,6 +275,19 @@ namespace GameFramework.BinarySerializer
 					return CRC32.CalculateHash(Encoding.ASCII.GetBytes(Member.Name));
 
 				return keyAttr.ID;
+			}
+
+			public static void CheckForDuplicateID(MemberInfo[] Members)
+			{
+				List<KeyAttribute> attributes = new List<KeyAttribute>();
+
+				for (int i = 0; i < Members.Length; ++i)
+					attributes.Add(Members[i].GetAttribute<KeyAttribute>());
+
+				for (int i = 0; i < attributes.Count; ++i)
+					for (int j = i + 1; j < attributes.Count; ++j)
+						if (attributes[i].ID == attributes[j].ID)
+							throw new ArgumentException("Key [" + attributes[i].ID + "] is duplicate");
 			}
 		}
 
