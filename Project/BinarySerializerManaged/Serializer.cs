@@ -282,7 +282,13 @@ namespace GameFramework.BinarySerializer
 				List<KeyAttribute> attributes = new List<KeyAttribute>();
 
 				for (int i = 0; i < Members.Length; ++i)
-					attributes.Add(Members[i].GetAttribute<KeyAttribute>());
+				{
+					KeyAttribute keyAttr = Members[i].GetAttribute<KeyAttribute>();
+					if (keyAttr == null)
+						continue;
+
+					attributes.Add(keyAttr);
+				}
 
 				for (int i = 0; i < attributes.Count; ++i)
 					for (int j = i + 1; j < attributes.Count; ++j)
