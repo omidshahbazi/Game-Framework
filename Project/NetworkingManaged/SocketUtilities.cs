@@ -21,7 +21,12 @@ namespace GameFramework.Networking
 
 		public static void CloseSocket(Socket Socket)
 		{
-			Socket.Shutdown(SocketShutdown.Both);
+			try
+			{
+				Socket.Shutdown(SocketShutdown.Both);
+			}
+			catch { }
+
 			Socket.Close();
 		}
 

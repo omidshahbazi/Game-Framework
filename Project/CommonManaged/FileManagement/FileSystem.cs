@@ -138,6 +138,14 @@ namespace GameFramework.Common.FileLayer
 			File.Move(GetFullPath(OldFilePath), GetFullPath((string.IsNullOrEmpty(oldFileDir) ? "" : "/") + NewFileName));
 		}
 
+		public static void CopyFile(string From, string To, bool Overwrite = false)
+		{
+			string from = GetFullPath(From);
+			string to = GetFullPath(To);
+
+			File.Copy(from, to, Overwrite);
+		}
+
 		public static void CopyAllFiles(string From, string To, bool Overwrite = false)
 		{
 			string from = GetFullPath(From);

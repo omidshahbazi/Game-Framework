@@ -167,13 +167,13 @@ namespace GameFramework.Networking
 
 		protected void Shutdown()
 		{
-			SocketUtilities.CloseSocket(Socket);
-
 			if (MultithreadedReceive)
 				receiveThread.Abort();
 
 			if (MultithreadedSend)
 				sendThread.Abort();
+
+			SocketUtilities.CloseSocket(Socket);
 		}
 
 		protected void RunReceiveThread()
