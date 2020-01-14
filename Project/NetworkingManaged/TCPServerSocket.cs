@@ -12,6 +12,8 @@ namespace GameFramework.Networking
 	{
 		private class TCPClient : Client
 		{
+			private IPEndPoint endPoint;
+
 			public override bool IsReady
 			{
 				get { return (SocketUtilities.GetIsReady(Socket) && base.IsReady); }
@@ -25,12 +27,13 @@ namespace GameFramework.Networking
 
 			public override IPEndPoint EndPoint
 			{
-				get { return (IPEndPoint)Socket.RemoteEndPoint; }
+				get { return endPoint; }
 			}
 
 			public TCPClient(Socket Socket)
 			{
 				this.Socket = Socket;
+				endPoint = (IPEndPoint)Socket.RemoteEndPoint;
 			}
 		}
 
@@ -71,7 +74,8 @@ namespace GameFramework.Networking
 		public override void DisconnectClient(Client Client)
 		{
 			lock (clients)
-				clients.Remove((TCPClient)Client);
+				if (clients.Contains((TCPClient)Client))
+					clients.Remove((TCPClient)Client);
 
 			base.DisconnectClient(Client);
 		}

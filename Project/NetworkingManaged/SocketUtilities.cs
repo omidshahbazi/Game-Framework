@@ -21,6 +21,9 @@ namespace GameFramework.Networking
 
 		public static void CloseSocket(Socket Socket)
 		{
+			if (!Socket.Connected)
+				return;
+
 			Socket.Shutdown(SocketShutdown.Both);
 			Socket.Close();
 		}
