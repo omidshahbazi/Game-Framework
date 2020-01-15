@@ -66,6 +66,9 @@ namespace GameFramework.Networking
 
 		public override void UnBind()
 		{
+			for (int i = 0; i < clients.Count; ++i)
+				SocketUtilities.CloseSocket(clients[i].Socket);
+
 			clients.Clear();
 
 			base.UnBind();

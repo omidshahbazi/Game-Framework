@@ -208,4 +208,14 @@ namespace GameFramework::Networking
 
 		return size;
 	}
+
+	void SocketUtilities::OpenDynamicTCPPorts(uint16_t From, uint16_t Count)
+	{
+		//netsh int ipv4 set dynamicport tcp start=1500 num=63000
+		//netsh int ipv4 show dynamicport tcp
+
+		string str = "netsh int ipv4 set dynamicport tcp start=" + to_string(From) + " num=" + to_string(Count);
+
+		system(str.c_str());
+	}
 }

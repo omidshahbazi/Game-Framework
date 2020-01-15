@@ -25,7 +25,12 @@ namespace GameFramework.Networking
 			if (!Socket.Connected)
 				return;
 
-			Socket.Shutdown(SocketShutdown.Both);
+			try
+			{
+				Socket.Shutdown(SocketShutdown.Both);
+			}
+			catch { }
+
 			Socket.Close();
 		}
 
