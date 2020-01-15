@@ -86,7 +86,7 @@ namespace GameFramework.Common.FileLayer
 
 		public static string GetDirectoryName(string Path)
 		{
-			return System.IO.Path.GetDirectoryName(Path);
+			return System.IO.Path.GetDirectoryName(Path).Replace('\\', '/');
 		}
 
 		public static bool DirectoryExists(string Path)
@@ -126,7 +126,7 @@ namespace GameFramework.Common.FileLayer
 			string[] files = Directory.GetFiles(GetFullPath(Path), SearchPattern, SearchOption);
 
 			for (int i = 0; i < files.Length; ++i)
-				files[i] = files[i].Substring(DataPath.Length);
+				files[i] = files[i].Substring(DataPath.Length).Replace('\\', '/');
 
 			return files;
 		}
@@ -181,7 +181,7 @@ namespace GameFramework.Common.FileLayer
 
 		public static string GetFullPath(string Path)
 		{
-			return System.IO.Path.Combine(DataPath, Path);
+			return System.IO.Path.Combine(DataPath, Path.Replace('\\', '/'));
 		}
 	}
 }
