@@ -30,7 +30,7 @@ namespace GameFramework.BinarySerializer
 
 				Buffer.WriteUInt16((ushort)members.Length);
 
-				BufferStream tempBuffer = new BufferStream(new MemoryStream(new byte[ushort.MaxValue + 1]));
+				BufferStream tempBuffer = new BufferStream(new MemoryStream());
 
 				for (int i = 0; i < members.Length; ++i)
 				{
