@@ -245,5 +245,10 @@ namespace GameFramework.Networking
 
 			SocketUtilities.CloseSocket(((TCPClient)Client).Socket);
 		}
+
+		public static void OpenDynamicTCPPorts(ushort From = 1500, ushort Count = 63000)
+		{
+			SocketUtilities.OpenDynamicTCPPorts(From, Count);
+		}
 	}
 }

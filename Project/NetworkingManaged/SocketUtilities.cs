@@ -1,6 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -151,6 +152,14 @@ namespace GameFramework.Networking
 			} while (bytesList.Count != 0);
 
 			return (uint)bytesList.Count;
+		}
+
+		public static void OpenDynamicTCPPorts(ushort From, ushort Count)
+		{
+			//netsh int ipv4 set dynamicport tcp start=1500 num=63000
+			//netsh int ipv4 show dynamicport tcp
+
+			Process.Start("netsh", string.Format("int ipv4 set dynamicport tcp start={0} num={1}", From, Count));
 		}
 	}
 }
