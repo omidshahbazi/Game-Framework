@@ -22,9 +22,6 @@ namespace GameFramework.Networking
 
 		public static void CloseSocket(Socket Socket)
 		{
-			if (!Socket.Connected)
-				return;
-
 			try
 			{
 				Socket.Shutdown(SocketShutdown.Both);
@@ -164,7 +161,11 @@ namespace GameFramework.Networking
 			//netsh int ipv4 set dynamicport tcp start=1500 num=63000
 			//netsh int ipv4 show dynamicport tcp
 
-			Process.Start("netsh", string.Format("int ipv4 set dynamicport tcp start={0} num={1}", From, Count));
+			Process process = new Process();
+			process.StartInfo.FileName = "netsh";
+			process.StartInfo.Arguments = string.Format("int ipv4 set dynamicport tcp start={0} num={1}", From, Count);
+			process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+			process.Start();
 		}
 	}
 }
