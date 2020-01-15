@@ -84,6 +84,18 @@ namespace GameFramework.Networking
 			private set;
 		}
 
+		public uint SendBufferSize
+		{
+			get;
+			set;
+		}
+
+		public uint ReceiveBufferSize
+		{
+			get;
+			set;
+		}
+
 		public bool MultithreadedCallbacks
 		{
 			get;
@@ -121,10 +133,11 @@ namespace GameFramework.Networking
 			events = new EventBaseList();
 			sendCommands = new SendCommandList();
 
+			SendBufferSize = Constants.SEND_BUFFER_SIZE;
+			ReceiveBufferSize = Constants.RECEIVE_BUFFER_SIZE;
+
 			Socket = SocketUtilities.CreateSocket(Type);
 			SocketUtilities.SetBlocking(Socket, false);
-			SocketUtilities.SetReceiveBufferSize(Socket, Constants.RECEIVE_BUFFER_SIZE);
-			SocketUtilities.SetSendBufferSize(Socket, Constants.SEND_BUFFER_SIZE);
 			SocketUtilities.SetReceiveTimeout(Socket, Constants.RECEIVE_TIMEOUT);
 			SocketUtilities.SetSendTimeout(Socket, Constants.SEND_TIMEOUT);
 			SocketUtilities.SetTimeToLive(Socket, Constants.TIME_TO_LIVE);
@@ -133,8 +146,6 @@ namespace GameFramework.Networking
 
 			if (Type == Protocols.TCP)
 				SocketUtilities.SetNagleAlgorithmEnabled(Socket, false);
-
-			ReceiveBuffer = new byte[Constants.RECEIVE_BUFFER_SIZE];
 
 			Statistics = new NetworkingStatistics();
 
@@ -178,6 +189,10 @@ namespace GameFramework.Networking
 
 		protected void RunReceiveThread()
 		{
+			SocketUtilities.SetSendBufferSize(Socket, SendBufferSize);
+			SocketUtilities.SetReceiveBufferSize(Socket, ReceiveBufferSize);
+			ReceiveBuffer = new byte[ReceiveBufferSize];
+
 			if (!MultithreadedReceive)
 				return;
 
@@ -221,7 +236,7 @@ namespace GameFramework.Networking
 
 				throw e;
 			}
-			catch(ObjectDisposedException e)
+			catch (ObjectDisposedException e)
 			{
 				HandleDisconnection(Target);
 			}
