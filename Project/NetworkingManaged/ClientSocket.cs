@@ -162,6 +162,10 @@ namespace GameFramework.Networking
 
 				throw e;
 			}
+			catch(Exception e)
+			{
+				HandleDisconnection(Socket);
+			}
 		}
 
 		protected abstract void HandleIncomingBuffer(BufferStream Buffer);
