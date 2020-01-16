@@ -194,6 +194,11 @@ namespace GameFramework.Networking
 				if (OnConnectionFailed != null)
 					CallbackUtilities.InvokeCallback(OnConnectionFailed.Invoke);
 			}
+			else if (ev is DisconnectedEvent)
+			{
+				if (OnDisconnected != null)
+					CallbackUtilities.InvokeCallback(OnDisconnected.Invoke);
+			}
 			else if (ev is BufferReceivedvent)
 			{
 				if (OnConnectionFailed != null)
