@@ -42,7 +42,7 @@ It will makes lots of implementation easier.
 
 ## How to Build
 
-Ensure you have Visual Studio 2017 or 2019 (Community Edition is acceptable
+Ensure you have Visual Studio 2017 or 2019 (Community Edition is acceptable)
 
 Open up Framework.sln
 
