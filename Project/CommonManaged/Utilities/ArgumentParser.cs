@@ -83,6 +83,9 @@ namespace GameFramework.Common.Utilities
 
 			for (int i = 0; i < Arguments.Length; i += 2)
 			{
+				if (i + 1 == Arguments.Length)
+					break;
+
 				string key = Arguments[i];
 
 				if (!key.StartsWith("-"))
