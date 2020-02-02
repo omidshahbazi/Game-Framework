@@ -160,7 +160,7 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 
 			str.Append(c);
 
-			char prevChar = NULL_CHAR;
+			char prevChar = c;
 
 			while (true)
 			{
