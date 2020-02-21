@@ -8,8 +8,6 @@ TCPServerSocket server;
 void Server_OnClientConnected(const Client* Client)
 {
 	std::cout << "Server_OnClientConnected " << Client->GetEndPoint().ToString() << std::endl;
-
-	//server.OnClientConnected -= Server_OnClientConnected;
 }
 
 void Server_OnClientDisconnected(const Client* Client)
@@ -28,15 +26,17 @@ void main()
 {
 	std::cout << "Server created" << std::endl;
 
-	server.OnClientConnected += Server_OnClientConnected;
-	server.OnClientDisconnected += Server_OnClientDisconnected;
-	server.OnBufferReceived += Server_OnBufferReceived;
+	auto ref = server.OnClientConnected.Add(Server_OnClientConnected);
+	//server.OnClientDisconnected += Server_OnClientDisconnected;
+	//server.OnBufferReceived += Server_OnBufferReceived;
+
+	server.OnClientConnected.Remove(ref);
 
 	//server.SetMultithreadedCallbacks(false);
 	//server.SetMultithreadedReceive(false);
 	//server.SetMultithreadedSend(false);
 
-	server.Bind("::0", 80);
+	server.Bind("::0", 88);
 	//socket.Bind("fe80::c011:8430:ece7:975f%15", 80);
 	std::cout << "Server bound" << std::endl;
 
