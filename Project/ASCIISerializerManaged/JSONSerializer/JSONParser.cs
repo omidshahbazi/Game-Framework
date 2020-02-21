@@ -174,7 +174,8 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 				if (prevChar != '\\' && c == '"')
 					break;
 
-				str.Append(c);
+				if (c != '\\' || prevChar == '\\')
+					str.Append(c);
 
 				if (prevChar == '\\' && c == '\\')
 					prevChar = NULL_CHAR;

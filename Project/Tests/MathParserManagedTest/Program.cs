@@ -62,8 +62,8 @@ namespace MathParserTest
 		static void Main(string[] args)
 		{
 
-			ISerializeObject obj435654 = Creator.Create<ISerializeObject>(System.IO.File.ReadAllText(@"D:\Projects\Backgammon1\Project\Networking\Binaries\Resources\InitialData_Default.json"));
-
+			ISerializeObject obj435654 = Creator.Create<ISerializeObject>(System.IO.File.ReadAllText(@"D:\Projects\Backgammon1\Project\Networking\Binaries\Resources\Strings_Default.json"));
+			string val = obj435654.Get<ISerializeObject>("Persian").Get<string>("Pack2Chat3Text");
 			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":null,\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}], \"Info\":\"element2\"}");
 			int[] b = Creator.Create<int[]>("[1, 3, 5]");
 
