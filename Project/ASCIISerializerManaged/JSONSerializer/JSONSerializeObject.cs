@@ -57,7 +57,7 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 					else if (value is string)
 					{
 						str.Append('"');
-						str.Append(value.ToString());
+						str.Append(value.ToString().Replace("\"", "\\\""));
 						str.Append('"');
 					}
 					else if (value is bool)
