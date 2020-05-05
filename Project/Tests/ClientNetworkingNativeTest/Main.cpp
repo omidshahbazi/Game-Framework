@@ -34,10 +34,10 @@ void main()
 {
 	std::cout << "Client created" << std::endl;
 
-	client.OnConnected += Server_OnConnected;
-	client.OnConnectionFailed += Server_OnConnectionFailed;
-	client.OnDisconnected += Client_OntDisconnected;
-	client.OnBufferReceived += Client_OnBufferReceived;
+	//client.OnConnected += Server_OnConnected;
+	//client.OnConnectionFailed += Server_OnConnectionFailed;
+	//client.OnDisconnected += Client_OntDisconnected;
+	//client.OnBufferReceived += Client_OnBufferReceived;
 
 	//client.SetMultithreadedCallbacks(false);
 	//client.SetMultithreadedReceive(false);

@@ -347,10 +347,25 @@ namespace GameFramework.DatabaseManaged.Generator
 						Builder.Append("utf8");
 						break;
 					case Collates.UTF8:
-						Builder.Append("utf8");
+						Builder.Append("utf8mb4");
 						break;
 					case Collates.ASCII:
 						Builder.Append("utf8");
+						break;
+				}
+
+				Builder.Append(" COLLATE =");
+
+				switch (Collate)
+				{
+					case Collates.Defualt:
+						Builder.Append("utf8_general_ci");
+						break;
+					case Collates.UTF8:
+						Builder.Append("utf8mb4_general_ci");
+						break;
+					case Collates.ASCII:
+						Builder.Append("utf8_general_ci");
 						break;
 				}
 			}
