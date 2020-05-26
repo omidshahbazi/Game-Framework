@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using GameFramework.Common.Utilities;
-
+using GameFramework.Deterministic.Mathematics;
 
 namespace GameFramework.Deterministic.Visitor
 {
@@ -52,6 +52,17 @@ namespace GameFramework.Deterministic.Visitor
 		public void VisitInt32(int Int)
 		{
 			Value += Get(BitConverter.GetBytes(Int));
+		}
+
+		public void VisitNumber(Number Number)
+		{
+			Value += Get(BitConverter.GetBytes(Number.Value));
+		}
+
+		public void VisitVector2(Vector2 Vector2)
+		{
+			VisitNumber(Vector2.X);
+			VisitNumber(Vector2.Y);
 		}
 
 		public void VisitIdentifier(Identifier Identifier)

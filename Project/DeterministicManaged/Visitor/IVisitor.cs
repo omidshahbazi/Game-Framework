@@ -1,4 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using GameFramework.Deterministic.Mathematics;
 using System.Collections;
 
 namespace GameFramework.Deterministic.Visitor
@@ -16,6 +17,8 @@ namespace GameFramework.Deterministic.Visitor
 		void VisitBool(bool Bool);
 		void VisitInt32(int Int);
 
+		void VisitNumber(Number Number);
+		void VisitVector2(Vector2 Vector2);
 		void VisitIdentifier(Identifier Identifier);
 	}
 }
