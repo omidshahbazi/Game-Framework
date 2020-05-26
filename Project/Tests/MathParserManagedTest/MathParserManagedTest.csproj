@@ -60,6 +60,10 @@
       <Project>{47000C4C-8A48-4B73-A411-5A89A6F4B518}</Project>
       <Name>DatabaseManaged</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\DeterministicManaged\DeterministicManaged.csproj">
+      <Project>{EA5CF4D3-540C-49C7-B13A-204781017C08}</Project>
+      <Name>DeterministicManaged</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MathParserManaged\MathParserManaged.csproj">
       <Project>{A4111CB2-D06B-405A-8A4C-381C99FE161C}</Project>
       <Name>MathParserManaged</Name>

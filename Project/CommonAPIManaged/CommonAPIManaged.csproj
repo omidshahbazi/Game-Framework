@@ -7,7 +7,7 @@
     <ProjectGuid>{73AC9040-E471-4E2F-87B0-B94B82AB2D5A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GameFramework.CommonAPIManaged</RootNamespace>
+    <RootNamespace>GameFramework.CommonAPI</RootNamespace>
     <AssemblyName>CommonAPIManaged</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

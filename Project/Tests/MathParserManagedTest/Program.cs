@@ -6,6 +6,7 @@ using GameFramework.ASCIISerializer;
 using GameFramework.Common.FileLayer;
 using GameFramework.DatabaseManaged;
 using GameFramework.DatabaseManaged.Generator;
+using GameFramework.Deterministic.Mathematics;
 using GameFramework.MathParser;
 
 namespace MathParserTest
@@ -61,6 +62,12 @@ namespace MathParserTest
 
 		static void Main(string[] args)
 		{
+			Number num;
+			num = 1.5F;
+
+			num /= 2;
+
+
 
 			ISerializeObject obj435654 = Creator.Create<ISerializeObject>(System.IO.File.ReadAllText(@"D:\Projects\Backgammon1\Project\Networking\Binaries\Resources\Strings_Default.json"));
 			string val = obj435654.Get<ISerializeObject>("Persian").Get<string>("Pack2Chat1Text");

@@ -47,6 +47,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClientNetworkingNativeTest"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerNetworkingNativeTest", "Tests\ServerNetworkingNativeTest\ServerNetworkingNativeTest.vcxproj", "{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeterministicManaged", "DeterministicManaged\DeterministicManaged.csproj", "{EA5CF4D3-540C-49C7-B13A-204781017C08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -293,6 +295,18 @@ Global
 		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|x64.Build.0 = Release|x64
 		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|x86.ActiveCfg = Release|Win32
 		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253}.Release|x86.Build.0 = Release|Win32
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Debug|x64.Build.0 = Debug|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Debug|x86.Build.0 = Debug|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|x64.ActiveCfg = Release|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|x64.Build.0 = Release|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|x86.ActiveCfg = Release|Any CPU
+		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
