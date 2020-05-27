@@ -149,7 +149,7 @@ namespace GameFramework.Networking
 					{
 						int size = 0;
 
-						lock (Socket)
+						lock (client.Socket)
 						{
 							if (client.Socket.Available == 0)
 							{
@@ -231,6 +231,8 @@ namespace GameFramework.Networking
 				return false;
 
 			client.Statistics.AddBandwidthOut(Command.Buffer.Size);
+
+			client.Statistics.SetLastTouchTime(Time.CurrentEpochTime);
 
 			SendOverSocket(client.Socket, Command.Buffer);
 

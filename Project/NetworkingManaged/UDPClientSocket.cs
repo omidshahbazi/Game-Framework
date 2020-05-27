@@ -67,8 +67,6 @@ namespace GameFramework.Networking
 
 		protected override void HandleIncomingBuffer(BufferStream Buffer)
 		{
-			Statistics.SetLastTouchTime(Time.CurrentEpochTime);
-
 			byte control = Buffer.ReadByte();
 
 			if (control == Constants.Control.BUFFER)

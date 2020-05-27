@@ -49,8 +49,6 @@ namespace GameFramework::Networking
 
 	void UDPClientSocket::HandleIncomingBuffer(BufferStream& Buffer)
 	{
-		GetStatistics().SetLastTouchTime(Time::GetCurrentEpochTime());
-
 		byte control = Buffer.ReadByte();
 
 		if (control == Constants::Control::BUFFER)

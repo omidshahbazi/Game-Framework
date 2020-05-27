@@ -175,6 +175,10 @@ namespace GameFramework::Networking
 		if (!client->GetIsReady())
 			return false;
 
+		client->GetStatistics().AddBandwidthOut(Command->GetBuffer().GetSize());
+
+		client->GetStatistics().SetLastTouchTime(Time::GetCurrentEpochTime());
+
 		BaseSocket::SendOverSocket(client->GetSocket(), Command->GetBuffer());
 
 		return true;
