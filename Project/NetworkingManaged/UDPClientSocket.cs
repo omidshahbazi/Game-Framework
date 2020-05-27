@@ -1,6 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
-using GameFramework.Common.Timing;
 using System.Net;
 
 namespace GameFramework.Networking
@@ -13,10 +12,16 @@ namespace GameFramework.Networking
 		private OutgoingUDPPacketsHolder outgoingReliablePacketHolder = null;
 		private OutgoingUDPPacketsHolder outgoingNonReliablePacketHolder = null;
 
+		public bool FindOptimumMTU
+		{
+			get;
+			set;
+		}
+
 		public uint MTU
 		{
 			get;
-			private set;
+			set;
 		}
 
 		public UDPClientSocket() : base(Protocols.UDP)
@@ -25,6 +30,9 @@ namespace GameFramework.Networking
 			incomingNonReliablePacketHolder = new IncomingUDPPacketsHolder();
 			outgoingReliablePacketHolder = new OutgoingUDPPacketsHolder();
 			outgoingNonReliablePacketHolder = new OutgoingUDPPacketsHolder();
+
+			FindOptimumMTU = true;
+			MTU = Constants.UDP.MAX_MTU;
 		}
 
 		public virtual void Send(byte[] Buffer, bool Reliable = true)
@@ -56,7 +64,8 @@ namespace GameFramework.Networking
 		{
 			Socket.Connect(EndPoint);
 
-			MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, 1000, Constants.UDP.MAX_MTU);
+			if (FindOptimumMTU)
+				MTU = SocketUtilities.FindOptimumMTU(EndPoint.Address, 1000, Constants.UDP.MAX_MTU);
 
 			BufferStream buffer = Packet.CreateHandshakeBufferStream(MTU);
 			SendInternal(buffer);
