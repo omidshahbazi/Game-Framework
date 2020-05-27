@@ -33,10 +33,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="Mathematics\Math.cs" />
     <Compile Include="Mathematics\Vector2.cs" />
@@ -51,6 +50,10 @@
     <ProjectReference Include="..\ASCIISerializerManaged\ASCIISerializerManaged.csproj">
       <Project>{CF111332-3A81-4D4A-A04C-6634D8B6A8C6}</Project>
       <Name>ASCIISerializerManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BinarySerializerManaged\BinarySerializerManaged.csproj">
+      <Project>{C4F68DA6-6645-46A1-8481-DFE4F1DC9075}</Project>
+      <Name>BinarySerializerManaged</Name>
     </ProjectReference>
     <ProjectReference Include="..\CommonManaged\CommonManaged.csproj">
       <Project>{26568521-9093-4208-9BAC-10F5B123BFFB}</Project>
