@@ -238,7 +238,7 @@ namespace GameFramework.ASCIISerializer
 							ISerializeObject subObj = SerializeObject(value);
 
 							if (shouldAddValueTypeInfo)
-								subObj.Set(TYPE_FIELD_NAME, valueType.AssemblyQualifiedName);
+								subObj.Set(TYPE_FIELD_NAME, valueType.GetMinimalTypeName());
 
 							obj.Set(name, subObj);
 						}
@@ -279,7 +279,7 @@ namespace GameFramework.ASCIISerializer
 							ISerializeObject subObj = SerializeObject(value);
 
 							if (shouldAddValueTypeInfo)
-								subObj.Set(TYPE_FIELD_NAME, valueType.AssemblyQualifiedName);
+								subObj.Set(TYPE_FIELD_NAME, valueType.GetMinimalTypeName());
 
 							arr.Add(subObj);
 						}

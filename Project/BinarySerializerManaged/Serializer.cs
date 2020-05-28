@@ -17,12 +17,50 @@ namespace GameFramework.BinarySerializer
 		{
 			public static void SerializeObject(object Instance, BufferStream Buffer)
 			{
+				SerializeObject(Instance, Instance.GetType(), Buffer);
+			}
+
+			public static void SerializeArray(object Instance, BufferStream Buffer)
+			{
+				Buffer.WriteBytes(Instance == null ? COMPLEX_VALUE_NULL_STATUS : COMPLEX_VALUE_NOT_NULL_STATUS);
+
+				if (Instance == null)
+					return;
+
+				Type elementType = Instance.GetType().GetElementType();
+
+				Array array = (Array)Instance;
+
+				Buffer.BeginWriteArray((uint)array.Length);
+
+				for (int i = 0; i < array.Length; ++i)
+				{
+					Buffer.BeginWriteArrayElement();
+
+					object value = array.GetValue(i);
+
+					WriteValue(Buffer, value, elementType);
+
+					Buffer.EndWriteArrayElement();
+				}
+
+				Buffer.EndWriteArray();
+			}
+
+			private static void SerializeObject(object Instance, Type MemberType, BufferStream Buffer)
+			{
 				Buffer.WriteBytes(Instance == null ? COMPLEX_VALUE_NULL_STATUS : COMPLEX_VALUE_NOT_NULL_STATUS);
 
 				if (Instance == null)
 					return;
 
 				Type type = Instance.GetType();
+
+				bool shouldAddValueTypeInfo = (type != MemberType);
+
+				Buffer.WriteBool(shouldAddValueTypeInfo);
+				if (shouldAddValueTypeInfo)
+					Buffer.WriteString(type.GetMinimalTypeName());
 
 				MemberInfo[] members = type.GetMemberVariables(ReflectionExtensions.AllNonStaticFlags);
 
@@ -63,33 +101,6 @@ namespace GameFramework.BinarySerializer
 				}
 			}
 
-			public static void SerializeArray(object Instance, BufferStream Buffer)
-			{
-				Buffer.WriteBytes(Instance == null ? COMPLEX_VALUE_NULL_STATUS : COMPLEX_VALUE_NOT_NULL_STATUS);
-
-				if (Instance == null)
-					return;
-
-				Type elementType = Instance.GetType().GetElementType();
-
-				Array array = (Array)Instance;
-
-				Buffer.BeginWriteArray((uint)array.Length);
-
-				for (int i = 0; i < array.Length; ++i)
-				{
-					Buffer.BeginWriteArrayElement();
-
-					object value = array.GetValue(i);
-
-					WriteValue(Buffer, value, elementType);
-
-					Buffer.EndWriteArrayElement();
-				}
-
-				Buffer.EndWriteArray();
-			}
-
 			private static void WriteValue(BufferStream Buffer, object Value, Type Type)
 			{
 				if (Type.IsArray)
@@ -110,7 +121,7 @@ namespace GameFramework.BinarySerializer
 				}
 				else
 				{
-					SerializeObject(Value, Buffer);
+					SerializeObject(Value, Type, Buffer);
 				}
 			}
 		}
@@ -122,6 +133,10 @@ namespace GameFramework.BinarySerializer
 				byte valueStatus = Buffer.ReadByte();
 				if (valueStatus == COMPLEX_VALUE_NULL_STATUS)
 					return null;
+
+				bool containsValueTypeInfo = Buffer.ReadBool();
+				if (containsValueTypeInfo)
+					Type = Type.GetType(Buffer.ReadString());
 
 				object instance = Activator.CreateInstance(Type);
 

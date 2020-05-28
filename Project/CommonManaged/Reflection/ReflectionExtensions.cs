@@ -13,6 +13,13 @@ namespace GameFramework.Common.Utilities
 		public const BindingFlags PublicStaticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
 		public const BindingFlags AllNonStaticFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
+		public static string GetMinimalTypeName(this Type Type)
+		{
+			//Simulation.Data.Game.FrameData, Simulation.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+
+			return Type.FullName + "," + Type.Assembly.GetName().Name;
+		}
+
 		public static MemberType[] GetFields<MemberType>(this Type Type, BindingFlags Flags = PublicStaticFlags)
 		{
 			List<MemberType> members = new List<MemberType>();

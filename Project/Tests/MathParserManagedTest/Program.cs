@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using GameFramework.Analytics;
 using GameFramework.ASCIISerializer;
+using GameFramework.BinarySerializer;
 using GameFramework.Common.FileLayer;
 using GameFramework.DatabaseManaged;
 using GameFramework.DatabaseManaged.Generator;
@@ -64,26 +65,11 @@ namespace MathParserTest
 
 		static void Main(string[] args)
 		{
-			FrameData frame = new FrameData();
-			frame.Events = new Simulation.Data.Event.EventBase[] { new MoveEvent(), new CreateObjectEvent() };
+			//ISerializeObject d = Creator.Serialize<ISerializeObject>(frame);
 
-			ISerializeObject d = Creator.Serialize<ISerializeObject>(frame);
-
-			FrameData f = Creator.Bind<FrameData>(d);
-
-			test t = new test();
-			t.child = new test1();
-
-			ISerializeObject d1 = Creator.Serialize<ISerializeObject>(t);
-
-			FileSystem.DataPath = "D:\\";
-			if (!FileSystem.DirectoryExists("omid"))
-				FileSystem.CreateDirectory("omid");
+			//FrameData f = Creator.Bind<FrameData>(d);
 
 
-			MySQLDatabase db = new MySQLDatabase("localhost", "root", "!QAZ2wsx", "backgammon");
-
-			int i = db.ExecuteInsert("INSERT INTO users_game(type, bet, white_user_id, black_user_id, bot_user_info, winner_user_id, finish_reason, start_time, end_time, version, replay_data) VALUES(1, 1, 1, 1, NULL, 1, NULL, NOW(), NULL, 1, NULL)");
 			//			string str = @"Trophy+
 			//if(B1=-1,0,if(B1=0,-30,if(B1=1,-20,if(B1=2,0,20))))+
 			//if(B2=-1,0,if(B2=0,-30,if(B2=1,-20,if(B2=2,0,20))))+
