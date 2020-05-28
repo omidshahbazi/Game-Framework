@@ -8,6 +8,8 @@ using GameFramework.DatabaseManaged;
 using GameFramework.DatabaseManaged.Generator;
 using GameFramework.Deterministic.Mathematics;
 using GameFramework.MathParser;
+using Simulation.Data.Event;
+using Simulation.Data.Game;
 
 namespace MathParserTest
 {
@@ -62,22 +64,12 @@ namespace MathParserTest
 
 		static void Main(string[] args)
 		{
-			Number num;
-			num = 1.5F;
+			FrameData frame = new FrameData();
+			frame.Events = new Simulation.Data.Event.EventBase[] { new MoveEvent(), new CreateObjectEvent() };
 
-			num /= 2;
+			ISerializeObject d = Creator.Serialize<ISerializeObject>(frame);
 
-
-
-			ISerializeObject obj435654 = Creator.Create<ISerializeObject>(System.IO.File.ReadAllText(@"D:\Projects\Backgammon1\Project\Networking\Binaries\Resources\Strings_Default.json"));
-			string val = obj435654.Get<ISerializeObject>("Persian").Get<string>("Pack2Chat1Text");
-
-
-			Obj obj = Creator.Create<Obj>("{\"a\":10,\"test\":null,\"vals\":[{\"a\":1}, {\"a\":4}, {\"a\":6}], \"Info\":\"element2\"}");
-			int[] b = Creator.Create<int[]>("[1, 3, 5]");
-
-			ISerializeObject d = Creator.Serialize<ISerializeObject>(obj);
-
+			FrameData f = Creator.Bind<FrameData>(d);
 
 			test t = new test();
 			t.child = new test1();

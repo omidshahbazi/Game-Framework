@@ -8,6 +8,8 @@ namespace GameFramework.ASCIISerializer
 {
 	public static class Creator
 	{
+		private const string TYPE_FIELD_NAME = "__TYPE";
+
 		private static class Overrider
 		{
 			public static void Override(ISerializeData Data, ISerializeData On)
@@ -102,7 +104,14 @@ namespace GameFramework.ASCIISerializer
 				Type elementType = (Type.IsArray ? Type.GetElementType() : Type);
 
 				if (Data is ISerializeObject)
-					return Bind((ISerializeObject)Data, elementType);
+				{
+					ISerializeObject obj = (ISerializeObject)Data;
+
+					if (obj.Contains(TYPE_FIELD_NAME))
+						elementType = Type.GetType(obj.Get<string>(TYPE_FIELD_NAME));
+
+					return Bind(obj, elementType);
+				}
 
 				return Bind((ISerializeArray)Data, Type);
 			}
@@ -194,18 +203,29 @@ namespace GameFramework.ASCIISerializer
 					MemberInfo member = members[i];
 
 					string name = member.Name;
+					Type memberType = null;
 					object value = null;
 
 					if (member is FieldInfo)
-						value = ((FieldInfo)member).GetValue(Instance);
+					{
+						FieldInfo filedInfo = (FieldInfo)member;
+						memberType = filedInfo.FieldType;
+						value = filedInfo.GetValue(Instance);
+					}
 					else if (member is PropertyInfo)
-						value = ((PropertyInfo)member).GetValue(Instance, null);
+					{
+						PropertyInfo propertyInfo = (PropertyInfo)member;
+						memberType = propertyInfo.PropertyType;
+						value = propertyInfo.GetValue(Instance, null);
+					}
 
 					if (value == null)
 						obj.Set(name, (object)null);
 					else
 					{
 						Type valueType = value.GetType();
+
+						bool shouldAddValueTypeInfo = (valueType != memberType);
 
 						if (valueType.IsArray)
 							obj.Set(name, SerializeArray(value));
@@ -214,7 +234,14 @@ namespace GameFramework.ASCIISerializer
 						else if (valueType.IsEnum)
 							obj.Set(name, value.ToString());
 						else
-							obj.Set(name, SerializeObject(value));
+						{
+							ISerializeObject subObj = SerializeObject(value);
+
+							if (shouldAddValueTypeInfo)
+								subObj.Set(TYPE_FIELD_NAME, valueType.AssemblyQualifiedName);
+
+							obj.Set(name, subObj);
+						}
 					}
 				}
 
@@ -227,6 +254,8 @@ namespace GameFramework.ASCIISerializer
 
 				Array array = (Array)Instance;
 
+				Type arrayType = Instance.GetType().GetElementType();
+
 				for (int i = 0; i < array.Length; ++i)
 				{
 					object value = array.GetValue(i);
@@ -237,6 +266,8 @@ namespace GameFramework.ASCIISerializer
 					{
 						Type valueType = value.GetType();
 
+						bool shouldAddValueTypeInfo = (valueType != arrayType);
+
 						if (valueType.IsArray)
 							arr.Add(SerializeArray(value));
 						else if (valueType.IsPrimitive || valueType == typeof(string))
@@ -244,7 +275,14 @@ namespace GameFramework.ASCIISerializer
 						else if (valueType.IsEnum)
 							arr.Add(value.ToString());
 						else
-							arr.Add(SerializeObject(value));
+						{
+							ISerializeObject subObj = SerializeObject(value);
+
+							if (shouldAddValueTypeInfo)
+								subObj.Set(TYPE_FIELD_NAME, valueType.AssemblyQualifiedName);
+
+							arr.Add(subObj);
+						}
 					}
 				}
 

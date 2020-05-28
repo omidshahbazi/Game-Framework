@@ -166,31 +166,6 @@ namespace GameFramework.BinarySerializer
 						((PropertyInfo)member).SetValue(instance, value, null);
 				}
 
-				//for (int i = 0; i < members.Length; ++i)
-				//{
-				//	MemberInfo member = members[i];
-
-				//	Type valueType = null;
-
-				//	if (member is FieldInfo)
-				//	{
-				//		FieldInfo fieldInfo = (FieldInfo)member;
-				//		valueType = fieldInfo.FieldType;
-				//	}
-				//	else if (member is PropertyInfo)
-				//	{
-				//		PropertyInfo propertyInfo = (PropertyInfo)member;
-				//		valueType = propertyInfo.PropertyType;
-				//	}
-
-				//	object value = ReadValue(Buffer, valueType);
-
-				//	if (member is FieldInfo)
-				//		((FieldInfo)member).SetValue(instance, value);
-				//	else if (member is PropertyInfo)
-				//		((PropertyInfo)member).SetValue(instance, value, null);
-				//}
-
 				return instance;
 			}
 
