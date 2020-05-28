@@ -1,18 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Threading;
-using GameFramework.Analytics;
-using GameFramework.ASCIISerializer;
-using GameFramework.BinarySerializer;
-using GameFramework.Common.FileLayer;
-using GameFramework.DatabaseManaged;
-using GameFramework.DatabaseManaged.Generator;
-using GameFramework.Deterministic.Mathematics;
-using GameFramework.MathParser;
-using Simulation.Data.Event;
-using Simulation.Data.Game;
-
-namespace MathParserTest
+﻿namespace MathParserTest
 {
 	class Program
 	{

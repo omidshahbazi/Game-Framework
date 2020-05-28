@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
+using GameFramework.Deterministic.Mathematics;
 using GameFramework.Deterministic.Visitor;
 using System;
 
@@ -7,6 +8,26 @@ namespace GameFramework.Deterministic
 {
 	public static class Extensions
 	{
+		public static Identifier ReadIdentifier(this BufferStream Buffer)
+		{
+			return new Identifier(Buffer.ReadInt32());
+		}
+
+		public static Number ReadNumber(this BufferStream Buffer)
+		{
+			return Buffer.ReadFloat32();
+		}
+
+		public static Vector2 ReadVector2(this BufferStream Buffer)
+		{
+			Vector2 data = new Vector2();
+
+			data.X = Buffer.ReadNumber();
+			data.Y = Buffer.ReadNumber();
+
+			return data;
+		}
+
 		public static void Visit(this IVisitee[] Visitees, IVisitor Visitor)
 		{
 			Visitor.BeginVisitArray(Visitees);
