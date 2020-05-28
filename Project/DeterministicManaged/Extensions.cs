@@ -28,7 +28,7 @@ namespace GameFramework.Deterministic
 			return data;
 		}
 
-		public static void Visit(this IVisitee[] Visitees, IVisitor Visitor)
+		public static void VisitArray(this IVisitor Visitor, IVisitee[] Visitees)
 		{
 			Visitor.BeginVisitArray(Visitees);
 			if (Visitees != null)
