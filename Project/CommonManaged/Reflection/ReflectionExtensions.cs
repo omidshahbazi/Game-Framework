@@ -15,8 +15,6 @@ namespace GameFramework.Common.Utilities
 
 		public static string GetMinimalTypeName(this Type Type)
 		{
-			//Simulation.Data.Game.FrameData, Simulation.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-
 			return Type.FullName + "," + Type.Assembly.GetName().Name;
 		}
 

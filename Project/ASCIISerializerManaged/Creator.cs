@@ -133,7 +133,14 @@ namespace GameFramework.ASCIISerializer
 					if (member is FieldInfo)
 						memberType = ((FieldInfo)member).FieldType;
 					else if (member is PropertyInfo)
-						memberType = ((PropertyInfo)member).PropertyType;
+					{
+						PropertyInfo propertyInfo = (PropertyInfo)member;
+
+						if (!propertyInfo.CanWrite)
+							continue;
+
+						memberType = propertyInfo.PropertyType;
+					}
 
 					object value = Cast(Object.Get<object>(member.Name), memberType);
 
@@ -215,6 +222,10 @@ namespace GameFramework.ASCIISerializer
 					else if (member is PropertyInfo)
 					{
 						PropertyInfo propertyInfo = (PropertyInfo)member;
+
+						if (!propertyInfo.CanRead)
+							continue;
+
 						memberType = propertyInfo.PropertyType;
 						value = propertyInfo.GetValue(Instance, null);
 					}

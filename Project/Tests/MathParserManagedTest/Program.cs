@@ -1,4 +1,7 @@
-﻿namespace MathParserTest
+﻿using GameFramework.ASCIISerializer;
+using GameFramework.Deterministic.Mathematics;
+
+namespace MathParserTest
 {
 	class Program
 	{
@@ -42,17 +45,16 @@
 
 		class test
 		{
-			public int a = 1;
-			//public string value = null;
-			public en e;
-
-			public test1 child;
+			public Number i = 1;
 		}
 
 		static void Main(string[] args)
 		{
-			//ISerializeObject d = Creator.Serialize<ISerializeObject>(frame);
+			test t = new test();
 
+			ISerializeObject d = Creator.Serialize<ISerializeObject>(t);
+
+			d.Contains("");
 			//FrameData f = Creator.Bind<FrameData>(d);
 
 

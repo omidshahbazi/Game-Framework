@@ -88,6 +88,10 @@ namespace GameFramework.BinarySerializer
 					else if (member is PropertyInfo)
 					{
 						PropertyInfo propertyInfo = (PropertyInfo)member;
+
+						if (!propertyInfo.CanRead)
+							continue;
+
 						value = propertyInfo.GetValue(Instance, null);
 						valueType = propertyInfo.PropertyType;
 					}
@@ -170,6 +174,10 @@ namespace GameFramework.BinarySerializer
 					else if (member is PropertyInfo)
 					{
 						PropertyInfo propertyInfo = (PropertyInfo)member;
+
+						if (!propertyInfo.CanWrite)
+							continue;
+
 						valueType = propertyInfo.PropertyType;
 					}
 
