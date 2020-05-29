@@ -1,4 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using System;
+
 namespace GameFramework.Deterministic.Mathematics
 {
 	public static class Math
@@ -121,6 +123,18 @@ namespace GameFramework.Deterministic.Mathematics
 				return -(float)Value;
 			else
 				return Value;
+		}
+
+		public static int Round(Number Value)
+		{
+			Number frac = Value % (int)Value;
+
+			int value = (int)Value;
+
+			if (frac < 0.5F)
+				return value;
+
+			return value + 1;
 		}
 
 		public static Number Floor(Number Value)

@@ -1,4 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using System.Runtime.CompilerServices;
+
 namespace GameFramework.Deterministic.Mathematics
 {
 	public struct Number
@@ -6,11 +8,17 @@ namespace GameFramework.Deterministic.Mathematics
 		private const long ONE = 1 << SHIFT_AMOUNT;
 		private const int SHIFT_AMOUNT = 12;
 
+		[CompilerGenerated]
 		private long RawValue;
 
 		public float Value
 		{
 			get { return RawValue / (float)ONE; }
+			set
+			{
+				value *= ONE;
+				RawValue = (int)System.Math.Round(value);
+			}
 		}
 
 		private Number(long Value)
@@ -21,7 +29,6 @@ namespace GameFramework.Deterministic.Mathematics
 		public Number(float Value)
 		{
 			Value *= ONE;
-
 			RawValue = (int)System.Math.Round(Value);
 		}
 
