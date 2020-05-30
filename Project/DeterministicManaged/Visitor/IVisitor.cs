@@ -19,6 +19,7 @@ namespace GameFramework.Deterministic.Visitor
 
 		void VisitNumber(Number Number);
 		void VisitVector2(Vector2 Vector2);
+		void VisitBounds(Bounds Bounds);
 		void VisitIdentifier(Identifier Identifier);
 	}
 }

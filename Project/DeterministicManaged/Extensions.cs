@@ -28,6 +28,16 @@ namespace GameFramework.Deterministic
 			return data;
 		}
 
+		public static Bounds ReadBounds(this BufferStream Buffer)
+		{
+			Bounds data = new Bounds();
+
+			data.Position = Buffer.ReadVector2();
+			data.Size = Buffer.ReadVector2();
+
+			return data;
+		}
+
 		public static void VisitArray(this IVisitor Visitor, IVisitee[] Visitees)
 		{
 			Visitor.BeginVisitArray(Visitees);

@@ -65,6 +65,12 @@ namespace GameFramework.Deterministic.Visitor
 			VisitNumber(Vector2.Y);
 		}
 
+		public void VisitBounds(Bounds Bounds)
+		{
+			VisitVector2(Bounds.Position);
+			VisitVector2(Bounds.Size);
+		}
+
 		public void VisitIdentifier(Identifier Identifier)
 		{
 			VisitInt32(Identifier);

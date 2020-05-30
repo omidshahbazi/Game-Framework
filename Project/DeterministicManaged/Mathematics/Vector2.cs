@@ -52,17 +52,19 @@ namespace GameFramework.Deterministic.Mathematics
 			return (Left.X > Right.X && Left.Y > Right.Y);
 		}
 
+		public static bool operator >=(Vector2 Left, Vector2 Right)
+		{
+			return (Left.X >= Right.X && Left.Y >= Right.Y);
+		}
+
 		public static bool operator <(Vector2 Left, Vector2 Right)
 		{
 			return (Left.X < Right.X && Left.Y < Right.Y);
 		}
 
-		public override bool Equals(object obj)
+		public static bool operator <=(Vector2 Left, Vector2 Right)
 		{
-			if (obj is Vector2)
-				return ((Vector2)obj) == this;
-			else
-				return false;
+			return (Left.X <= Right.X && Left.Y <= Right.Y);
 		}
 
 		public override string ToString()
