@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using GameFramework.Common.Utilities;
-using GameFramework.Deterministic.Mathematics;
 
 namespace GameFramework.Deterministic.Visitor
 {

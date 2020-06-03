@@ -1,5 +1,5 @@
 ﻿using GameFramework.ASCIISerializer;
-using GameFramework.Deterministic.Mathematics;
+using GameFramework.Deterministic;
 
 namespace MathParserTest
 {

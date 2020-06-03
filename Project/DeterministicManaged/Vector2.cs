@@ -1,5 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
-namespace GameFramework.Deterministic.Mathematics
+namespace GameFramework.Deterministic
 {
 	public struct Vector2
 	{
@@ -11,10 +11,38 @@ namespace GameFramework.Deterministic.Mathematics
 		public Number X;
 		public Number Y;
 
+		public Number SqrMagnitude
+		{
+			get { return Math.Pow(X, 2) + Math.Pow(X, 2); }
+		}
+
+		public Number Magnitude
+		{
+			get { return Math.Sqrt(SqrMagnitude); }
+		}
+
+		public Vector2 Normalized
+		{
+			get
+			{
+				Vector2 value = this;
+				value.Normalize();
+				return value;
+			}
+		}
+
 		public Vector2(Number X, Number Y)
 		{
 			this.X = X;
 			this.Y = Y;
+		}
+
+		public void Normalize()
+		{
+			Number value = Magnitude;
+
+			X /= value;
+			Y /= value;
 		}
 
 		public static Vector2 operator *(Vector2 Left, Number Right)

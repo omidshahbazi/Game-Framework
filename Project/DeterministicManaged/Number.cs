@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.Runtime.CompilerServices;
 
-namespace GameFramework.Deterministic.Mathematics
+namespace GameFramework.Deterministic
 {
 	public struct Number
 	{

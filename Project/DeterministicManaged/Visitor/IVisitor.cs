@@ -1,5 +1,4 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using GameFramework.Deterministic.Mathematics;
 using System.Collections;
 
 namespace GameFramework.Deterministic.Visitor

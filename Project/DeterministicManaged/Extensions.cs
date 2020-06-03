@@ -1,6 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.BinarySerializer;
-using GameFramework.Deterministic.Mathematics;
 using GameFramework.Deterministic.Visitor;
 using System;
 

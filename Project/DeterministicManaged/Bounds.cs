@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.Runtime.CompilerServices;
 
-namespace GameFramework.Deterministic.Mathematics
+namespace GameFramework.Deterministic
 {
 	public struct Bounds
 	{
@@ -42,7 +42,7 @@ namespace GameFramework.Deterministic.Mathematics
 
 		public bool Contains(Vector2 Point)
 		{
-			return (Point >= Min && Point <= Max);
+			return Physics.BoundsContains(Min, Max, Point);
 		}
 
 		public void Expand(Vector2 Amount)
@@ -54,11 +54,7 @@ namespace GameFramework.Deterministic.Mathematics
 
 		public bool Intersects(Bounds Bounds)
 		{
-			return
-				Contains(Bounds.Min) ||
-				Contains(Bounds.Max) ||
-				Contains(Bounds.Position + new Vector2(Size.X, 0)) ||
-				Contains(Bounds.Position + new Vector2(0, Size.Y));
+			return Physics.BoundsIntersect(Min, Max, Bounds.Min, Bounds.Max);
 		}
 
 		public override string ToString()
