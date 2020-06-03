@@ -13,7 +13,7 @@ namespace GameFramework.Deterministic
 
 		public Number SqrMagnitude
 		{
-			get { return Math.Pow(X, 2) + Math.Pow(X, 2); }
+			get { return Math.Pow(X, 2) + Math.Pow(Y, 2); }
 		}
 
 		public Number Magnitude
@@ -39,6 +39,9 @@ namespace GameFramework.Deterministic
 
 		public void Normalize()
 		{
+			if (X == 0 && Y == 0)
+				return;
+
 			Number value = Magnitude;
 
 			X /= value;

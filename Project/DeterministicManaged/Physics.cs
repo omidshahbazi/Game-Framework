@@ -76,5 +76,35 @@ namespace GameFramework.Deterministic
 
 			return true;
 		}
+
+		public static bool LineBoundsIntersect(Vector2 Min, Vector2 Max, Vector2 StartPoint, Vector2 EndPoint, out Vector2 IntersectionPoint)
+		{
+			IntersectionPoint = Vector2.ZERO;
+
+			if (EndPoint.X < Min.X && StartPoint.X < Min.X) return false;
+			if (EndPoint.X > Max.X && StartPoint.X > Max.X) return false;
+			if (EndPoint.Y < Min.Y && StartPoint.Y < Min.Y) return false;
+			if (EndPoint.Y > Max.Y && StartPoint.Y > Max.Y) return false;
+
+			if (BoundsContains(Min, Max, StartPoint) || BoundsContains(Min, Max, EndPoint))
+			{
+				IntersectionPoint = StartPoint;
+				return true;
+			}
+
+			if (BoundsContains(Min, Max, EndPoint))
+			{
+				IntersectionPoint = EndPoint;
+				return true;
+			}
+
+			if ((LinesIntersect(Min, new Vector2(Max.X, Min.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)) ||
+				(LinesIntersect(Min, new Vector2(Min.X, Max.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)) ||
+				(LinesIntersect(Max, new Vector2(Min.X, Max.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)) ||
+				(LinesIntersect(Max, new Vector2(Max.X, Min.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)))
+				return true;
+
+			return false;
+		}
 	}
 }
