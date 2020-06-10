@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
-namespace GameFramework.Deterministic
+namespace GameFramework.Deterministic.Physics
 {
-	public static class Physics
+	public static class Utilities
 	{
 		public static Number CompareDistance(Vector3 A, Vector3 B, Number Distance)
 		{

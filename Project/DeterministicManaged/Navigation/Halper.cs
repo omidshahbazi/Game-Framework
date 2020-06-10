@@ -1,4 +1,5 @@
 ﻿// Copyright 2015-2016 Zorvan Game Studio. All Rights Reserved.
+using GameFramework.Deterministic.Physics;
 using System.Collections.Generic;
 
 namespace GameFramework.Deterministic.Navigation
@@ -89,7 +90,7 @@ namespace GameFramework.Deterministic.Navigation
 				if (node.State == NodeStates.Walkable)
 					continue;
 
-				if (Physics.LineIntersectsBounds(From.Position, To.Position, node.Bound.Min, node.Bound.Max))
+				if (Utilities.LineIntersectsBounds(From.Position, To.Position, node.Bound.Min, node.Bound.Max))
 					return node;
 			}
 

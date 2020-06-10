@@ -1,4 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using GameFramework.Deterministic.Physics;
 using System.Runtime.CompilerServices;
 
 namespace GameFramework.Deterministic
@@ -44,7 +45,7 @@ namespace GameFramework.Deterministic
 
 		public bool Contains(Vector3 Point)
 		{
-			return Physics.BoundsContainsPoint(Min, Max, Point);
+			return Utilities.BoundsContainsPoint(Min, Max, Point);
 		}
 
 		public void Expand(Vector3 Amount)
@@ -56,7 +57,7 @@ namespace GameFramework.Deterministic
 
 		public bool Intersects(Bounds Bounds)
 		{
-			return Physics.BoundsIntersectsBounds(Min, Max, Bounds.Min, Bounds.Max);
+			return Utilities.BoundsIntersectsBounds(Min, Max, Bounds.Min, Bounds.Max);
 		}
 
 		public override string ToString()

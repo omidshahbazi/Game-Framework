@@ -63,6 +63,51 @@ namespace GameFramework.Deterministic
 			Visitor.EndVisitArray();
 		}
 
+		public static void VisitArray(this IVisitor Visitor, Number[] Visitees)
+		{
+			Visitor.BeginVisitArray(Visitees);
+			if (Visitees != null)
+				for (int i = 0; i < Visitees.Length; ++i)
+				{
+					Visitor.BeginVisitArrayElement();
+
+					Visitor.VisitNumber(Visitees[i]);
+
+					Visitor.EndVisitArrayElement();
+				}
+			Visitor.EndVisitArray();
+		}
+
+		public static void VisitArray(this IVisitor Visitor, Vector2[] Visitees)
+		{
+			Visitor.BeginVisitArray(Visitees);
+			if (Visitees != null)
+				for (int i = 0; i < Visitees.Length; ++i)
+				{
+					Visitor.BeginVisitArrayElement();
+
+					Visitor.VisitVector2(Visitees[i]);
+
+					Visitor.EndVisitArrayElement();
+				}
+			Visitor.EndVisitArray();
+		}
+
+		public static void VisitArray(this IVisitor Visitor, Vector3[] Visitees)
+		{
+			Visitor.BeginVisitArray(Visitees);
+			if (Visitees != null)
+				for (int i = 0; i < Visitees.Length; ++i)
+				{
+					Visitor.BeginVisitArrayElement();
+
+					Visitor.VisitVector3(Visitees[i]);
+
+					Visitor.EndVisitArrayElement();
+				}
+			Visitor.EndVisitArray();
+		}
+
 		public static void Deserialize<T>(this T[] Visitees, ref T[] RefVisitees, byte[] Data, Func<BufferStream, T> Deserializer) where T : IVisitee
 		{
 			Visitees.Deserialize(ref RefVisitees, new BufferStream(Data), Deserializer);
@@ -76,6 +121,51 @@ namespace GameFramework.Deterministic
 
 			for (int i = 0; i < len; ++i)
 				RefVisitees[i] = Deserializer(Buffer);
+		}
+
+		public static void Deserialize(this Number[] Visitees, ref Number[] RefVisitees, byte[] Data)
+		{
+			Visitees.Deserialize(ref RefVisitees, new BufferStream(Data));
+		}
+
+		public static void Deserialize(this Number[] Visitees, ref Number[] RefVisitees, BufferStream Buffer)
+		{
+			uint len = Buffer.BeginReadArray();
+
+			Array.Resize(ref RefVisitees, (int)len);
+
+			for (int i = 0; i < len; ++i)
+				RefVisitees[i] = Buffer.ReadNumber();
+		}
+
+		public static void Deserialize(this Vector2[] Visitees, ref Vector2[] RefVisitees, byte[] Data)
+		{
+			Visitees.Deserialize(ref RefVisitees, new BufferStream(Data));
+		}
+
+		public static void Deserialize(this Vector2[] Visitees, ref Vector2[] RefVisitees, BufferStream Buffer)
+		{
+			uint len = Buffer.BeginReadArray();
+
+			Array.Resize(ref RefVisitees, (int)len);
+
+			for (int i = 0; i < len; ++i)
+				RefVisitees[i] = Buffer.ReadVector2();
+		}
+
+		public static void Deserialize(this Vector3[] Visitees, ref Vector3[] RefVisitees, byte[] Data)
+		{
+			Visitees.Deserialize(ref RefVisitees, new BufferStream(Data));
+		}
+
+		public static void Deserialize(this Vector3[] Visitees, ref Vector3[] RefVisitees, BufferStream Buffer)
+		{
+			uint len = Buffer.BeginReadArray();
+
+			Array.Resize(ref RefVisitees, (int)len);
+
+			for (int i = 0; i < len; ++i)
+				RefVisitees[i] = Buffer.ReadVector3();
 		}
 	}
 }
