@@ -3,108 +3,77 @@ namespace GameFramework.Deterministic
 {
 	public static class Physics
 	{
-		public static Vector2 CalculateGravityForce(Vector2 Gravity, Number Mass)
+		public static Number CompareDistance(Vector3 A, Vector3 B, Number Distance)
 		{
-			return Gravity * Mass;
+			A.Y = B.Y;
+			Number num = (A - B).SqrMagnitude;
+			Number sqDis = Distance * Distance;
+
+			return Math.Sign(num - sqDis);
 		}
 
-		public static Vector2 CalculateAcceleration(Vector2 Force, Number Mass)
+		public static bool LinesIntersectsLine(Vector3 StartPoint1, Vector3 EndPoint1, Vector3 StartPoint2, Vector3 EndPoint2)
 		{
-			return Force / Mass;
+			Vector3 v1Diff = EndPoint1 - StartPoint1;
+			Vector3 v2Diff = EndPoint2 - StartPoint2;
+
+			float denom = (v2Diff.Z * v1Diff.X) - (v2Diff.X * v1Diff.Z);
+
+			float numerator = (v2Diff.X * (StartPoint1.Z - StartPoint2.Z)) - (v2Diff.Z * (StartPoint1.X - StartPoint2.X));
+			float numerator2 = (v1Diff.X * (StartPoint1.Z - StartPoint2.Z)) - (v1Diff.Z * (StartPoint1.X - StartPoint2.X));
+
+			if (denom == 0.0f)
+			{
+				if (numerator == 0.0f && numerator2 == 0.0f)
+					return false; //COINCIDENT;
+
+				return false; // PARALLEL;
+			}
+
+			float ua = numerator / denom;
+			float ub = numerator2 / denom;
+
+			return (ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f);
 		}
 
-		public static Vector2 CalculateVelocity(Vector2 Acceleration, Number DeltaTime)
+		public static bool BoundsIntersectsBounds(Vector3 Min1, Vector3 Max1, Vector3 Min2, Vector3 Max2)
 		{
-			return Acceleration * DeltaTime;
-		}
+			Vector3 d1 = Min2 - Max1;
+			Vector3 d2 = Min1 - Max2;
 
-		public static Vector2 CalculateVelocity(Vector2 Force, Number Mass, Number DeltaTime)
-		{
-			return CalculateVelocity(CalculateAcceleration(Force, Mass), DeltaTime);
-		}
-
-		public static Vector2 CalculateMovement(Vector2 Velocity, Number DeltaTime)
-		{
-			return Velocity * DeltaTime;
-		}
-
-		public static Vector2 CalculateMovement(Vector2 Force, Number Mass, Number DeltaTime)
-		{
-			return CalculateMovement(CalculateVelocity(Force, Mass, DeltaTime), DeltaTime);
-		}
-
-		public static bool LinesIntersect(Vector2 StartPoint1, Vector2 EndPoint1, Vector2 StartPoint2, Vector2 EndPoint2, out Vector2 IntersectionPoint)
-		{
-			IntersectionPoint = Vector2.ZERO;
-
-			Number a1 = EndPoint1.Y - StartPoint1.Y;
-			Number b1 = StartPoint1.X - EndPoint1.X;
-			Number c1 = a1 * (StartPoint1.X) + b1 * (StartPoint1.Y);
-
-			Number a2 = EndPoint2.Y - StartPoint2.Y;
-			Number b2 = StartPoint2.X - EndPoint2.X;
-			Number c2 = a2 * (StartPoint2.X) + b2 * (StartPoint2.Y);
-
-			Number determinant = a1 * b2 - a2 * b1;
-
-			if (determinant == 0)
+			if (d1.X > 0 || d1.Y > 0 || d1.Z > 0)
 				return false;
 
-			Number x = (b2 * c1 - b1 * c2) / determinant;
-			Number y = (a1 * c2 - a2 * c1) / determinant;
-
-			IntersectionPoint = new Vector2(x, y);
-
-			return true;
-		}
-
-		public static bool BoundsContains(Vector2 Min, Vector2 Max, Vector2 Point)
-		{
-			return (Point >= Min && Point <= Max);
-		}
-
-		public static bool BoundsIntersect(Vector2 Min1, Vector2 Max1, Vector2 Min2, Vector2 Max2)
-		{
-			Vector2 d1 = Min2 - Max1;
-			Vector2 d2 = Min1 - Max2;
-
-			if (d1.X > 0 || d1.Y > 0)
-				return false;
-
-			if (d2.X > 0 || d2.Y > 0)
+			if (d2.X > 0 || d2.Y > 0 || d2.Z > 0)
 				return false;
 
 			return true;
 		}
 
-		public static bool LineBoundsIntersect(Vector2 Min, Vector2 Max, Vector2 StartPoint, Vector2 EndPoint, out Vector2 IntersectionPoint)
+		public static bool LineIntersectsBounds( Vector3 StartPoint, Vector3 EndPoint, Vector3 Min, Vector3 Max)
 		{
-			IntersectionPoint = Vector2.ZERO;
+			Vector3 lowerLeft = Min;
+			Vector3 upperRight = Max;
+			Vector3 upperLeft = new Vector3(lowerLeft.X, 0, upperRight.Z);
+			Vector3 lowerRight = new Vector3(upperRight.X, 0, lowerLeft.Z);
 
-			if (EndPoint.X < Min.X && StartPoint.X < Min.X) return false;
-			if (EndPoint.X > Max.X && StartPoint.X > Max.X) return false;
-			if (EndPoint.Y < Min.Y && StartPoint.Y < Min.Y) return false;
-			if (EndPoint.Y > Max.Y && StartPoint.Y > Max.Y) return false;
-
-			if (BoundsContains(Min, Max, StartPoint) || BoundsContains(Min, Max, EndPoint))
+			if (StartPoint.X > lowerLeft.X && StartPoint.X < upperRight.X && StartPoint.Z < lowerLeft.Z && StartPoint.Z > upperRight.Z &&
+				EndPoint.X > lowerLeft.X && EndPoint.X < upperRight.X && EndPoint.Z < lowerLeft.Z && EndPoint.Z > upperRight.Z)
 			{
-				IntersectionPoint = StartPoint;
 				return true;
 			}
 
-			if (BoundsContains(Min, Max, EndPoint))
-			{
-				IntersectionPoint = EndPoint;
-				return true;
-			}
-
-			if ((LinesIntersect(Min, new Vector2(Max.X, Min.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)) ||
-				(LinesIntersect(Min, new Vector2(Min.X, Max.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)) ||
-				(LinesIntersect(Max, new Vector2(Min.X, Max.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)) ||
-				(LinesIntersect(Max, new Vector2(Max.X, Min.Y), StartPoint, EndPoint, out IntersectionPoint) && BoundsContains(Min, Max, IntersectionPoint)))
-				return true;
+			if (LinesIntersectsLine(StartPoint, EndPoint, upperLeft, lowerLeft)) return true;
+			if (LinesIntersectsLine(StartPoint, EndPoint, lowerLeft, lowerRight)) return true;
+			if (LinesIntersectsLine(StartPoint, EndPoint, upperLeft, upperRight)) return true;
+			if (LinesIntersectsLine(StartPoint, EndPoint, upperRight, lowerRight)) return true;
 
 			return false;
+		}
+
+		public static bool BoundsContainsPoint(Vector3 Min, Vector3 Max, Vector3 Point)
+		{
+			return (Min <= Point && Point <= Max);
 		}
 	}
 }

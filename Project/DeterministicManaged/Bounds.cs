@@ -5,47 +5,49 @@ namespace GameFramework.Deterministic
 {
 	public struct Bounds
 	{
-		public Vector2 Position;
-		public Vector2 Size;
+		public Vector3 Position;
+		public Vector3 Size;
 
 		[CompilerGenerated]
-		public Vector2 Center
+		public Vector3 Center
 		{
 			get { return Position + (Size / 2); }
 		}
 
 		[CompilerGenerated]
-		public Vector2 Min
+		public Vector3 Min
 		{
 			get { return Position; }
 		}
 
 		[CompilerGenerated]
-		public Vector2 Max
+		public Vector3 Max
 		{
 			get { return Position + Size; }
 		}
 
-		public Bounds(Number X, Number Y, Number Width, Number Height)
+		public Bounds(Number X, Number Y, Number Z, Number Width, Number Height, Number Depth)
 		{
 			Position.X = X;
 			Position.Y = Y;
+			Position.Z = Z;
 			Size.X = Width;
 			Size.Y = Height;
+			Size.Z = Depth;
 		}
 
-		public Bounds(Vector2 Position, Vector2 Size)
+		public Bounds(Vector3 Position, Vector3 Size)
 		{
 			this.Position = Position;
 			this.Size = Size;
 		}
 
-		public bool Contains(Vector2 Point)
+		public bool Contains(Vector3 Point)
 		{
-			return Physics.BoundsContains(Min, Max, Point);
+			return Physics.BoundsContainsPoint(Min, Max, Point);
 		}
 
-		public void Expand(Vector2 Amount)
+		public void Expand(Vector3 Amount)
 		{
 			Amount /= 2;
 			Position -= Amount;
@@ -54,7 +56,7 @@ namespace GameFramework.Deterministic
 
 		public bool Intersects(Bounds Bounds)
 		{
-			return Physics.BoundsIntersect(Min, Max, Bounds.Min, Bounds.Max);
+			return Physics.BoundsIntersectsBounds(Min, Max, Bounds.Min, Bounds.Max);
 		}
 
 		public override string ToString()

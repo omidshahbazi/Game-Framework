@@ -48,6 +48,11 @@ namespace GameFramework.Deterministic
 			Y /= value;
 		}
 
+		public Number Dot(Vector2 Other)
+		{
+			return (X * Other.X) + (Y * Other.Y);
+		}
+
 		public static Vector2 operator *(Vector2 Left, Number Right)
 		{
 			return new Vector2(Left.X * Right, Left.Y * Right);

@@ -27,12 +27,23 @@ namespace GameFramework.Deterministic
 			return data;
 		}
 
+		public static Vector3 ReadVector3(this BufferStream Buffer)
+		{
+			Vector3 data = new Vector3();
+
+			data.X = Buffer.ReadNumber();
+			data.Y = Buffer.ReadNumber();
+			data.Z = Buffer.ReadNumber();
+
+			return data;
+		}
+
 		public static Bounds ReadBounds(this BufferStream Buffer)
 		{
 			Bounds data = new Bounds();
 
-			data.Position = Buffer.ReadVector2();
-			data.Size = Buffer.ReadVector2();
+			data.Position = Buffer.ReadVector3();
+			data.Size = Buffer.ReadVector3();
 
 			return data;
 		}
