@@ -64,7 +64,7 @@ namespace GameFramework.Deterministic.Visitor
 			VisitNumber(Vector2.Y);
 		}
 
-		public void VisitVector2(Vector3 Vector3)
+		public void VisitVector3(Vector3 Vector3)
 		{
 			VisitNumber(Vector3.X);
 			VisitNumber(Vector3.Y);
@@ -73,8 +73,8 @@ namespace GameFramework.Deterministic.Visitor
 
 		public void VisitBounds(Bounds Bounds)
 		{
-			VisitVector2(Bounds.Position);
-			VisitVector2(Bounds.Size);
+			VisitVector3(Bounds.Position);
+			VisitVector3(Bounds.Size);
 		}
 
 		public void VisitIdentifier(Identifier Identifier)
