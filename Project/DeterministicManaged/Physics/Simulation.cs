@@ -1,7 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
 
-using System;
-
 namespace GameFramework.Deterministic.Physics
 {
 	public static class Simulation
@@ -29,7 +27,7 @@ namespace GameFramework.Deterministic.Physics
 
 					SolveContact(contact);
 
-					if (contact.Points.Length != 0)
+					if (contact.Points != null && contact.Points.Length != 0)
 						Contacts.Add(contact);
 				}
 			}
@@ -50,7 +48,7 @@ namespace GameFramework.Deterministic.Physics
 			for (int i = 0; i < Contacts.Count; ++i)
 				CorrectPosition(Contacts[i]);
 
-			for (int i =0; i < Scene.Bodies.Length; ++i)
+			for (int i = 0; i < Scene.Bodies.Length; ++i)
 			{
 				Body body = Scene.Bodies[i];
 

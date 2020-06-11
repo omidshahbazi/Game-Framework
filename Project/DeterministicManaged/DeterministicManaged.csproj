@@ -52,6 +52,7 @@
     <Compile Include="Physics\Shape.cs" />
     <Compile Include="Physics\Body.cs" />
     <Compile Include="Physics\Scene.cs" />
+    <Compile Include="Physics\Simulation.cs" />
     <Compile Include="Physics\Utilities.cs" />
     <Compile Include="Vector3.cs" />
     <Compile Include="Vector2.cs" />

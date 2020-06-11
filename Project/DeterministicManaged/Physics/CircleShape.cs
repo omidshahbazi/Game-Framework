@@ -3,7 +3,7 @@ using GameFramework.Deterministic.Visitor;
 
 namespace GameFramework.Deterministic.Physics
 {
-	public abstract class CircleShape : Shape
+	public class CircleShape : Shape
 	{
 		public Number Radius;
 
