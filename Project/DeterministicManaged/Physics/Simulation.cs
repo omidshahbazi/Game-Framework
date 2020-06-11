@@ -1,5 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 
+using System;
+
 namespace GameFramework.Deterministic.Physics
 {
 	public static class Simulation
@@ -25,7 +27,7 @@ namespace GameFramework.Deterministic.Physics
 
 					Contact contact = new Contact() { BodyA = a, BodyB = b };
 
-					SolveContact(contact);
+					DispatchContact(contact);
 
 					if (contact.Points != null && contact.Points.Length != 0)
 						Contacts.Add(contact);
@@ -56,9 +58,25 @@ namespace GameFramework.Deterministic.Physics
 			}
 		}
 
-		public static void CheckContact(Contact Contact)
+		public static void DispatchContact(Contact Contact)
 		{
+			bool aIsCircle = (Contact.BodyA.Shape is CircleShape);
+			bool bIsCircle = (Contact.BodyB.Shape is CircleShape);
 
+			if (aIsCircle)
+			{
+				if (bIsCircle)
+					DispatchCircleToCircle(Contact);
+				else
+					DispatchCircleToPolygon(Contact);
+			}
+			else
+			{
+				if (bIsCircle)
+					DispatchPolygonToCircle(Contact);
+				else
+					DispatchPolygonToPolygon(Contact);
+			}
 		}
 
 		public static void InitializeContact(Contact Contact)
@@ -81,6 +99,22 @@ namespace GameFramework.Deterministic.Physics
 		}
 
 		private static void CorrectPosition(Contact Contact)
+		{
+		}
+
+		public static void DispatchCircleToCircle(Contact Contact)
+		{
+		}
+
+		public static void DispatchCircleToPolygon(Contact Contact)
+		{
+		}
+
+		public static void DispatchPolygonToPolygon(Contact Contact)
+		{
+		}
+
+		public static void DispatchPolygonToCircle(Contact Contact)
 		{
 		}
 	}
