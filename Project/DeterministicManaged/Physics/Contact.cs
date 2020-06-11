@@ -1,5 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using GameFramework.Deterministic.Visitor;
+using System.Collections.Generic;
 
 namespace GameFramework.Deterministic.Physics
 {
@@ -10,4 +10,7 @@ namespace GameFramework.Deterministic.Physics
 		public Vector3 Normal;
 		public Vector3[] Points;
 	}
+
+	public class ContactList : List<Contact>
+	{ }
 }
