@@ -104,6 +104,40 @@ namespace GameFramework.Deterministic.Physics
 
 		public static void DispatchCircleToCircle(Contact Contact)
 		{
+			CircleShape a = (CircleShape)Contact.BodyA.Shape;
+			CircleShape b = (CircleShape)Contact.BodyB.Shape;
+
+			// Calculate translational vector, which is normal
+			Vector3 normal = Contact.BodyB.Position - Contact.BodyA.Position;
+
+			Number dist_sqr = normal.SqrMagnitude;
+			Number radius = a.Radius + b.Radius;
+
+			// Not in contact
+			if (dist_sqr >= radius * radius)
+			{
+				Contact.Points = null;
+
+				return;
+			}
+
+			Number distance = Math.Sqrt(dist_sqr);
+
+			Contact.Points = new Vector3[1];
+
+			if (distance == 0.0f)
+			{
+				//Contact.penetration = A->radius;
+				Contact.Normal = Vector3.RIGHT;
+				Contact.Points[0] = Contact.BodyA.Position;
+
+				return;
+			}
+
+			//Contact.penetration = radius - distance;
+			Contact.Normal = normal / distance; // Faster than using Normalized since we already performed sqrt
+			
+			Contact.Points[0] = Contact.Normal * a.Radius + Contact.BodyA.Position;
 		}
 
 		public static void DispatchCircleToPolygon(Contact Contact)

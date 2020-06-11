@@ -14,7 +14,7 @@ namespace MathParserTest
 
 			Body body1 = new Body();
 			body1.Mass = 1;
-			body1.Position = new Vector3(0, 10, 0);
+			body1.Position = new Vector3(0, 1, 0);
 			body1.Shape = new CircleShape() { Radius = 2 };
 			ArrayUtilities.Add(ref scene.Bodies, body1);
 
