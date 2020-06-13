@@ -14,8 +14,8 @@ namespace MathParserTest
 
 			Body body1 = new Body();
 			body1.Mass = 1;
-			body1.Position = new Vector3(0, 1, 0);
-			body1.Shape = new SphereShape() { Radius = 2 };
+			body1.Position = new Vector3(0, 2, 0);
+			body1.Shape = new SphereShape() { Radius = 0.5F};
 			ArrayUtilities.Add(ref scene.Bodies, body1);
 
 			Body body2 = new Body();
@@ -25,7 +25,7 @@ namespace MathParserTest
 			ArrayUtilities.Add(ref scene.Bodies, body2);
 
 			Simulation.Config config = new Simulation.Config();
-			config.StepTime = 1;
+			config.StepTime = 0.2F;
 
 			while (true)
 			{
@@ -35,7 +35,7 @@ namespace MathParserTest
 
 				Console.WriteLine("Body1: {0}, Body2: {1} [Contacts: {2}]", body1.Position, body2.Position, contacts.Count);
 
-				Thread.Sleep(1000);
+				Thread.Sleep(1000 * config.StepTime);
 			}
 		}
 	}

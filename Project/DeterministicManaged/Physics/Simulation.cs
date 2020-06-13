@@ -8,7 +8,7 @@ namespace GameFramework.Deterministic.Physics
 		public class Config
 		{
 			public Number StepTime;
-			public Vector3 Gravity;
+			public Vector3 Gravity = new Vector3(0, -9.8F, 0);
 			public int CCDStepCount = 10;
 		}
 
@@ -45,7 +45,7 @@ namespace GameFramework.Deterministic.Physics
 					SolveManifold((Manifold)Contacts[j]);
 
 			for (int i = 0; i < Scene.Bodies.Length; ++i)
-				IntegrateVelocity(Scene.Bodies[i]);
+				IntegrateVelocity(Scene.Bodies[i], Config);
 
 			for (int i = 0; i < Contacts.Count; ++i)
 				CorrectPosition((Manifold)Contacts[i]);
@@ -65,7 +65,7 @@ namespace GameFramework.Deterministic.Physics
 				return;
 
 			Body.Velocity += (Body.Force / Body.Mass + Config.Gravity) * (Config.StepTime / 2.0f);
-			//Body.angularVelocity += b->torque * b->iI * (dt / 2.0f);
+			//Body.angularVelocity += Boyd.torque * Manifold.BodyB.iI * (Config.StepTime / 2.0F);
 		}
 
 		private static void DispatchManifold(Manifold Manifold)
@@ -92,11 +92,11 @@ namespace GameFramework.Deterministic.Physics
 		private static void InitializeManifold(Manifold Manifold, Config Config)
 		{
 			// Calculate average restitution
-			//e = Math.Min(A->restitution, B->restitution);
+			//e = Math.Min(Manifold.BodyA.restitution, Manifold.BodyB.restitution);
 
 			// Calculate static and dynamic friction
-			//sf = std::sqrt(A->staticFriction * B->staticFriction);
-			//df = std::sqrt(A->dynamicFriction * B->dynamicFriction);
+			//sf = std::sqrt(Manifold.BodyA.staticFriction * Manifold.BodyB.staticFriction);
+			//df = std::sqrt(Manifold.BodyA.dynamicFriction * Manifold.BodyB.dynamicFriction);
 
 			for (uint i = 0; i < Manifold.Points.Length; ++i)
 			{
@@ -106,106 +106,116 @@ namespace GameFramework.Deterministic.Physics
 
 				Vector3 rv =
 					Manifold.BodyB.Velocity
-					//+ (Manifold.BodyB->angularVelocity * rb)
+					//+ (Manifold.BodyB.angularVelocity * rb)
 					- Manifold.BodyA.Velocity
-					//- (A->angularVelocity, ra)
+					//- (Manifold.BodyA.angularVelocity, ra)
 					;
 
 				// Determine if we should perform a resting collision or not
 				// The idea is if the only thing moving this object is gravity,
 				// then the collision should be performed without any restitution
 				//if (rv.SqrMagnitude < (Config.Gravity * Config.StepTime).SqrMagnitude + Math.Epsilon)
-				//e = 0.0f;
+				//e = 0.0F;
 			}
 		}
 
 		private static void SolveManifold(Manifold Manifold)
 		{
 			// Early out and positional correct if both objects have infinite mass
-			if (Equal(A->im + B->im, 0))
+			if (Manifold.BodyA.Mass + Manifold.BodyB.Mass == 0)
 			{
-				InfiniteMassCorrection();
+				Manifold.BodyA.Velocity = Vector3.Zero;
+				Manifold.BodyB.Velocity = Vector3.Zero;
+
 				return;
 			}
 
-			for (uint32 i = 0; i < contact_count; ++i)
-			{
-				// Calculate radii from COM to contact
-				Vec2 ra = contacts[i] - A->position;
-				Vec2 rb = contacts[i] - B->position;
+			//for (uint i = 0; i < Manifold.Points.Length; ++i)
+			//{
+			//	// Calculate radii from COM to contact
+			//	Vector3 rA = Manifold.Points[i] - Manifold.BodyA.Position;
+			//	Vector3 rB = Manifold.Points[i] - Manifold.BodyB.Position;
 
-				// Relative velocity
-				Vec2 rv = B->velocity + Cross(B->angularVelocity, rb) -
-					A->velocity - Cross(A->angularVelocity, ra);
+			//	// Relative velocity
+			//	Vector3 rv = Manifold.BodyB.Velocity + Cross(Manifold.BodyB.angularVelocity, rB) - Manifold.BodyA.Velocity - Cross(Manifold.BodyA.angularVelocity, rA);
 
-				// Relative velocity along the normal
-				real contactVel = Dot(rv, normal);
+			//	// Relative velocity along the normal
+			//	Number contactVel = rv.Dot(Manifold.Normal);
 
-				// Do not resolve if velocities are separating
-				if (contactVel > 0)
-					return;
+			//	// Do not resolve if velocities are separating
+			//	if (contactVel > 0)
+			//		return;
 
-				real raCrossN = Cross(ra, normal);
-				real rbCrossN = Cross(rb, normal);
-				real invMassSum = A->im + B->im + Sqr(raCrossN) * A->iI + Sqr(rbCrossN) * B->iI;
+			//Number invMassA = (Manifold.BodyA.Mass == 0 ? (Number)0 : 1 / Manifold.BodyA.Mass);
+			//Number invMassB = (Manifold.BodyB.Mass == 0 ? (Number)0 : 1 / Manifold.BodyB.Mass);
 
-				// Calculate impulse scalar
-				real j = -(1.0f + e) * contactVel;
-				j /= invMassSum;
-				j /= (real)contact_count;
+			//	Number rACrossN = Cross(rA, normal);
+			//	Number rBCrossN = Cross(rB, normal);
+			//	Number invMassSum = invMassA + invMassB + (rACrossN * rACrossN) * Manifold.BodyA.iI + (rBCrossN * rBCrossN) * Manifold.BodyB.iI;
 
-				// Apply impulse
-				Vec2 impulse = normal * j;
-				A->ApplyImpulse(-impulse, ra);
-				B->ApplyImpulse(impulse, rb);
+			//	// Calculate impulse scalar
+			//	Number j = -(1.0f + e) * contactVel;
+			//	j /= invMassSum;
+			//	j /= (Number)Manifold.Points.Length;
 
-				// Friction impulse
-				rv = B->velocity + Cross(B->angularVelocity, rb) -
-					A->velocity - Cross(A->angularVelocity, ra);
+			//	// Apply impulse
+			//	Vector3 impulse = Manifold.Normal * j;
+			//	Manifold.BodyA.ApplyImpulse(-impulse, rA);
+			//	Manifold.BodyB.ApplyImpulse(impulse, rB);
 
-				Vec2 t = rv - (normal * Dot(rv, normal));
-				t.Normalize();
+			//	// Friction impulse
+			//	rv = Manifold.BodyB.Velocity + Cross(Manifold.BodyB.angularVelocity, rB) -
+			//		Manifold.BodyA.Velocity - Cross(Manifold.BodyA.angularVelocity, rA);
 
-				// j tangent magnitude
-				real jt = -Dot(rv, t);
-				jt /= invMassSum;
-				jt /= (real)contact_count;
+			//	Vector3 t = rv - (Manifold.Normal * rv.Dot(Manifold.Normal));
+			//	t.Normalize();
 
-				// Don't apply tiny friction impulses
-				if (Equal(jt, 0.0f))
-					return;
+			//	// j tangent magnitude
+			//	Number jt = -rv.Dot(t);
+			//	jt /= invMassSum;
+			//	jt /= (Number)Manifold.Points.Length;
 
-				// Coulumb's law
-				Vec2 tangentImpulse;
-				if (std::abs(jt) < j * sf)
-					tangentImpulse = t * jt;
-				else
-					tangentImpulse = t * -j * df;
+			//	// Don't apply tiny friction impulses
+			//	if (jt == 0)
+			//		return;
 
-				// Apply friction impulse
-				A->ApplyImpulse(-tangentImpulse, ra);
-				B->ApplyImpulse(tangentImpulse, rb);
-			}
+			//	// Coulumb's law
+			//	Vector3 tangentImpulse;
+			//	if (Math.Abs(jt) < j * sf)
+			//		tangentImpulse = t * jt;
+			//	else
+			//		tangentImpulse = t * -j * df;
+
+			//	// Apply friction impulse
+			//	Manifold.BodyA.ApplyImpulse(-tangentImpulse, rA);
+			//	Manifold.BodyB.ApplyImpulse(tangentImpulse, rB);
+			//}
 		}
 
 		private static void CorrectPosition(Manifold Manifold)
 		{
-			const real k_slop = 0.05f; // Penetration allowance
-			const real percent = 0.4f; // Penetration percentage to correct
-			Vec2 correction = (std::max(penetration - k_slop, 0.0f) / (A->im + B->im)) * normal * percent;
-			A->position -= correction * A->im;
-			B->position += correction * B->im;
+			Number Slope = 0.05F; // Penetration allowance
+			Number Percent = 0.4F; // Penetration percentage to correct
+
+			Number invMassA = (Manifold.BodyA.Mass == 0 ? (Number)0 : 1 / Manifold.BodyA.Mass);
+			Number invMassB = (Manifold.BodyB.Mass == 0 ? (Number)0 : 1 / Manifold.BodyB.Mass);
+
+			Vector3 correction = Manifold.Normal * (Math.Max(Manifold.Penetration - Slope, 0.0F) / (invMassA + invMassB)) * Percent;
+
+			Manifold.BodyA.Position -= correction * invMassA;
+			Manifold.BodyB.Position += correction * invMassB;
 		}
 
-		private static void IntegrateVelocity(Body Body)
+		private static void IntegrateVelocity(Body Body, Config Config)
 		{
-			if (b->im == 0.0f)
+			if (Body.Mass == 0)
 				return;
 
-			b->position += b->velocity * dt;
-			b->orient += b->angularVelocity * dt;
-			b->SetOrient(b->orient);
-			IntegrateForces(b, dt);
+			Body.Position += Body.Velocity * Config.StepTime;
+			//Body.Orient += Body.angularVelocity * dt;
+			//Body.SetOrient(Body.orient);
+
+			IntegrateForces(Body, Config);
 		}
 
 		private static void DispatchSphereToSphere(Manifold Manifold)
@@ -231,7 +241,7 @@ namespace GameFramework.Deterministic.Physics
 
 			Manifold.Points = new Vector3[1];
 
-			if (distance == 0.0f)
+			if (distance == 0)
 			{
 				Manifold.Penetration = a.Radius;
 				Manifold.Normal = Vector3.Right;
@@ -295,8 +305,7 @@ namespace GameFramework.Deterministic.Physics
 			Number dot2 = (center - v2).Dot(v1 - v2);
 			Manifold.Penetration = a.Radius - separation;
 
-			// Closest to v1
-			if (dot1 <= 0.0f)
+			if (dot1 <= 0) // Closest to v1
 			{
 				if ((center - v1).SqrMagnitude > a.Radius * a.Radius)
 					return;
@@ -309,9 +318,7 @@ namespace GameFramework.Deterministic.Physics
 				v1 = Manifold.BodyB.Rotation * v1 + Manifold.BodyB.Position;
 				Manifold.Points = new Vector3[] { v1 };
 			}
-
-			// Closest to v2
-			else if (dot2 <= 0.0f)
+			else if (dot2 <= 0) // Closest to v2
 			{
 				if ((center - v2).SqrMagnitude > a.Radius * a.Radius)
 					return;
@@ -324,9 +331,7 @@ namespace GameFramework.Deterministic.Physics
 				n.Normalize();
 				Manifold.Normal = n;
 			}
-
-			// Closest to face
-			else
+			else // Closest to face
 			{
 				Vector3 n = b.Normals[faceNormal];
 				if ((center - v1).Dot(n) > a.Radius)
@@ -356,14 +361,14 @@ namespace GameFramework.Deterministic.Physics
 			uint faceA;
 			Number penetrationA;
 			FindAxisLeastPenetration(Manifold, out faceA, out penetrationA);
-			if (penetrationA >= 0.0f)
+			if (penetrationA >= 0)
 				return;
 
 			// Check for a separating axis with B's face planes
 			uint faceB;
 			Number penetrationB;
 			FindAxisLeastPenetration(Manifold, out faceB, out penetrationB);
-			if (penetrationB >= 0.0f)
+			if (penetrationB >= 0)
 				return;
 
 			uint referenceIndex;
@@ -453,7 +458,7 @@ namespace GameFramework.Deterministic.Physics
 			// Keep points behind reference face
 			uint cp = 0; // clipped points behind reference face
 			Number separation = refFaceNormal.Dot(incidentFace[0]) - refC;
-			if (separation <= 0.0f)
+			if (separation <= 0)
 			{
 				ArrayUtilities.Add(ref Manifold.Points, incidentFace[0]);
 				Manifold.Penetration = -separation;
@@ -463,7 +468,7 @@ namespace GameFramework.Deterministic.Physics
 				Manifold.Penetration = 0;
 
 			separation = refFaceNormal.Dot(incidentFace[1]) - refC;
-			if (separation <= 0.0f)
+			if (separation <= 0)
 			{
 				ArrayUtilities.Add(ref Manifold.Points, incidentFace[1]);
 
@@ -556,14 +561,14 @@ namespace GameFramework.Deterministic.Physics
 			Number d2 = Normal.Dot(Faces[1]) - C;
 
 			// If negative (behind plane) clip
-			if (d1 <= 0.0f)
+			if (d1 <= 0)
 				value[sp++] = Faces[0];
 
-			if (d2 <= 0.0f)
+			if (d2 <= 0)
 				value[sp++] = Faces[1];
 
 			// If the points are on different sides of the plane
-			if (d1 * d2 < 0.0f) // less than to ignore -0.0f
+			if (d1 * d2 < 0) // less than to ignore -0
 			{
 				// Push interesection point
 				Number alpha = d1 / (d1 - d2);
