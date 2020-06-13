@@ -236,5 +236,13 @@ namespace GameFramework.Deterministic
 
 			return 0;
 		}
+
+		public static bool BiasGreaterThan(Number A, Number B)
+		{
+			Number BiasRelative = 0.95f;
+			Number BiasAbsolute = 0.01f;
+
+			return A >= B * BiasRelative + A * BiasAbsolute;
+		}
 	}
 }

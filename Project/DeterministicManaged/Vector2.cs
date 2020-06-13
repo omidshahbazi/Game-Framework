@@ -3,10 +3,10 @@ namespace GameFramework.Deterministic
 {
 	public struct Vector2
 	{
-		public static readonly Vector2 ZERO = new Vector2(0, 0);
-		public static readonly Vector2 ONE = new Vector2(1, 1);
-		public static readonly Vector2 UP = new Vector2(0, 1);
-		public static readonly Vector2 RIGHT = new Vector2(1, 0);
+		public static readonly Vector2 Zero = new Vector2(0, 0);
+		public static readonly Vector2 One = new Vector2(1, 1);
+		public static readonly Vector2 Up = new Vector2(0, 1);
+		public static readonly Vector2 Right = new Vector2(1, 0);
 
 		public Number X;
 		public Number Y;
@@ -51,6 +51,11 @@ namespace GameFramework.Deterministic
 		public Number Dot(Vector2 Other)
 		{
 			return (X * Other.X) + (Y * Other.Y);
+		}
+
+		public static Vector2 operator -(Vector2 Other)
+		{
+			return new Vector2(-Other.X, -Other.Y);
 		}
 
 		public static Vector2 operator *(Vector2 Left, Number Right)

@@ -3,11 +3,11 @@ namespace GameFramework.Deterministic
 {
 	public struct Vector3
 	{
-		public static readonly Vector3 ZERO = new Vector3(0, 0, 0);
-		public static readonly Vector3 ONE = new Vector3(1, 1, 1);
-		public static readonly Vector3 UP = new Vector3(0, 1, 0);
-		public static readonly Vector3 RIGHT = new Vector3(1, 0, 0);
-		public static readonly Vector3 FORWARD = new Vector3(0, 0, 1);
+		public static readonly Vector3 Zero = new Vector3(0, 0, 0);
+		public static readonly Vector3 One = new Vector3(1, 1, 1);
+		public static readonly Vector3 Up = new Vector3(0, 1, 0);
+		public static readonly Vector3 Right = new Vector3(1, 0, 0);
+		public static readonly Vector3 Forward = new Vector3(0, 0, 1);
 
 		public Number X;
 		public Number Y;
@@ -55,6 +55,11 @@ namespace GameFramework.Deterministic
 		public Number Dot(Vector3 Other)
 		{
 			return (X * Other.X) + (Y * Other.Y) + (Z * Other.Z);
+		}
+
+		public static Vector3 operator -(Vector3 Other)
+		{
+			return new Vector3(-Other.X, -Other.Y, -Other.Z);
 		}
 
 		public static Vector3 operator *(Vector3 Left, Number Right)

@@ -5,6 +5,10 @@ namespace GameFramework.Deterministic
 {
 	public struct Number
 	{
+		public static readonly Number MaxValue = 99999;
+		public static readonly Number MinValue = -99999;
+		public static readonly Number Epsilon = 1.401298E-45F;
+
 		private const long ONE = 1 << SHIFT_AMOUNT;
 		private const int SHIFT_AMOUNT = 12;
 
@@ -30,6 +34,11 @@ namespace GameFramework.Deterministic
 		{
 			Value *= ONE;
 			RawValue = (int)System.Math.Round(Value);
+		}
+
+		public static Number operator -(Number Other)
+		{
+			return -Other.Value;
 		}
 
 		public static Number operator *(Number Left, Number Right)
