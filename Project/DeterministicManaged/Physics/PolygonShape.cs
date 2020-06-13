@@ -8,6 +8,8 @@ namespace GameFramework.Deterministic.Physics
 		public Vector3[] Vertices;
 		public Vector3[] Normals;
 
+		public Matrix3 Orientation;
+
 		public override void Visit(IVisitor Visitor)
 		{
 			base.Visit(Visitor);

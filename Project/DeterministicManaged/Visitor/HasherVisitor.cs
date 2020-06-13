@@ -71,6 +71,13 @@ namespace GameFramework.Deterministic.Visitor
 			VisitNumber(Vector3.Z);
 		}
 
+		public void VisitMatrix3(Matrix3 Matrix3)
+		{
+			for (int i = 0; i < 3; ++i)
+				for (int j = 0; j < 3; ++j)
+					VisitNumber(Matrix3.Values[i, j]);
+		}
+
 		public void VisitBounds(Bounds Bounds)
 		{
 			VisitVector3(Bounds.Position);

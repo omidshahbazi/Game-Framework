@@ -92,11 +92,11 @@ namespace GameFramework.Deterministic.Physics
 		private static void InitializeManifold(Manifold Manifold, Config Config)
 		{
 			// Calculate average restitution
-			//e = Math.Min(Manifold.BodyA.restitution, Manifold.BodyB.restitution);
+			Manifold.MixedRestitution = Math.Min(Manifold.BodyA.Restitution, Manifold.BodyB.Restitution);
 
 			// Calculate static and dynamic friction
-			//sf = std::sqrt(Manifold.BodyA.staticFriction * Manifold.BodyB.staticFriction);
-			//df = std::sqrt(Manifold.BodyA.dynamicFriction * Manifold.BodyB.dynamicFriction);
+			Manifold.MixedStaticFriction = Math.Sqrt(Manifold.BodyA.StaticFriction * Manifold.BodyB.StaticFriction);
+			Manifold.MixedDynamicFriction = Math.Sqrt(Manifold.BodyA.DynamicFriction * Manifold.BodyB.DynamicFriction);
 
 			for (uint i = 0; i < Manifold.Points.Length; ++i)
 			{
@@ -104,18 +104,13 @@ namespace GameFramework.Deterministic.Physics
 				Vector3 ra = Manifold.Points[i] - Manifold.BodyA.Position;
 				Vector3 rb = Manifold.Points[i] - Manifold.BodyB.Position;
 
-				Vector3 rv =
-					Manifold.BodyB.Velocity
-					//+ (Manifold.BodyB.angularVelocity * rb)
-					- Manifold.BodyA.Velocity
-					//- (Manifold.BodyA.angularVelocity, ra)
-					;
+				Vector3 rv = Manifold.BodyB.Velocity + (Manifold.BodyB.AngularVelocity * rb) - Manifold.BodyA.Velocity - (Manifold.BodyA.AngularVelocity * ra);
 
 				// Determine if we should perform a resting collision or not
 				// The idea is if the only thing moving this object is gravity,
 				// then the collision should be performed without any restitution
-				//if (rv.SqrMagnitude < (Config.Gravity * Config.StepTime).SqrMagnitude + Math.Epsilon)
-				//e = 0.0F;
+				if (rv.SqrMagnitude < (Config.Gravity * Config.StepTime).SqrMagnitude + Math.Epsilon)
+					Manifold.MixedRestitution = 0.0F;
 			}
 		}
 
@@ -130,66 +125,68 @@ namespace GameFramework.Deterministic.Physics
 				return;
 			}
 
-			//for (uint i = 0; i < Manifold.Points.Length; ++i)
-			//{
-			//	// Calculate radii from COM to contact
-			//	Vector3 rA = Manifold.Points[i] - Manifold.BodyA.Position;
-			//	Vector3 rB = Manifold.Points[i] - Manifold.BodyB.Position;
+			for (uint i = 0; i < Manifold.Points.Length; ++i)
+			{
+				// Calculate radii from COM to contact
+				Vector3 rA = Manifold.Points[i] - Manifold.BodyA.Position;
+				Vector3 rB = Manifold.Points[i] - Manifold.BodyB.Position;
 
-			//	// Relative velocity
-			//	Vector3 rv = Manifold.BodyB.Velocity + Cross(Manifold.BodyB.angularVelocity, rB) - Manifold.BodyA.Velocity - Cross(Manifold.BodyA.angularVelocity, rA);
+				// Relative velocity
+				Vector3 rv = Manifold.BodyB.Velocity + (Manifold.BodyB.AngularVelocity * rB) - Manifold.BodyA.Velocity - (Manifold.BodyA.AngularVelocity * rA);
 
-			//	// Relative velocity along the normal
-			//	Number contactVel = rv.Dot(Manifold.Normal);
+				// Relative velocity along the normal
+				Number contactVel = rv.Dot(Manifold.Normal);
 
-			//	// Do not resolve if velocities are separating
-			//	if (contactVel > 0)
-			//		return;
+				// Do not resolve if velocities are separating
+				if (contactVel > 0)
+					return;
 
-			//Number invMassA = (Manifold.BodyA.Mass == 0 ? (Number)0 : 1 / Manifold.BodyA.Mass);
-			//Number invMassB = (Manifold.BodyB.Mass == 0 ? (Number)0 : 1 / Manifold.BodyB.Mass);
+				Number invMassA = (Manifold.BodyA.Mass == 0 ? (Number)0 : 1 / Manifold.BodyA.Mass);
+				Number invMassB = (Manifold.BodyB.Mass == 0 ? (Number)0 : 1 / Manifold.BodyB.Mass);
 
-			//	Number rACrossN = Cross(rA, normal);
-			//	Number rBCrossN = Cross(rB, normal);
-			//	Number invMassSum = invMassA + invMassB + (rACrossN * rACrossN) * Manifold.BodyA.iI + (rBCrossN * rBCrossN) * Manifold.BodyB.iI;
+				Number invInertiaA = (Manifold.BodyA.Inertia == 0 ? (Number)0 : 1 / Manifold.BodyA.Inertia);
+				Number invInertiaB = (Manifold.BodyB.Inertia == 0 ? (Number)0 : 1 / Manifold.BodyB.Inertia);
 
-			//	// Calculate impulse scalar
-			//	Number j = -(1.0f + e) * contactVel;
-			//	j /= invMassSum;
-			//	j /= (Number)Manifold.Points.Length;
+				Vector3 rACrossN = rA * Manifold.Normal;
+				Vector3 rBCrossN = rB * Manifold.Normal;
+				Number invMassSum = ((rACrossN * rACrossN) * invInertiaA + (rBCrossN * rBCrossN) * invInertiaB + invMassA + invMassB).Magnitude;
 
-			//	// Apply impulse
-			//	Vector3 impulse = Manifold.Normal * j;
-			//	Manifold.BodyA.ApplyImpulse(-impulse, rA);
-			//	Manifold.BodyB.ApplyImpulse(impulse, rB);
+				// Calculate impulse scalar
+				Number j = -(1.0f + Manifold.MixedRestitution) * contactVel;
+				j /= invMassSum;
+				j /= Manifold.Points.Length;
 
-			//	// Friction impulse
-			//	rv = Manifold.BodyB.Velocity + Cross(Manifold.BodyB.angularVelocity, rB) -
-			//		Manifold.BodyA.Velocity - Cross(Manifold.BodyA.angularVelocity, rA);
+				// Apply impulse
+				Vector3 impulse = Manifold.Normal * j;
+				Manifold.BodyA.ApplyImpulse(-impulse, rA);
+				Manifold.BodyB.ApplyImpulse(impulse, rB);
 
-			//	Vector3 t = rv - (Manifold.Normal * rv.Dot(Manifold.Normal));
-			//	t.Normalize();
+				// Friction impulse
+				rv = Manifold.BodyB.Velocity + (Manifold.BodyB.AngularVelocity * rB) - Manifold.BodyA.Velocity - (Manifold.BodyA.AngularVelocity * rA);
 
-			//	// j tangent magnitude
-			//	Number jt = -rv.Dot(t);
-			//	jt /= invMassSum;
-			//	jt /= (Number)Manifold.Points.Length;
+				Vector3 t = rv - (Manifold.Normal * rv.Dot(Manifold.Normal));
+				t.Normalize();
 
-			//	// Don't apply tiny friction impulses
-			//	if (jt == 0)
-			//		return;
+				// j tangent magnitude
+				Number jt = -rv.Dot(t);
+				jt /= invMassSum;
+				jt /= (Number)Manifold.Points.Length;
 
-			//	// Coulumb's law
-			//	Vector3 tangentImpulse;
-			//	if (Math.Abs(jt) < j * sf)
-			//		tangentImpulse = t * jt;
-			//	else
-			//		tangentImpulse = t * -j * df;
+				// Don't apply tiny friction impulses
+				if (jt == 0)
+					return;
 
-			//	// Apply friction impulse
-			//	Manifold.BodyA.ApplyImpulse(-tangentImpulse, rA);
-			//	Manifold.BodyB.ApplyImpulse(tangentImpulse, rB);
-			//}
+				// Coulumb's law
+				Vector3 tangentImpulse;
+				if (Math.Abs(jt) < j * Manifold.MixedStaticFriction)
+					tangentImpulse = t * jt;
+				else
+					tangentImpulse = t * -j * Manifold.MixedDynamicFriction;
+
+				// Apply friction impulse
+				Manifold.BodyA.ApplyImpulse(-tangentImpulse, rA);
+				Manifold.BodyB.ApplyImpulse(tangentImpulse, rB);
+			}
 		}
 
 		private static void CorrectPosition(Manifold Manifold)
@@ -212,8 +209,8 @@ namespace GameFramework.Deterministic.Physics
 				return;
 
 			Body.Position += Body.Velocity * Config.StepTime;
-			//Body.Orient += Body.angularVelocity * dt;
-			//Body.SetOrient(Body.orient);
+			Body.Rotation += Body.AngularVelocity * Config.StepTime;
+			Body.SetOrient(Body.Rotation);
 
 			IntegrateForces(Body, Config);
 		}
@@ -265,7 +262,7 @@ namespace GameFramework.Deterministic.Physics
 
 			// Transform SphereShape center to Polygon model space
 			Vector3 center = Manifold.BodyA.Position;
-			center = Manifold.BodyB.Rotation.Transpose() * (center - Manifold.BodyB.Position);
+			center = b.Orientation.Transpose() * (center - Manifold.BodyB.Position);
 
 			// Find edge with minimum penetration
 			// Exact concept as using support points in Polygon vs Polygon
@@ -497,7 +494,7 @@ namespace GameFramework.Deterministic.Physics
 				Vector3 nw = Manifold.BodyA.Rotation * n;
 
 				// Transform face normal into B's model space
-				Matrix3 buT = Manifold.BodyB.Rotation.Transpose();
+				Matrix3 buT = b.Orientation.Transpose();
 				n = buT * nw;
 
 				// Retrieve support point from B along -n
@@ -528,7 +525,7 @@ namespace GameFramework.Deterministic.Physics
 
 			// Calculate normal in incident's frame of reference
 			referenceNormal = ReferenceBody.Rotation * referenceNormal; // To world space
-			referenceNormal = IncidentBody.Rotation.Transpose() * referenceNormal; // To incident's model space
+			referenceNormal = IncidentPolygon.Orientation.Transpose() * referenceNormal; // To incident's model space
 
 			// Find most anti-normal face on incident polygon
 			uint incidentFace = 0;

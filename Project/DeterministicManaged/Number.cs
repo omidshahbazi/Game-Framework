@@ -7,6 +7,7 @@ namespace GameFramework.Deterministic
 	{
 		public static readonly Number MaxValue = 99999;
 		public static readonly Number MinValue = -99999;
+		public static readonly Number Epsilon = new Number(1);
 
 		private const long ONE = 1 << SHIFT_AMOUNT;
 		private const int SHIFT_AMOUNT = 12;

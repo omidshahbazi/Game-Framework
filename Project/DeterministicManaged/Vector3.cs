@@ -42,7 +42,7 @@ namespace GameFramework.Deterministic
 
 		public void Normalize()
 		{
-			if (X == 0 && Y == 0)
+			if (Math.IsZero(X) && Math.IsZero(Y) && Math.IsZero(Z))
 				return;
 
 			Number value = Magnitude;
@@ -67,9 +67,24 @@ namespace GameFramework.Deterministic
 			return new Vector3(Left.X * Right, Left.Y * Right, Left.Z * Right);
 		}
 
+		public static Vector3 operator *(Vector3 Left, Vector3 Right)
+		{
+			return new Vector3((Left.Y * Right.Z) - (Left.Z * Right.Y), (Left.X * Right.Z) - (Left.Z * Right.X), (Left.X * Right.Y) - (Left.Z * Right.X));
+		}
+
 		public static Vector3 operator /(Vector3 Left, Number Right)
 		{
 			return new Vector3(Left.X / Right, Left.Y / Right, Left.Z / Right);
+		}
+
+		public static Vector3 operator /(Vector3 Left, Vector3 Right)
+		{
+			return new Vector3(Left.X / Right.X, Left.Y / Right.Y, Left.Z / Right.Z);
+		}
+
+		public static Vector3 operator +(Vector3 Left, Number Right)
+		{
+			return new Vector3(Left.X + Right, Left.Y + Right, Left.Z + Right);
 		}
 
 		public static Vector3 operator +(Vector3 Left, Vector3 Right)

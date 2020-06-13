@@ -36,7 +36,17 @@ namespace GameFramework.Deterministic
 		public static readonly Number ThreePI = PI * 3;
 		public static readonly Number DegreesToRadians = 0.01745329251994329576923690768489;
 		public static readonly Number RadiansToDegrees = 57.295779513082320876798154814105;
-		public static readonly Number Epsilon = 1.401298E-45F;
+		public static readonly Number Epsilon = Number.Epsilon;
+
+		public static bool AreEqual(Number Left, Number Right)
+		{
+			return Abs(Left - Right) <= Epsilon;
+		}
+
+		public static bool IsZero(Number Value)
+		{
+			return AreEqual(Value, 0);
+		}
 
 		public static Number Sqrt(Number Value)
 		{
@@ -197,7 +207,7 @@ namespace GameFramework.Deterministic
 
 		public static Number Min(params Number[] Values)
 		{
-			Number result = float.MaxValue;
+			Number result = Number.MaxValue;
 
 			for (int i = 0; i < Values.Length; ++i)
 				if (result > Values[i].Value)
@@ -208,7 +218,7 @@ namespace GameFramework.Deterministic
 
 		public static Number Max(params Number[] Values)
 		{
-			Number result = float.MinValue;
+			Number result = Number.MinValue;
 
 			for (int i = 0; i < Values.Length; ++i)
 				if (result < Values[i].Value)
@@ -222,7 +232,7 @@ namespace GameFramework.Deterministic
 			Number result = Value1;
 
 			for (int i = 1; i < Power; ++i)
-				result *= Value1.Value;
+				result *= Value1;
 
 			return result;
 		}
