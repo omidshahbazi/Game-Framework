@@ -11,6 +11,8 @@ namespace GameFramework.Deterministic.Physics
 		public Vector3 Orientation;
 		public Number Mass;
 
+		public Vector3 Force;
+
 		public Shape Shape;
 
 		public void Visit(IVisitor Visitor)
@@ -19,6 +21,8 @@ namespace GameFramework.Deterministic.Physics
 			Visitor.VisitVector3(Velocity);
 			Visitor.VisitVector3(Orientation);
 			Visitor.VisitNumber(Mass);
+
+			Visitor.VisitVector3(Force);
 
 			Shape.Visit(Visitor);
 		}

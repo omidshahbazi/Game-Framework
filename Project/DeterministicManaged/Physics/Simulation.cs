@@ -8,6 +8,7 @@ namespace GameFramework.Deterministic.Physics
 		public class Config
 		{
 			public Number StepTime;
+			public Vector3 Gravity;
 			public int CCDStepCount = 10;
 		}
 
@@ -37,7 +38,7 @@ namespace GameFramework.Deterministic.Physics
 				IntegrateForces(Scene.Bodies[i], Config);
 
 			for (int i = 0; i < Contacts.Count; ++i)
-				InitializeManifold((Manifold)Contacts[i]);
+				InitializeManifold((Manifold)Contacts[i], Config);
 
 			for (int i = 0; i < Config.CCDStepCount; ++i)
 				for (int j = 0; j < Contacts.Count; ++j)
@@ -53,13 +54,18 @@ namespace GameFramework.Deterministic.Physics
 			{
 				Body body = Scene.Bodies[i];
 
-				//TODO: remove any force and torque
+				body.Force = Vector3.Zero;
+				//body.torque = 0;
 			}
 		}
 
-		public static void IntegrateForces(Body Body, Config Config)
+		private static void IntegrateForces(Body Body, Config Config)
 		{
+			if (Body.Mass == 0)
+				return;
 
+			Body.Velocity += (Body.Force / Body.Mass + Config.Gravity) * (Config.StepTime / 2.0f);
+			//Body.angularVelocity += b->torque * b->iI * (dt / 2.0f);
 		}
 
 		private static void DispatchManifold(Manifold Manifold)
@@ -83,22 +89,123 @@ namespace GameFramework.Deterministic.Physics
 			}
 		}
 
-		private static void InitializeManifold(Manifold Manifold)
+		private static void InitializeManifold(Manifold Manifold, Config Config)
 		{
+			// Calculate average restitution
+			//e = Math.Min(A->restitution, B->restitution);
 
+			// Calculate static and dynamic friction
+			//sf = std::sqrt(A->staticFriction * B->staticFriction);
+			//df = std::sqrt(A->dynamicFriction * B->dynamicFriction);
+
+			for (uint i = 0; i < Manifold.Points.Length; ++i)
+			{
+				// Calculate radii from COM to contact
+				Vector3 ra = Manifold.Points[i] - Manifold.BodyA.Position;
+				Vector3 rb = Manifold.Points[i] - Manifold.BodyB.Position;
+
+				Vector3 rv =
+					Manifold.BodyB.Velocity
+					//+ (Manifold.BodyB->angularVelocity * rb)
+					- Manifold.BodyA.Velocity
+					//- (A->angularVelocity, ra)
+					;
+
+				// Determine if we should perform a resting collision or not
+				// The idea is if the only thing moving this object is gravity,
+				// then the collision should be performed without any restitution
+				//if (rv.SqrMagnitude < (Config.Gravity * Config.StepTime).SqrMagnitude + Math.Epsilon)
+				//e = 0.0f;
+			}
 		}
 
 		private static void SolveManifold(Manifold Manifold)
 		{
+			// Early out and positional correct if both objects have infinite mass
+			if (Equal(A->im + B->im, 0))
+			{
+				InfiniteMassCorrection();
+				return;
+			}
 
+			for (uint32 i = 0; i < contact_count; ++i)
+			{
+				// Calculate radii from COM to contact
+				Vec2 ra = contacts[i] - A->position;
+				Vec2 rb = contacts[i] - B->position;
+
+				// Relative velocity
+				Vec2 rv = B->velocity + Cross(B->angularVelocity, rb) -
+					A->velocity - Cross(A->angularVelocity, ra);
+
+				// Relative velocity along the normal
+				real contactVel = Dot(rv, normal);
+
+				// Do not resolve if velocities are separating
+				if (contactVel > 0)
+					return;
+
+				real raCrossN = Cross(ra, normal);
+				real rbCrossN = Cross(rb, normal);
+				real invMassSum = A->im + B->im + Sqr(raCrossN) * A->iI + Sqr(rbCrossN) * B->iI;
+
+				// Calculate impulse scalar
+				real j = -(1.0f + e) * contactVel;
+				j /= invMassSum;
+				j /= (real)contact_count;
+
+				// Apply impulse
+				Vec2 impulse = normal * j;
+				A->ApplyImpulse(-impulse, ra);
+				B->ApplyImpulse(impulse, rb);
+
+				// Friction impulse
+				rv = B->velocity + Cross(B->angularVelocity, rb) -
+					A->velocity - Cross(A->angularVelocity, ra);
+
+				Vec2 t = rv - (normal * Dot(rv, normal));
+				t.Normalize();
+
+				// j tangent magnitude
+				real jt = -Dot(rv, t);
+				jt /= invMassSum;
+				jt /= (real)contact_count;
+
+				// Don't apply tiny friction impulses
+				if (Equal(jt, 0.0f))
+					return;
+
+				// Coulumb's law
+				Vec2 tangentImpulse;
+				if (std::abs(jt) < j * sf)
+					tangentImpulse = t * jt;
+				else
+					tangentImpulse = t * -j * df;
+
+				// Apply friction impulse
+				A->ApplyImpulse(-tangentImpulse, ra);
+				B->ApplyImpulse(tangentImpulse, rb);
+			}
 		}
 
 		private static void CorrectPosition(Manifold Manifold)
 		{
+			const real k_slop = 0.05f; // Penetration allowance
+			const real percent = 0.4f; // Penetration percentage to correct
+			Vec2 correction = (std::max(penetration - k_slop, 0.0f) / (A->im + B->im)) * normal * percent;
+			A->position -= correction * A->im;
+			B->position += correction * B->im;
 		}
 
 		private static void IntegrateVelocity(Body Body)
 		{
+			if (b->im == 0.0f)
+				return;
+
+			b->position += b->velocity * dt;
+			b->orient += b->angularVelocity * dt;
+			b->SetOrient(b->orient);
+			IntegrateForces(b, dt);
 		}
 
 		private static void DispatchSphereToSphere(Manifold Manifold)
@@ -174,7 +281,7 @@ namespace GameFramework.Deterministic.Physics
 			Vector3 v2 = b.Vertices[i2];
 
 			// Check to see if center is within polygon
-			if (separation < Number.Epsilon)
+			if (separation < Math.Epsilon)
 			{
 				Manifold.Points = new Vector3[1];
 				Manifold.Normal = -(Manifold.BodyB.Rotation * b.Normals[faceNormal]);

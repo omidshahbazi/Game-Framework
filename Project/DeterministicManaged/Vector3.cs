@@ -114,7 +114,7 @@ namespace GameFramework.Deterministic
 
 		public override string ToString()
 		{
-			return "V2[" + X + ", " + Y + ", " + Z + "]";
+			return "(" + X + ", " + Y + ", " + Z + ")";
 		}
 	}
 }

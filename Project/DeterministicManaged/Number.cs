@@ -7,7 +7,6 @@ namespace GameFramework.Deterministic
 	{
 		public static readonly Number MaxValue = 99999;
 		public static readonly Number MinValue = -99999;
-		public static readonly Number Epsilon = 1.401298E-45F;
 
 		private const long ONE = 1 << SHIFT_AMOUNT;
 		private const int SHIFT_AMOUNT = 12;
@@ -136,7 +135,7 @@ namespace GameFramework.Deterministic
 
 		public override string ToString()
 		{
-			return "N[" + Value + "]";
+			return Value.ToString();
 		}
 	}
 }

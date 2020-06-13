@@ -27,13 +27,13 @@ namespace MathParserTest
 			Simulation.Config config = new Simulation.Config();
 			config.StepTime = 1;
 
-			ContactList contacts = new ContactList();
-
 			while (true)
 			{
+				ContactList contacts = new ContactList();
+
 				Simulation.Simulate(scene, config, contacts);
 
-				Console.WriteLine("Body1: {0}, Body2: {1}", body1.Position, body2.Position);
+				Console.WriteLine("Body1: {0}, Body2: {1} [Contacts: {2}]", body1.Position, body2.Position, contacts.Count);
 
 				Thread.Sleep(1000);
 			}
