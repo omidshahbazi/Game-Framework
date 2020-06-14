@@ -59,6 +59,15 @@ namespace GameFramework.Deterministic.Physics
 			}
 		}
 
+		public static void ApplyImpulse(Body Body, Vector3 Impulse, Vector3 ContactDirection)
+		{
+			Number invMass = (Body.Mass == 0 ? (Number)0 : 1 / Body.Mass);
+			Number invInertia = (Body.Inertia == 0 ? (Number)0 : 1 / Body.Inertia);
+
+			Body.Velocity += Impulse * invMass;
+			Body.AngularVelocity += ContactDirection * Impulse * invInertia;
+		}
+
 		private static void IntegrateForces(Body Body, Config Config)
 		{
 			if (Body.Mass == 0)
@@ -158,8 +167,8 @@ namespace GameFramework.Deterministic.Physics
 
 				// Apply impulse
 				Vector3 impulse = Manifold.Normal * j;
-				Manifold.BodyA.ApplyImpulse(-impulse, rA);
-				Manifold.BodyB.ApplyImpulse(impulse, rB);
+				ApplyImpulse(Manifold.BodyA, -impulse, rA);
+				ApplyImpulse(Manifold.BodyB, impulse, rB);
 
 				// Friction impulse
 				rv = Manifold.BodyB.Velocity + (Manifold.BodyB.AngularVelocity * rB) - Manifold.BodyA.Velocity - (Manifold.BodyA.AngularVelocity * rA);
@@ -184,8 +193,8 @@ namespace GameFramework.Deterministic.Physics
 					tangentImpulse = t * -j * Manifold.MixedDynamicFriction;
 
 				// Apply friction impulse
-				Manifold.BodyA.ApplyImpulse(-tangentImpulse, rA);
-				Manifold.BodyB.ApplyImpulse(tangentImpulse, rB);
+				ApplyImpulse(Manifold.BodyA, -tangentImpulse, rA);
+				ApplyImpulse(Manifold.BodyB, tangentImpulse, rB);
 			}
 		}
 
@@ -210,7 +219,7 @@ namespace GameFramework.Deterministic.Physics
 
 			Body.Position += Body.Velocity * Config.StepTime;
 			Body.Rotation += Body.AngularVelocity * Config.StepTime;
-			Body.SetOrient(Body.Rotation);
+			//Body.SetOrient(Body.Rotation);
 
 			IntegrateForces(Body, Config);
 		}

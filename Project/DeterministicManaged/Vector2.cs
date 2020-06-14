@@ -39,10 +39,10 @@ namespace GameFramework.Deterministic
 
 		public void Normalize()
 		{
-			if (Math.IsZero(X) && Math.IsZero(Y))
-				return;
-
 			Number value = Magnitude;
+
+			if (Math.IsZero(value))
+				return;
 
 			X /= value;
 			Y /= value;
