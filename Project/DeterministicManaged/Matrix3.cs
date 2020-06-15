@@ -4,26 +4,68 @@ namespace GameFramework.Deterministic
 {
 	public struct Matrix3
 	{
+		public static readonly Matrix3 Zero = new Matrix3(new Number[3, 3]);
+		public static readonly Matrix3 Identity = new Matrix3(new Number[,] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } });
+
 		public Number[,] Values;
 
-		public Matrix3(Vector3 Angles)
+		public Vector3 EulerAngles
 		{
-			Values = new Number[3, 3];
+			get
+			{
+				Number sY = Math.Sqrt((Values[0, 0] * Values[0, 0]) + (Values[1, 0] * Values[1, 0]));
 
-			//Number c = Math.Cos(radians);
-			//Number s = Math.Sin(radians);
+				bool singular = sY < 1e-6; // If
 
-			//m00 = c; m01 = -s;
-			//m10 = s; m11 = c;
+				Vector3 value = Vector3.Zero;
+				if (!singular)
+				{
+					value.X = Math.Atan2(Values[2, 1], Values[2, 2]);
+					value.Y = Math.Atan2(-Values[2, 0], sY);
+					value.Z = Math.Atan2(Values[1, 0], Values[0, 0]);
+				}
+				else
+				{
+					value.X = Math.Atan2(-Values[1, 2], Values[1, 1]);
+					value.Y = Math.Atan2(-Values[2, 0], sY);
+					value.Z = 0;
+				}
 
-			Values[0, 0] = 1;
-			Values[1, 1] = 1;
-			Values[2, 2] = 1;
+				return value;
+			}
+		}
+
+		public Matrix3(Number[,] Values)
+		{
+			this.Values = Values;
+		}
+
+		public void SetRotation(Vector3 EulerAngles)
+		{
+			Number sinX = Math.Sin(EulerAngles.X);
+			Number cosX = Math.Cos(EulerAngles.X);
+
+			Number sinY = Math.Sin(EulerAngles.Y);
+			Number cosY = Math.Cos(EulerAngles.Y);
+
+			Number sinZ = Math.Sin(EulerAngles.Z);
+			Number cosZ = Math.Cos(EulerAngles.Z);
+
+			Values[0, 0] = (cosX * cosY * cosZ) - (sinX * sinZ);
+			Values[0, 1] = -(cosX * cosY * sinZ) - (sinX * cosZ);
+			Values[0, 2] = cosX * sinY;
+			Values[1, 0] = (sinX * cosY * cosZ) + (cosX * sinZ);
+			Values[1, 1] = -(sinX * cosY * sinZ) + (cosX * cosZ);
+			Values[1, 2] = sinX * sinY;
+			Values[2, 0] = -sinY * cosZ;
+			Values[2, 1] = sinY * sinZ;
+			Values[2, 2] = cosY;
 		}
 
 		public Matrix3 Abs()
 		{
 			Matrix3 mat = new Matrix3();
+			mat.Values = new Number[3, 3];
 
 			mat.Values[0, 0] = Math.Abs(Values[0, 0]);
 			mat.Values[0, 1] = Math.Abs(Values[0, 1]);
@@ -56,6 +98,7 @@ namespace GameFramework.Deterministic
 		public Matrix3 Transpose()
 		{
 			Matrix3 mat = new Matrix3();
+			mat.Values = new Number[3, 3];
 
 			mat.Values[0, 0] = Values[0, 0];
 			mat.Values[0, 1] = Values[1, 0];

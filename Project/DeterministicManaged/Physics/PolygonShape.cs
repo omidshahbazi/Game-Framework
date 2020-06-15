@@ -8,7 +8,10 @@ namespace GameFramework.Deterministic.Physics
 		public Vector3[] Vertices;
 		public Vector3[] Normals;
 
-		public Matrix3 Orientation;
+		public override Types GetType()
+		{
+			return Types.Polygon;
+		}
 
 		public override void Visit(IVisitor Visitor)
 		{

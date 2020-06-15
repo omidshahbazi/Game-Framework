@@ -7,6 +7,11 @@ namespace GameFramework.Deterministic.Physics
 	{
 		public Number Radius;
 
+		public override Types GetType()
+		{
+			return Types.Sphere;
+		}
+
 		public override void Visit(IVisitor Visitor)
 		{
 			base.Visit(Visitor);

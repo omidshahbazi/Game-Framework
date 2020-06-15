@@ -15,12 +15,21 @@ namespace MathParserTest
 			Body body1 = new Body();
 			body1.Mass = 1;
 			body1.Position = new Vector3(0, 2, 0);
-			body1.Shape = new SphereShape() { Radius = 0.5F};
+			body1.Orientation = Matrix3.Identity;
+			//body1.Shape = new SphereShape() { Radius = 0.5F};
+
+			body1.Shape = new PolygonShape()
+			{
+				Vertices = new Vector3[] { new Vector3(-0.5F, -0.5F, 0), new Vector3(-0.5F, 0.5F, 0), new Vector3(0.5F, 0.5F, 0), new Vector3(0.5F, -0.5F, 0) },
+				Normals = new Vector3[] { Vector3.One, Vector3.One, Vector3.One, Vector3.One }
+			};
+
 			ArrayUtilities.Add(ref scene.Bodies, body1);
 
 			Body body2 = new Body();
 			body2.Mass = 0;
 			body2.Position = new Vector3(0, 0, 0);
+			body2.Orientation = Matrix3.Identity;
 			body2.Shape = new SphereShape() { Radius = 1 };
 			ArrayUtilities.Add(ref scene.Bodies, body2);
 

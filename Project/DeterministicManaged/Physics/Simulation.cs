@@ -1,5 +1,6 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.Common.Extensions;
+using System;
 
 namespace GameFramework.Deterministic.Physics
 {
@@ -12,15 +13,22 @@ namespace GameFramework.Deterministic.Physics
 			public int CCDStepCount = 10;
 		}
 
+		private static readonly Action<Manifold>[,] ManifoldDispatchers = new Action<Manifold>[,] { { DispatchSphereToSphere, DispatchSphereToPolygon }, { DispatchPolygonToSphere, DispatchPolygonToPolygon } };
+
 		public static void Simulate(Scene Scene, Config Config, ContactList Contacts)
 		{
-			for (int i = 0; i < Scene.Bodies.Length; ++i)
-			{
-				Body a = Scene.Bodies[i];
+			Simulate(Scene.Bodies, Config, Contacts);
+		}
 
-				for (int j = i + 1; j < Scene.Bodies.Length; ++j)
+		public static void Simulate(Body[] Bodies, Config Config, ContactList Contacts)
+		{
+			for (int i = 0; i < Bodies.Length; ++i)
+			{
+				Body a = Bodies[i];
+
+				for (int j = i + 1; j < Bodies.Length; ++j)
 				{
-					Body b = Scene.Bodies[j];
+					Body b = Bodies[j];
 
 					if (a.Mass == 0 && b.Mass == 0)
 						continue;
@@ -34,8 +42,8 @@ namespace GameFramework.Deterministic.Physics
 				}
 			}
 
-			for (int i = 0; i < Scene.Bodies.Length; ++i)
-				IntegrateForces(Scene.Bodies[i], Config);
+			for (int i = 0; i < Bodies.Length; ++i)
+				IntegrateForces(Bodies[i], Config);
 
 			for (int i = 0; i < Contacts.Count; ++i)
 				InitializeManifold((Manifold)Contacts[i], Config);
@@ -44,19 +52,24 @@ namespace GameFramework.Deterministic.Physics
 				for (int j = 0; j < Contacts.Count; ++j)
 					SolveManifold((Manifold)Contacts[j]);
 
-			for (int i = 0; i < Scene.Bodies.Length; ++i)
-				IntegrateVelocity(Scene.Bodies[i], Config);
+			for (int i = 0; i < Bodies.Length; ++i)
+				IntegrateVelocity(Bodies[i], Config);
 
 			for (int i = 0; i < Contacts.Count; ++i)
 				CorrectPosition((Manifold)Contacts[i]);
 
-			for (int i = 0; i < Scene.Bodies.Length; ++i)
+			for (int i = 0; i < Bodies.Length; ++i)
 			{
-				Body body = Scene.Bodies[i];
+				Body body = Bodies[i];
 
 				body.Force = Vector3.Zero;
-				//body.torque = 0;
+				body.Torque = 0;
 			}
+		}
+
+		public static void ApplyForce(Body Body, Vector3 Force)
+		{
+			Body.Force += Force;
 		}
 
 		public static void ApplyImpulse(Body Body, Vector3 Impulse, Vector3 ContactDirection)
@@ -73,29 +86,33 @@ namespace GameFramework.Deterministic.Physics
 			if (Body.Mass == 0)
 				return;
 
+			Number invInertia = (Body.Inertia == 0 ? (Number)0 : 1 / Body.Inertia);
+
 			Body.Velocity += (Body.Force / Body.Mass + Config.Gravity) * (Config.StepTime / 2.0f);
-			//Body.angularVelocity += Boyd.torque * Manifold.BodyB.iI * (Config.StepTime / 2.0F);
+			Body.AngularVelocity += Body.Torque * invInertia * (Config.StepTime / 2.0F);
 		}
 
 		private static void DispatchManifold(Manifold Manifold)
 		{
-			bool aIsSphere = (Manifold.BodyA.Shape is SphereShape);
-			bool bIsSphere = (Manifold.BodyB.Shape is SphereShape);
+			//bool aIsSphere = (Manifold.BodyA.Shape is SphereShape);
+			//bool bIsSphere = (Manifold.BodyB.Shape is SphereShape);
 
-			if (aIsSphere)
-			{
-				if (bIsSphere)
-					DispatchSphereToSphere(Manifold);
-				else
-					DispatchSphereToPolygon(Manifold);
-			}
-			else
-			{
-				if (bIsSphere)
-					DispatchPolygonToSphere(Manifold);
-				else
-					DispatchPolygonToPolygon(Manifold);
-			}
+			//if (aIsSphere)
+			//{
+			//	if (bIsSphere)
+			//		DispatchSphereToSphere(Manifold);
+			//	else
+			//		DispatchSphereToPolygon(Manifold);
+			//}
+			//else
+			//{
+			//	if (bIsSphere)
+			//		DispatchPolygonToSphere(Manifold);
+			//	else
+			//		DispatchPolygonToPolygon(Manifold);
+			//}
+
+			ManifoldDispatchers[(int)Manifold.BodyA.Shape.GetType(), (int)Manifold.BodyB.Shape.GetType()](Manifold);
 		}
 
 		private static void InitializeManifold(Manifold Manifold, Config Config)
@@ -218,8 +235,10 @@ namespace GameFramework.Deterministic.Physics
 				return;
 
 			Body.Position += Body.Velocity * Config.StepTime;
-			Body.Rotation += Body.AngularVelocity * Config.StepTime;
-			//Body.SetOrient(Body.Rotation);
+
+			Matrix3 rot = Matrix3.Zero;
+			rot.SetRotation(Body.AngularVelocity * Config.StepTime);
+			Body.Orientation *= rot;
 
 			IntegrateForces(Body, Config);
 		}
@@ -267,11 +286,13 @@ namespace GameFramework.Deterministic.Physics
 			SphereShape a = (SphereShape)Manifold.BodyA.Shape;
 			PolygonShape b = (PolygonShape)Manifold.BodyB.Shape;
 
+			Vector3 rotationB = Manifold.BodyB.Orientation.EulerAngles;
+
 			Manifold.Points = null;
 
 			// Transform SphereShape center to Polygon model space
 			Vector3 center = Manifold.BodyA.Position;
-			center = b.Orientation.Transpose() * (center - Manifold.BodyB.Position);
+			center = Manifold.BodyB.Orientation.Transpose() * (center - Manifold.BodyB.Position);
 
 			// Find edge with minimum penetration
 			// Exact concept as using support points in Polygon vs Polygon
@@ -300,7 +321,7 @@ namespace GameFramework.Deterministic.Physics
 			if (separation < Math.Epsilon)
 			{
 				Manifold.Points = new Vector3[1];
-				Manifold.Normal = -(Manifold.BodyB.Rotation * b.Normals[faceNormal]);
+				Manifold.Normal = -(rotationB * b.Normals[faceNormal]);
 				Manifold.Points = new Vector3[] { Manifold.Normal * a.Radius + Manifold.BodyA.Position };
 				Manifold.Penetration = a.Radius;
 				return;
@@ -318,10 +339,10 @@ namespace GameFramework.Deterministic.Physics
 
 				Manifold.Points = new Vector3[1];
 				Vector3 n = v1 - center;
-				n = Manifold.BodyB.Rotation * n;
+				n = rotationB * n;
 				n.Normalize();
 				Manifold.Normal = n;
-				v1 = Manifold.BodyB.Rotation * v1 + Manifold.BodyB.Position;
+				v1 = rotationB * v1 + Manifold.BodyB.Position;
 				Manifold.Points = new Vector3[] { v1 };
 			}
 			else if (dot2 <= 0) // Closest to v2
@@ -331,9 +352,9 @@ namespace GameFramework.Deterministic.Physics
 
 				Manifold.Points = new Vector3[1];
 				Vector3 n = v2 - center;
-				v2 = Manifold.BodyB.Rotation * v2 + Manifold.BodyB.Position;
+				v2 = rotationB * v2 + Manifold.BodyB.Position;
 				Manifold.Points = new Vector3[] { v2 };
-				n = Manifold.BodyB.Rotation * n;
+				n = rotationB * n;
 				n.Normalize();
 				Manifold.Normal = n;
 			}
@@ -343,7 +364,7 @@ namespace GameFramework.Deterministic.Physics
 				if ((center - v1).Dot(n) > a.Radius)
 					return;
 
-				n = Manifold.BodyB.Rotation * n;
+				n = rotationB * n;
 				Manifold.Normal = -n;
 				Manifold.Points = new Vector3[] { Manifold.Normal * a.Radius + Manifold.BodyA.Position };
 			}
@@ -351,7 +372,15 @@ namespace GameFramework.Deterministic.Physics
 
 		private static void DispatchPolygonToSphere(Manifold Manifold)
 		{
+			Body temp = Manifold.BodyB;
+			Manifold.BodyB = Manifold.BodyA;
+			Manifold.BodyA = temp;
+
 			DispatchSphereToPolygon(Manifold);
+
+			temp = Manifold.BodyB;
+			Manifold.BodyB = Manifold.BodyA;
+			Manifold.BodyA = temp;
 
 			Manifold.Normal = -Manifold.Normal;
 		}
@@ -410,6 +439,8 @@ namespace GameFramework.Deterministic.Physics
 				flip = true;
 			}
 
+			Vector3 refBodyRotation = refBody.Orientation.EulerAngles;
+
 			// World space incident face
 			Vector3[] incidentFace = new Vector3[2];
 			FindIncidentFace(incidentFace, refBody, refPoly, incBody, incPoly, referenceIndex);
@@ -433,8 +464,8 @@ namespace GameFramework.Deterministic.Physics
 			Vector3 v2 = refPoly.Vertices[referenceIndex];
 
 			// Transform vertices to world space
-			v1 = refBody.Rotation * v1 + refBody.Position;
-			v2 = refBody.Rotation * v2 + refBody.Position;
+			v1 = refBodyRotation * v1 + refBody.Position;
+			v2 = refBodyRotation * v2 + refBody.Position;
 
 			// Calculate reference face side normal in world space
 			Vector3 sidePlaneNormal = (v2 - v1);
@@ -489,21 +520,21 @@ namespace GameFramework.Deterministic.Physics
 		private static void FindAxisLeastPenetration(Manifold Manifold, out uint FaceIndex, out Number FaceDistance)
 		{
 			FaceIndex = 0;
-			FaceDistance = 0;
+			FaceDistance = Number.MinValue;
 
 			PolygonShape a = (PolygonShape)Manifold.BodyA.Shape;
 			PolygonShape b = (PolygonShape)Manifold.BodyB.Shape;
 
-			FaceDistance = Number.MinValue;
+			Vector3 bodyARotation = Manifold.BodyA.Orientation.EulerAngles;
 
 			for (uint i = 0; i < a.Vertices.Length; ++i)
 			{
 				// Retrieve a face normal from A
 				Vector3 n = a.Normals[i];
-				Vector3 nw = Manifold.BodyA.Rotation * n;
+				Vector3 nw = bodyARotation * n;
 
 				// Transform face normal into B's model space
-				Matrix3 buT = b.Orientation.Transpose();
+				Matrix3 buT = Manifold.BodyB.Orientation.Transpose();
 				n = buT * nw;
 
 				// Retrieve support point from B along -n
@@ -512,7 +543,7 @@ namespace GameFramework.Deterministic.Physics
 				// Retrieve vertex on face from A, transform into
 				// B's model space
 				Vector3 v = a.Vertices[i];
-				v = Manifold.BodyA.Rotation * v + Manifold.BodyA.Position;
+				v = bodyARotation * v + Manifold.BodyA.Position;
 				v -= Manifold.BodyB.Position;
 				v = buT * v;
 
@@ -533,8 +564,8 @@ namespace GameFramework.Deterministic.Physics
 			Vector3 referenceNormal = ReferencePolygon.Normals[ReferenceIndex];
 
 			// Calculate normal in incident's frame of reference
-			referenceNormal = ReferenceBody.Rotation * referenceNormal; // To world space
-			referenceNormal = IncidentPolygon.Orientation.Transpose() * referenceNormal; // To incident's model space
+			referenceNormal = ReferenceBody.Orientation.EulerAngles * referenceNormal; // To world space
+			referenceNormal = IncidentBody.Orientation.Transpose() * referenceNormal; // To incident's model space
 
 			// Find most anti-normal face on incident polygon
 			uint incidentFace = 0;
@@ -549,10 +580,12 @@ namespace GameFramework.Deterministic.Physics
 				}
 			}
 
+			Vector3 incidentBodyRotation = IncidentBody.Orientation.EulerAngles;
+
 			// Assign face vertices for incidentFace
-			Faces[0] = IncidentBody.Rotation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
+			Faces[0] = incidentBodyRotation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
 			incidentFace = incidentFace + 1 >= IncidentPolygon.Vertices.Length ? 0 : incidentFace + 1;
-			Faces[1] = IncidentBody.Rotation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
+			Faces[1] = incidentBodyRotation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
 		}
 
 		private static uint Clip(Vector3 Normal, Number C, Vector3[] Faces)

@@ -6,7 +6,7 @@ namespace GameFramework.Deterministic.Physics
 	public class Body : IVisitee
 	{
 		public Vector3 Position;
-		public Vector3 Rotation;
+		public Matrix3 Orientation;
 		public Number Mass;
 		public Number Inertia;
 		public Number Restitution;
@@ -23,7 +23,7 @@ namespace GameFramework.Deterministic.Physics
 		public void Visit(IVisitor Visitor)
 		{
 			Visitor.VisitVector3(Position);
-			Visitor.VisitVector3(Rotation);
+			Visitor.VisitMatrix3(Orientation);
 			Visitor.VisitNumber(Mass);
 			Visitor.VisitNumber(Inertia);
 			Visitor.VisitNumber(Restitution);
