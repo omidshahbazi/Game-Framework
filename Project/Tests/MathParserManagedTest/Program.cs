@@ -1,4 +1,6 @@
-﻿using GameFramework.Common.Extensions;
+﻿using GameFramework.ASCIISerializer;
+using GameFramework.BinarySerializer;
+using GameFramework.Common.Extensions;
 using GameFramework.Deterministic;
 using GameFramework.Deterministic.Physics;
 using System;
@@ -8,129 +10,112 @@ namespace MathParserTest
 {
 	class Program
 	{
+		//	static void Main(string[] args)
+		//	{
+		//		Scene scene = new Scene();
+
+		//		Body body1 = new Body();
+		//		body1.Mass = 1;
+		//		body1.Position = new Vector3(0, 2, 0);
+		//		body1.Orientation = Matrix3.Identity;
+		//		//body1.Shape = new SphereShape() { Radius = 0.5F};
+
+		//		body1.Shape = new PolygonShape()
+		//		{
+		//			Vertices = new Vector3[] { new Vector3(-0.5F, -0.5F, 0), new Vector3(-0.5F, 0.5F, 0), new Vector3(0.5F, 0.5F, 0), new Vector3(0.5F, -0.5F, 0) },
+		//			Normals = new Vector3[] { Vector3.One, Vector3.One, Vector3.One, Vector3.One }
+		//		};
+
+		//		ArrayUtilities.Add(ref scene.Bodies, body1);
+
+		//		Body body2 = new Body();
+		//		body2.Mass = 0;
+		//		body2.Position = new Vector3(0, 0, 0);
+		//		body2.Orientation = Matrix3.Identity;
+		//		body2.Shape = new SphereShape() { Radius = 1 };
+		//		ArrayUtilities.Add(ref scene.Bodies, body2);
+
+		//		Simulation.Config config = new Simulation.Config();
+		//		config.StepTime = 0.2F;
+
+		//		while (true)
+		//		{
+		//			ContactList contacts = new ContactList();
+
+		//			Simulation.Simulate(scene, config, contacts);
+
+		//			Console.WriteLine("Body1: {0}, Body2: {1} [Contacts: {2}]", body1.Position, body2.Position, contacts.Count);
+
+		//			Thread.Sleep(1000 * config.StepTime);
+		//		}
+		//	}
+		//}
+
+
+
+
+		//class Program
+		//{
+		//	class obj1
+		//	{
+		//		int a;
+		//	}
+
+		//	enum infos
+		//	{
+		//		element1,
+		//		element2
+		//	}
+
+		//	class Obj
+		//	{
+		//		int a = 0;
+		//		public string test
+		//		{
+		//			get;
+		//			private set;
+		//		}
+
+		//		infos Info;
+
+		//		obj1[] vals;
+		//	}
+
+
+
+		//	enum en
+		//	{
+		//		a1,
+		//		a2
+		//	}
+
+		//	class test1
+		//	{
+		//		float xx = 23.5F;
+		//	}
+
+		class test
+		{
+			public int[][] b = new int[][] { new int[] { 10, 11, 12 }, new int[] { 20, 30, 40 } };
+			public int[,] a = new int[,] { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+			public Matrix3 i = Matrix3.Zero;
+			public Matrix3 j = Matrix3.Identity;
+		}
+
 		static void Main(string[] args)
 		{
-			Scene scene = new Scene();
+			test t = new test();
 
-			Body body1 = new Body();
-			body1.Mass = 1;
-			body1.Position = new Vector3(0, 2, 0);
-			body1.Orientation = Matrix3.Identity;
-			//body1.Shape = new SphereShape() { Radius = 0.5F};
+			ISerializeObject d = Creator.Serialize<ISerializeObject>(t);
 
-			body1.Shape = new PolygonShape()
-			{
-				Vertices = new Vector3[] { new Vector3(-0.5F, -0.5F, 0), new Vector3(-0.5F, 0.5F, 0), new Vector3(0.5F, 0.5F, 0), new Vector3(0.5F, -0.5F, 0) },
-				Normals = new Vector3[] { Vector3.One, Vector3.One, Vector3.One, Vector3.One }
-			};
+			test f = Creator.Bind<test>(d);
 
-			ArrayUtilities.Add(ref scene.Bodies, body1);
+			BufferStream buff = new BufferStream(new byte[10000]);
+			Serializer.Serialize(f, buff);
 
-			Body body2 = new Body();
-			body2.Mass = 0;
-			body2.Position = new Vector3(0, 0, 0);
-			body2.Orientation = Matrix3.Identity;
-			body2.Shape = new SphereShape() { Radius = 1 };
-			ArrayUtilities.Add(ref scene.Bodies, body2);
+			buff.ResetRead();
 
-			Simulation.Config config = new Simulation.Config();
-			config.StepTime = 0.2F;
-
-			while (true)
-			{
-				ContactList contacts = new ContactList();
-
-				Simulation.Simulate(scene, config, contacts);
-
-				Console.WriteLine("Body1: {0}, Body2: {1} [Contacts: {2}]", body1.Position, body2.Position, contacts.Count);
-
-				Thread.Sleep(1000 * config.StepTime);
-			}
+			f = Serializer.Deserialize<test>(buff);
 		}
 	}
-
-
-
-
-	//class Program
-	//{
-	//	class obj1
-	//	{
-	//		int a;
-	//	}
-
-	//	enum infos
-	//	{
-	//		element1,
-	//		element2
-	//	}
-
-	//	class Obj
-	//	{
-	//		int a = 0;
-	//		public string test
-	//		{
-	//			get;
-	//			private set;
-	//		}
-
-	//		infos Info;
-
-	//		obj1[] vals;
-	//	}
-
-
-
-	//	enum en
-	//	{
-	//		a1,
-	//		a2
-	//	}
-
-	//	class test1
-	//	{
-	//		float xx = 23.5F;
-	//	}
-
-	//	class test
-	//	{
-	//		public Number i = 1;
-	//	}
-
-	//	static void Main(string[] args)
-	//	{
-	//		test t = new test();
-
-	//		ISerializeObject d = Creator.Serialize<ISerializeObject>(t);
-
-	//		d.Contains("");
-	//		//FrameData f = Creator.Bind<FrameData>(d);
-
-
-	//		//			string str = @"Trophy+
-	//		//if(B1=-1,0,if(B1=0,-30,if(B1=1,-20,if(B1=2,0,20))))+
-	//		//if(B2=-1,0,if(B2=0,-30,if(B2=1,-20,if(B2=2,0,20))))+
-	//		//if(B3=-1,0,if(B3=0,-30,if(B3=1,-20,if(B3=2,0,20))))+
-	//		//if(B4=-1,0,if(B4=0,-30,if(B4=1,-20,if(B4=2,0,20))))+
-
-	//		//if(B5=-1,0,if(B5=0,-30,if(B5=1,-20,if(B5=2,0,20))))";
-
-	//		//			Expression ex0 = new Expression(str);
-	//		//			//Expression ex1 = new Expression("  ( 15+ 2)");
-	//		//			//Expression ex2 = new Expression("((1 +2) * 3)");
-	//		//			//Expression ex3 = new Expression("((15 +2) * 3.4) ^ 2");
-	//		//			//Expression ex4 = new Expression("((15 +2 - 1) * 3.4) ^ 0.95");
-	//		//			//Expression ex5 = new Expression("if (x>= \n10, x+10, if (x> 0, 15, 11))");
-	//		//			//Expression ex6 = new Expression("random(1,5)");
-	//		//			double res0 = ex0.Calculate(new Argument("Trophy", 351), new Argument("B1", -1), new Argument("B2", -1), new Argument("B3", -1), new Argument("B4", -1), new Argument("B5", -1));
-	//		//			//double res1 = ex1.Calculate();
-	//		//			//double res2 = ex2.Calculate();
-	//		//			//double res3 = ex3.Calculate();
-	//		//			//double res4 = ex4.Calculate();
-	//		//			//double res5 = ex5.Calculate(new Argument("x", -5));
-	//		//			//double a = ex6.Calculate(new Argument("x", 1));
-	//		//			//Console.WriteLine(ex6.ToString());
-	//		//			Console.ReadLine();
-	//	}
-	//}
 }

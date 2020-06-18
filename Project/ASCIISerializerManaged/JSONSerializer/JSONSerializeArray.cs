@@ -155,7 +155,16 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 				obj = (obj is string ? Enum.Parse(type, obj.ToString()) : Enum.ToObject(type, obj));
 			}
 			else
-				obj = Convert.ChangeType(obj, typeof(T));
+			{
+				try
+				{
+					obj = Convert.ChangeType(obj, typeof(T));
+				}
+				catch
+				{
+					return DefaultValue;
+				}
+			}
 
 			return (T)obj;
 		}

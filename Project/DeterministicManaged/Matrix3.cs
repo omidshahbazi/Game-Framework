@@ -1,5 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 
+using System.Runtime.CompilerServices;
+
 namespace GameFramework.Deterministic
 {
 	public struct Matrix3
@@ -9,6 +11,7 @@ namespace GameFramework.Deterministic
 
 		public Number[,] Values;
 
+		[CompilerGenerated]
 		public Vector3 EulerAngles
 		{
 			get

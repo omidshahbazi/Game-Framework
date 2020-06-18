@@ -243,10 +243,6 @@ namespace GameFramework.BinarySerializer
 			return ReadUInt32();
 		}
 
-		public void ReadArrayElement()
-		{
-		}
-
 		public void Print(int BytesPerLine = 8)
 		{
 			Console.Write("Size: ");

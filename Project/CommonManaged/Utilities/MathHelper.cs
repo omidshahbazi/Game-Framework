@@ -110,5 +110,18 @@ namespace GameFramework.Common.Utilities
 
 			return Value;
 		}
+
+		public static int[] FindMultiplesOf(int Value)
+		{
+			int halfValue = Value / 2;
+
+			List<int> multiples = new List<int>();
+
+			for (int i = 2; i <= halfValue; ++i)
+				if (Value % i == 0)
+					multiples.Add(i);
+
+			return multiples.ToArray();
+		}
 	}
 }

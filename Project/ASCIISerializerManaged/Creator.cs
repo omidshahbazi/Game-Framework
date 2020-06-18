@@ -1,7 +1,9 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.ASCIISerializer.JSONSerializer;
+using GameFramework.Common.Extensions;
 using GameFramework.Common.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace GameFramework.ASCIISerializer
@@ -155,12 +157,64 @@ namespace GameFramework.ASCIISerializer
 
 			private static object Bind(ISerializeArray Array, Type Type)
 			{
-				Array arr = (Array)Activator.CreateInstance(Type, (int)Array.Count);
+				Array arr = null;
 
-				for (uint i = 0; i < Array.Count; ++i)
-					arr.SetValue(Cast(Array.Get<object>(i), Type.GetElementType()), i);
+				Type elementType = Type.GetElementType();
+
+				if (Type.Name.Contains(",")) // Multidimension
+				{
+					List<object> dimensions = new List<object>();
+					ISerializeData data = Array;
+					while (true)
+					{
+						ISerializeArray arrTemp = (ISerializeArray)data;
+
+						dimensions.Add((int)arrTemp.Count);
+
+						if (arrTemp.Count == 0)
+							break;
+
+						data = arrTemp.Get<ISerializeArray>(0);
+						if (data == null)
+							break;
+
+						if (!(data is ISerializeArray))
+							break;
+					}
+
+					arr = (Array)Activator.CreateInstance(Type, dimensions.ToArray());
+
+					int[] indices = new int[dimensions.Count];
+
+					Bind(Array, elementType, arr, indices, 0);
+				}
+				else // Jagged
+				{
+					arr = (Array)Activator.CreateInstance(Type, (int)Array.Count);
+
+					for (uint i = 0; i < Array.Count; ++i)
+						arr.SetValue(Cast(Array.Get<object>(i), elementType), i);
+				}
 
 				return arr;
+			}
+
+			private static void Bind(ISerializeArray Array, Type Type, Array Object, int[] Indices, int DimensionIndex)
+			{
+				for (uint i = 0; i < Array.Count; ++i)
+				{
+					if (DimensionIndex < Indices.Length - 1)
+					{
+						if (DimensionIndex < Indices.Length - 1)
+							Indices.Set(0, (uint)DimensionIndex + 1, (uint)(Indices.Length - (DimensionIndex + 1)));
+
+						Bind(Array.Get<ISerializeArray>(i), Type, Object, Indices, DimensionIndex + 1);
+					}
+					else
+						Object.SetValue(Cast(Array.Get<object>(i), Type), Indices);
+
+					++Indices[DimensionIndex];
+				}
 			}
 
 			private static object Cast(object Value, Type Type)
@@ -261,23 +315,19 @@ namespace GameFramework.ASCIISerializer
 
 			private static ISerializeArray SerializeArray(object Instance)
 			{
+				object[] array = ((Array)Instance).ToJaggedArray();
+
 				ISerializeArray arr = Creator.Create<ISerializeArray>();
-
-				Array array = (Array)Instance;
-
-				Type arrayType = Instance.GetType().GetElementType();
 
 				for (int i = 0; i < array.Length; ++i)
 				{
-					object value = array.GetValue(i);
+					object value = array[i];
 
 					if (value == null)
 						arr.Add((object)null);
 					else
 					{
 						Type valueType = value.GetType();
-
-						bool shouldAddValueTypeInfo = (valueType != arrayType);
 
 						if (valueType.IsArray)
 							arr.Add(SerializeArray(value));
@@ -286,14 +336,7 @@ namespace GameFramework.ASCIISerializer
 						else if (valueType.IsEnum)
 							arr.Add(value.ToString());
 						else
-						{
-							ISerializeObject subObj = SerializeObject(value);
-
-							if (shouldAddValueTypeInfo)
-								subObj.Set(TYPE_FIELD_NAME, valueType.GetMinimalTypeName());
-
-							arr.Add(subObj);
-						}
+							arr.Add(SerializeObject(value));
 					}
 				}
 
