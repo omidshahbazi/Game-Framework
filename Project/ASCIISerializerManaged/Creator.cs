@@ -232,7 +232,21 @@ namespace GameFramework.ASCIISerializer
 					return 0;
 				}
 
-				return Convert.ChangeType(Value, Type);
+				try
+				{
+					return Convert.ChangeType(Value, Type);
+				}
+				catch
+				{ }
+
+				try
+				{
+					return Activator.CreateInstance(Type, Value);
+				}
+				catch
+				{ }
+
+				throw new InvalidCastException(string.Format("Invalid cast from '{0}' to '{1}'.", Value.GetType(), Type));
 			}
 		}
 
