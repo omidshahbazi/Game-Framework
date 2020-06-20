@@ -40,7 +40,7 @@ namespace GameFramework.Deterministic
 
 		public static Matrix3 ReadMatrix3(this BufferStream Buffer)
 		{
-			Matrix3 data = new Matrix3();
+			Matrix3 data = Matrix3.Zero;
 
 			for (int i = 0; i < 3; ++i)
 				for (int j = 0; j < 3; ++j)

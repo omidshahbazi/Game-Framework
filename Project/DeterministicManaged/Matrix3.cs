@@ -67,8 +67,7 @@ namespace GameFramework.Deterministic
 
 		public Matrix3 Abs()
 		{
-			Matrix3 mat = new Matrix3();
-			mat.Values = new Number[3, 3];
+			Matrix3 mat = Matrix3.Zero;
 
 			mat.Values[0, 0] = Math.Abs(Values[0, 0]);
 			mat.Values[0, 1] = Math.Abs(Values[0, 1]);
@@ -100,8 +99,7 @@ namespace GameFramework.Deterministic
 
 		public Matrix3 Transpose()
 		{
-			Matrix3 mat = new Matrix3();
-			mat.Values = new Number[3, 3];
+			Matrix3 mat = Matrix3.Zero;
 
 			mat.Values[0, 0] = Values[0, 0];
 			mat.Values[0, 1] = Values[1, 0];
