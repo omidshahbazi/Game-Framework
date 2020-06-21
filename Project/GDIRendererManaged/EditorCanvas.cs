@@ -8,6 +8,18 @@ namespace GameFramework.GDIRenderer
 	{
 		private Point lastMousePosition;
 
+		public bool DrawOriginLines
+		{
+			get;
+			set;
+		}
+
+		public bool DrawGridLines
+		{
+			get;
+			set;
+		}
+
 		protected bool IsPanning
 		{
 			get;
@@ -16,22 +28,31 @@ namespace GameFramework.GDIRenderer
 
 		protected override void OnDrawCanvas(IDevice Device)
 		{
-			base.OnDrawCanvas(Device);
-
-			Pen originPen = new Pen(Color.Black, 1.0F);
-			Pen gridPen = new Pen(Color.Gray, 0.5F);
-
 			PointF min = ScreenToCanvas(PointF.Empty);
 			PointF max = ScreenToCanvas(new PointF(Width, Height));
 
-			//for (float x = min.X; x < max.X; x += 10)
-			//	Graphics.DrawLine(gridPen, x, min.Y, x, max.Y);
+			if (DrawGridLines)
+			{
+				Pen gridPen = new Pen(Color.Gray, 0.2F);
 
-			//for (float y = min.Y; y < max.Y; y += 10)
-			//	Graphics.DrawLine(gridPen, min.X, y, max.X, y);
+				float unit = 10;// 100.0F / Zoom;
 
-			Device.DrawLine(min.X, 0.0F, max.X, 0.0F, originPen);
-			Device.DrawLine(0.0F, min.Y, 0.0F, max.Y, originPen);
+				for (float x = min.X; x < max.X; x += unit)
+					Device.DrawLine(x, min.Y, x, max.Y, gridPen);
+
+				for (float y = min.Y; y < max.Y; y += unit)
+					Device.DrawLine(min.X, y, max.X, y, gridPen);
+			}
+
+			if (DrawOriginLines)
+			{
+				Pen originPen = new Pen(Color.Black, 1.0F);
+
+				Device.DrawLine(min.X, 0.0F, max.X, 0.0F, originPen);
+				Device.DrawLine(0.0F, min.Y, 0.0F, max.Y, originPen);
+			}
+
+			base.OnDrawCanvas(Device);
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
