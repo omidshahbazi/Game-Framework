@@ -49,6 +49,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerNetworkingNativeTest"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeterministicManaged", "DeterministicManaged\DeterministicManaged.csproj", "{EA5CF4D3-540C-49C7-B13A-204781017C08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GDIRendererManaged", "GDIRendererManaged\GDIRendererManaged.csproj", "{CF198119-9E6B-4F90-A878-088CBF2CE90D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -307,6 +309,18 @@ Global
 		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|x64.Build.0 = Release|Any CPU
 		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|x86.ActiveCfg = Release|Any CPU
 		{EA5CF4D3-540C-49C7-B13A-204781017C08}.Release|x86.Build.0 = Release|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|x64.Build.0 = Release|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

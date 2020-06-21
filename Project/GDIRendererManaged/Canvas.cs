@@ -1,0 +1,179 @@
+﻿// Copyright 2016-2017 ?????????????. All Rights Reserved.
+using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+using System.Windows.Forms;
+
+namespace GameFramework.GDIRenderer
+{
+	public class Canvas : UserControl
+	{
+		public delegate void DrawCanvasHandler(IDevice Device);
+
+		protected Matrix matrix = new Matrix();
+
+		private float minimumZoom = 1.0F;
+		private float maximumZoom = 1.0F;
+		private float zoom = 1.0F;
+
+		private PointF[] pointArray = new PointF[1] { PointF.Empty };
+
+		public event DrawCanvasHandler DrawCanvas;
+
+		private Device device = null;
+
+		public PointF Pan
+		{
+			get;
+			set;
+		}
+
+		public float Zoom
+		{
+			get { return zoom; }
+			set
+			{
+				if (value < MinimumZoom)
+					zoom = MinimumZoom;
+				else if (value > MaximumZoom)
+					zoom = MaximumZoom;
+				else
+					zoom = value;
+			}
+		}
+
+		public float MinimumZoom
+		{
+			get { return minimumZoom; }
+			set { minimumZoom = value; }
+		}
+
+		public float MaximumZoom
+		{
+			get { return maximumZoom; }
+			set { maximumZoom = value; }
+		}
+
+		public Point Origin
+		{
+			get;
+			set;
+		}
+
+		public int TextContrast
+		{
+			get;
+			set;
+		}
+
+		public InterpolationMode InterpolationMode
+		{
+			get;
+			set;
+		}
+
+		public SmoothingMode SmoothingMode
+		{
+			get;
+			set;
+		}
+
+		public CompositingQuality CompositingQuality
+		{
+			get;
+			set;
+		}
+
+		public GraphicsUnit GraphicsUnit
+		{
+			get;
+			set;
+		}
+
+		public PixelOffsetMode PixelOffsetMode
+		{
+			get;
+			set;
+		}
+
+		public TextRenderingHint TextRenderingHint
+		{
+			get;
+			set;
+		}
+
+		public Canvas()
+		{
+			ResizeRedraw = true;
+			DoubleBuffered = true;
+			GraphicsUnit = GraphicsUnit.Pixel;
+		}
+
+		protected override void OnMouseEnter(EventArgs e)
+		{
+			base.OnMouseEnter(e);
+
+			Focus();
+		}
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			if (device == null)
+				device = new Device();
+			device.Graphics = e.Graphics;
+
+			matrix.Reset();
+			matrix.Translate(Pan.X, Pan.Y);
+			matrix.Scale(Zoom, Zoom);
+			e.Graphics.Transform = matrix;
+
+			e.Graphics.CompositingQuality = CompositingQuality;
+			e.Graphics.InterpolationMode = InterpolationMode;
+			e.Graphics.SmoothingMode = SmoothingMode;
+			e.Graphics.PageUnit = GraphicsUnit;
+			e.Graphics.PixelOffsetMode = PixelOffsetMode;
+			e.Graphics.RenderingOrigin = Origin;
+			e.Graphics.TextContrast = TextContrast;
+			e.Graphics.TextRenderingHint = TextRenderingHint;
+
+			OnDrawCanvas(device);
+		}
+
+		protected virtual void OnDrawCanvas(IDevice Device)
+		{
+			if (DrawCanvas != null)
+				DrawCanvas(Device);
+		}
+
+		public void LookAt(PointF Point)
+		{
+			var halfW = Width * 0.5F;
+			var halfH = Height * 0.5F;
+			Pan = new PointF(-Point.X * Zoom + halfW, -Point.Y * Zoom + halfH);
+		}
+
+		public PointF CanvasToScreen(PointF Point)
+		{
+			pointArray[0] = Point;
+			matrix.TransformPoints(pointArray);
+			return pointArray[0];
+		}
+
+		public PointF ScreenToCanvas(PointF Point)
+		{
+			pointArray[0] = Point;
+			Matrix inverseMatrix = matrix.Clone();
+			inverseMatrix.Invert();
+			inverseMatrix.TransformPoints(pointArray);
+			return pointArray[0];
+		}
+
+		public override void Refresh()
+		{
+			base.Refresh();
+
+			Invalidate();
+		}
+	}
+}
