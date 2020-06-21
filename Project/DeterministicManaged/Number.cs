@@ -30,6 +30,12 @@ namespace GameFramework.Deterministic
 			RawValue = Value;
 		}
 
+		public Number(double Value)
+		{
+			Value *= ONE;
+			RawValue = (int)System.Math.Round(Value);
+		}
+
 		public Number(float Value)
 		{
 			Value *= ONE;
