@@ -103,6 +103,12 @@ namespace GameFramework.GDIRenderer
 			set;
 		}
 
+		public bool FlipY
+		{
+			get;
+			set;
+		}
+
 		public Canvas()
 		{
 			ResizeRedraw = true;
@@ -125,7 +131,7 @@ namespace GameFramework.GDIRenderer
 
 			matrix.Reset();
 			matrix.Translate(Pan.X, Pan.Y);
-			matrix.Scale(Zoom, Zoom);
+			matrix.Scale(Zoom, Zoom * (FlipY ? -1 : 1));
 			e.Graphics.Transform = matrix;
 
 			e.Graphics.CompositingQuality = CompositingQuality;
