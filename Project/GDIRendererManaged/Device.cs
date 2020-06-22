@@ -58,12 +58,12 @@ namespace GameFramework.GDIRenderer
 
 		void IDevice.DrawCircle(float X, float Y, float Radius, Pen Pen)
 		{
-			Graphics.DrawEllipse(Pen, new RectangleF(X, Y, Radius, Radius));
+			Graphics.DrawEllipse(Pen, new RectangleF(X, Y, Radius * 2, Radius * 2));
 		}
 
 		void IDevice.DrawFillCircle(float X, float Y, float Radius, Brush Brush)
 		{
-			Graphics.FillEllipse(Brush, new RectangleF(X, Y, Radius, Radius));
+			Graphics.FillEllipse(Brush, new RectangleF(X, Y, Radius * 2, Radius * 2));
 		}
 
 		SizeF IDevice.MeasureString(string Value, Font Font)
