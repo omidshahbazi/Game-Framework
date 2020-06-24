@@ -156,7 +156,9 @@ namespace GameFramework.GDIRenderer
 		{
 			var halfW = Width * 0.5F;
 			var halfH = Height * 0.5F;
-			Pan = new PointF(-Point.X * Zoom + halfW, -Point.Y * Zoom + halfH);
+			Pan = new PointF(-Point.X * Zoom + halfW, Point.Y * Zoom + halfH);
+
+			Refresh();
 		}
 
 		public PointF CanvasToScreen(PointF Point)

@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeterministicManaged", "Det
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GDIRendererManaged", "GDIRendererManaged\GDIRendererManaged.csproj", "{CF198119-9E6B-4F90-A878-088CBF2CE90D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeterministicManagedTest", "Tests\DeterministicManagedTest\DeterministicManagedTest.csproj", "{5E503774-25CE-48DF-AE8C-2B15FADD330C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -321,6 +323,18 @@ Global
 		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|x64.Build.0 = Release|Any CPU
 		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|x86.ActiveCfg = Release|Any CPU
 		{CF198119-9E6B-4F90-A878-088CBF2CE90D}.Release|x86.Build.0 = Release|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Debug|x64.Build.0 = Debug|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Debug|x86.Build.0 = Debug|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Release|x64.ActiveCfg = Release|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Release|x64.Build.0 = Release|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Release|x86.ActiveCfg = Release|Any CPU
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -334,6 +348,7 @@ Global
 		{836429D0-C515-4B28-B18D-A946ADD2227D} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
 		{8A2EB620-C47B-4B96-AD51-41253607FD97} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
 		{AAD4027D-8D4C-4330-A6AF-0E961FCF4253} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
+		{5E503774-25CE-48DF-AE8C-2B15FADD330C} = {5086D0B1-5ADD-4F2E-B887-ABB2D554746A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {387CE56F-DF30-4C5E-8D43-82CFB09C9921}

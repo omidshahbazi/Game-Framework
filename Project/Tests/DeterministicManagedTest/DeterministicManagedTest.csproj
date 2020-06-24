@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5E503774-25CE-48DF-AE8C-2B15FADD330C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DeterministicTest</RootNamespace>
+    <AssemblyName>DeterministicManagedTest</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binaries\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binaries\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Drawer.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestWindow.Designer.cs">
+      <DependentUpon>TestWindow.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AnalyticsManaged\AnalyticsManaged.csproj">
+      <Project>{7e1d73d2-07dc-428e-b951-0fff9144bc6b}</Project>
+      <Name>AnalyticsManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ASCIISerializerManaged\ASCIISerializerManaged.csproj">
+      <Project>{CF111332-3A81-4D4A-A04C-6634D8B6A8C6}</Project>
+      <Name>ASCIISerializerManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\BinarySerializerManaged\BinarySerializerManaged.csproj">
+      <Project>{C4F68DA6-6645-46A1-8481-DFE4F1DC9075}</Project>
+      <Name>BinarySerializerManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CommonManaged\CommonManaged.csproj">
+      <Project>{26568521-9093-4208-9bac-10f5b123bffb}</Project>
+      <Name>CommonManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DatabaseManaged\DatabaseManaged.csproj">
+      <Project>{47000C4C-8A48-4B73-A411-5A89A6F4B518}</Project>
+      <Name>DatabaseManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DeterministicManaged\DeterministicManaged.csproj">
+      <Project>{EA5CF4D3-540C-49C7-B13A-204781017C08}</Project>
+      <Name>DeterministicManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GDIRendererManaged\GDIRendererManaged.csproj">
+      <Project>{CF198119-9E6B-4F90-A878-088CBF2CE90D}</Project>
+      <Name>GDIRendererManaged</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MathParserManaged\MathParserManaged.csproj">
+      <Project>{A4111CB2-D06B-405A-8A4C-381C99FE161C}</Project>
+      <Name>MathParserManaged</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestWindow.resx">
+      <DependentUpon>TestWindow.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

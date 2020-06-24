@@ -286,13 +286,13 @@ namespace GameFramework.Deterministic.Physics
 			SphereShape a = (SphereShape)Manifold.BodyA.Shape;
 			PolygonShape b = (PolygonShape)Manifold.BodyB.Shape;
 
-			Vector3 rotationB = Manifold.BodyB.Orientation.EulerAngles;
+			Matrix3 orientationB = Manifold.BodyB.Orientation;
 
 			Manifold.Points = null;
 
 			// Transform SphereShape center to Polygon model space
 			Vector3 center = Manifold.BodyA.Position;
-			center = Manifold.BodyB.Orientation.Transpose() * (center - Manifold.BodyB.Position);
+			center = orientationB.Transpose() * (center - Manifold.BodyB.Position);
 
 			// Find edge with minimum penetration
 			// Exact concept as using support points in Polygon vs Polygon
@@ -320,8 +320,7 @@ namespace GameFramework.Deterministic.Physics
 			// Check to see if center is within polygon
 			if (separation < Math.Epsilon)
 			{
-				Manifold.Points = new Vector3[1];
-				Manifold.Normal = -(rotationB * b.Normals[faceNormal]);
+				Manifold.Normal = -(orientationB * b.Normals[faceNormal]);
 				Manifold.Points = new Vector3[] { Manifold.Normal * a.Radius + Manifold.BodyA.Position };
 				Manifold.Penetration = a.Radius;
 				return;
@@ -337,12 +336,11 @@ namespace GameFramework.Deterministic.Physics
 				if ((center - v1).SqrMagnitude > a.Radius * a.Radius)
 					return;
 
-				Manifold.Points = new Vector3[1];
 				Vector3 n = v1 - center;
-				n = rotationB * n;
+				n = orientationB * n;
 				n.Normalize();
 				Manifold.Normal = n;
-				v1 = rotationB * v1 + Manifold.BodyB.Position;
+				v1 = orientationB * v1 + Manifold.BodyB.Position;
 				Manifold.Points = new Vector3[] { v1 };
 			}
 			else if (dot2 <= 0) // Closest to v2
@@ -350,11 +348,10 @@ namespace GameFramework.Deterministic.Physics
 				if ((center - v2).SqrMagnitude > a.Radius * a.Radius)
 					return;
 
-				Manifold.Points = new Vector3[1];
 				Vector3 n = v2 - center;
-				v2 = rotationB * v2 + Manifold.BodyB.Position;
+				v2 = orientationB * v2 + Manifold.BodyB.Position;
 				Manifold.Points = new Vector3[] { v2 };
-				n = rotationB * n;
+				n = orientationB * n;
 				n.Normalize();
 				Manifold.Normal = n;
 			}
@@ -364,7 +361,7 @@ namespace GameFramework.Deterministic.Physics
 				if ((center - v1).Dot(n) > a.Radius)
 					return;
 
-				n = rotationB * n;
+				n = orientationB * n;
 				Manifold.Normal = -n;
 				Manifold.Points = new Vector3[] { Manifold.Normal * a.Radius + Manifold.BodyA.Position };
 			}

@@ -116,23 +116,41 @@ namespace GameFramework.Deterministic
 
 		public static Vector3 operator *(Matrix3 lhs, Vector3 rhs)
 		{
-			//return new Vector3(lhs.values[0, 0] * rhs.X + lhs.values[0, 1] * rhs.Y, lhs.values[1, 0] * rhs.X + lhs.values[1, 1] * rhs.Y);
-			return rhs;
+			Vector3 result = Vector3.Zero;
+
+			result.X =
+				rhs.X * lhs.Values[0, 0] +
+				rhs.Y * lhs.Values[1, 0] +
+				rhs.Z * lhs.Values[2, 0];
+
+			result.Y =
+				rhs.X * lhs.Values[0, 1] +
+				rhs.Y * lhs.Values[1, 1] +
+				rhs.Z * lhs.Values[2, 1];
+
+			result.Z =
+				rhs.X * lhs.Values[0, 2] +
+				rhs.Y * lhs.Values[1, 2] +
+				rhs.Z * lhs.Values[2, 2];
+
+			return result;
 		}
 
 		public static Matrix3 operator *(Matrix3 lhs, Matrix3 rhs)
 		{
-			// [00 01]  [00 01]
-			// [10 11]  [10 11]
+			Matrix3 result = Matrix3.Zero;
 
-			//return new Matrix3(
-			//	values[0, 0] * rhs.values[0, 0] + values[0, 1] * rhs.values[1, 0],
-			//	values[0, 0] * rhs.values[0, 1] + values[0, 1] * rhs.values[1, 1],
-			//	values[1, 0] * rhs.values[0, 0] + values[1, 1] * rhs.values[1, 0],
-			//	values[1, 0] * rhs.values[0, 1] + values[1, 1] * rhs.values[1, 1]
-			//);
-
-			return rhs;
+			for (int i = 0; i < 3; ++i)
+			{
+				for (int j = 0; j < 3; ++j)
+				{
+					result.Values[i, j] =
+						lhs.Values[i, 0] * rhs.Values[0, j] +
+						lhs.Values[i, 1] * rhs.Values[1, j] +
+						lhs.Values[i, 2] * rhs.Values[2, j];
+				}
+			}
+			return result;
 		}
 	}
 }

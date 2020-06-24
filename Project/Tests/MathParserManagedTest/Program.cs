@@ -1,6 +1,4 @@
-﻿using GameFramework.ASCIISerializer;
-using GameFramework.BinarySerializer;
-using GameFramework.Common.Extensions;
+﻿using GameFramework.Common.Extensions;
 using GameFramework.Deterministic;
 using GameFramework.Deterministic.Physics;
 using System;
@@ -20,11 +18,12 @@ namespace MathParserTest
 			body1.Orientation = Matrix3.Identity;
 			//body1.Shape = new SphereShape() { Radius = 0.5F};
 
-			body1.Shape = new PolygonShape()
-			{
-				Vertices = new Vector3[] { new Vector3(-0.5F, -0.5F, 0), new Vector3(-0.5F, 0.5F, 0), new Vector3(0.5F, 0.5F, 0), new Vector3(0.5F, -0.5F, 0) },
-				Normals = new Vector3[] { Vector3.One, Vector3.One, Vector3.One, Vector3.One }
-			};
+			body1.Shape = new SphereShape() { Radius = 1 };
+			//body1.Shape = new PolygonShape()
+			//{
+			//	Vertices = new Vector3[] { new Vector3(-0.5F, -0.5F, 0), new Vector3(-0.5F, 0.5F, 0), new Vector3(0.5F, 0.5F, 0), new Vector3(0.5F, -0.5F, 0) },
+			//	Normals = new Vector3[] { Vector3.One, Vector3.One, Vector3.One, Vector3.One }
+			//};
 
 			ArrayUtilities.Add(ref scene.Bodies, body1);
 
@@ -32,7 +31,15 @@ namespace MathParserTest
 			body2.Mass = 0;
 			body2.Position = new Vector3(0, 0, 0);
 			body2.Orientation = Matrix3.Identity;
-			body2.Shape = new SphereShape() { Radius = 1 };
+
+			//body2.Shape = new SphereShape() { Radius = 1 };
+			body2.Shape = new PolygonShape()
+			{
+				Vertices = new Vector3[] { new Vector3(-0.5F, -0.5F, 0), new Vector3(-0.5F, 0.5F, 0), new Vector3(0.5F, 0.5F, 0), new Vector3(0.5F, -0.5F, 0) },
+				Normals = new Vector3[] { Vector3.One, Vector3.One, Vector3.One, Vector3.One }
+			};
+
+
 			ArrayUtilities.Add(ref scene.Bodies, body2);
 
 			Simulation.Config config = new Simulation.Config();
