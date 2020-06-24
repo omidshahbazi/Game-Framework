@@ -186,6 +186,7 @@ namespace GameFramework.Deterministic.Physics
 				Vector3 rACrossN = rA * Manifold.Normal;
 				Vector3 rBCrossN = rB * Manifold.Normal;
 				Number invMassSum = ((rACrossN * rACrossN) * invInertiaA + (rBCrossN * rBCrossN) * invInertiaB + invMassA + invMassB).Magnitude;
+				invMassSum = Math.Max(1, invMassSum);
 
 				// Calculate impulse scalar
 				Number j = -(1.0f + Manifold.MixedRestitution) * contactVel;

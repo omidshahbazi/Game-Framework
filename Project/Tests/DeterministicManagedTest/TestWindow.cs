@@ -39,14 +39,14 @@ namespace DeterministicTest
 			groundBody.Orientation = Matrix3.Identity;
 			groundBody.Shape = new PolygonShape()
 			{
+				Vertices = new Vector3[] { new Vector3(-350, -10, 0), new Vector3(-350, 10, 0), new Vector3(350, 10, 0), new Vector3(350, -10, 0) },
 				//Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, -10, 0), new Vector3(700, -30, 0) },
-				Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, 20, 0), new Vector3(700, 0, 0) },
+				//Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, 20, 0), new Vector3(700, 0, 0) },
 				Normals = new Vector3[] { -Vector3.Up, Vector3.Up, Vector3.Up, -Vector3.Up }
 			};
 
 			config = new Simulation.Config();
 			config.StepTime = STEP_TIME;
-			config.Gravity.Y = -111;
 
 			editorCanvas1.LookAt(new PointF(800, 200));
 		}
@@ -80,7 +80,7 @@ namespace DeterministicTest
 			{
 				Body body = new Body();
 				ArrayUtilities.Add(ref scene.Bodies, body);
-				body.Mass = 8;
+				body.Mass = 80;
 				body.Inertia = 20;
 				body.Position = new Vector3(loc.X, loc.Y, 0);
 				body.Orientation = Matrix3.Identity;

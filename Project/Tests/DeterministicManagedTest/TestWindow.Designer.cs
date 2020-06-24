@@ -38,7 +38,7 @@
 			this.editorCanvas1.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.Default;
 			this.editorCanvas1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.editorCanvas1.DrawGridLines = false;
-			this.editorCanvas1.DrawOriginLines = false;
+			this.editorCanvas1.DrawOriginLines = true;
 			this.editorCanvas1.FlipY = true;
 			this.editorCanvas1.GraphicsUnit = System.Drawing.GraphicsUnit.Pixel;
 			this.editorCanvas1.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Default;
