@@ -90,12 +90,12 @@ namespace GameFramework.Deterministic
 
 		public static Number Cos(Number Value)
 		{
-			return Sin(Value.Value + 1.570796F);
+			return Sin(Value + 1.570796F);
 		}
 
 		public static Number Tan(Number Value)
 		{
-			return Sin(Value.Value) / Cos(Value.Value);
+			return Sin(Value) / Cos(Value);
 		}
 
 		public static Number Asin(Number Value)
@@ -122,7 +122,7 @@ namespace GameFramework.Deterministic
 
 		public static Number Atan(Number Value)
 		{
-			return Asin(Value / Sqrt(1 + (Value.Value * Value.Value)));
+			return Asin(Value / Sqrt(1 + (Value * Value)));
 		}
 
 		public static Number Atan2(Number Value1, Number Value2)
@@ -210,8 +210,8 @@ namespace GameFramework.Deterministic
 			Number result = Number.MaxValue;
 
 			for (int i = 0; i < Values.Length; ++i)
-				if (result > Values[i].Value)
-					result = Values[i].Value;
+				if (result > Values[i])
+					result = Values[i];
 
 			return result;
 		}
@@ -221,8 +221,8 @@ namespace GameFramework.Deterministic
 			Number result = Number.MinValue;
 
 			for (int i = 0; i < Values.Length; ++i)
-				if (result < Values[i].Value)
-					result = Values[i].Value;
+				if (result < Values[i])
+					result = Values[i];
 
 			return result;
 		}
@@ -239,7 +239,7 @@ namespace GameFramework.Deterministic
 
 		public static int Sign(Number Value)
 		{
-			if (Value.Value < 0)
+			if (Value < 0)
 				return -1;
 
 			if (Value > 0)

@@ -55,7 +55,7 @@ namespace GameFramework.Deterministic.Visitor
 
 		public void VisitNumber(Number Number)
 		{
-			Value += Get(BitConverter.GetBytes(Number.Value));
+			Value += Get(BitConverter.GetBytes(Number));
 		}
 
 		public void VisitVector2(Vector2 Vector2)

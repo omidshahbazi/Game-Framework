@@ -79,6 +79,11 @@ namespace GameFramework.Deterministic.Physics
 
 			Body.Velocity += Impulse * invMass;
 			Body.AngularVelocity += ContactDirection * Impulse * invInertia;
+
+			if (Body.Velocity.Magnitude >= 1000)
+			{
+				int a = 1;
+			}
 		}
 
 		private static void IntegrateForces(Body Body, Config Config)
@@ -90,6 +95,11 @@ namespace GameFramework.Deterministic.Physics
 
 			Body.Velocity += (Body.Force / Body.Mass + Config.Gravity) * (Config.StepTime / 2.0f);
 			Body.AngularVelocity += Body.Torque * invInertia * (Config.StepTime / 2.0F);
+
+			if (Body.Velocity.Magnitude >= 1000)
+			{
+				int a = 1;
+			}
 		}
 
 		private static void DispatchManifold(Manifold Manifold)

@@ -1,4 +1,5 @@
 ﻿using GameFramework.Common.Extensions;
+using GameFramework.Common.Timing;
 using GameFramework.Deterministic;
 using GameFramework.Deterministic.Physics;
 using GameFramework.GDIRenderer;
@@ -12,15 +13,18 @@ namespace DeterministicTest
 	{
 		private const float STEP_TIME = 0.016F;
 
+		private Timer timer = null;
 		private Scene scene = null;
 		private ContactList contacts = null;
 		private Simulation.Config config = null;
+
+		private bool doSimulation = true;
 
 		public TestWindow()
 		{
 			InitializeComponent();
 
-			Timer timer = new Timer();
+			timer = new Timer();
 			timer.Interval = (int)(STEP_TIME * 1000);
 			timer.Tick += Timer_Tick;
 			timer.Start();
@@ -35,20 +39,28 @@ namespace DeterministicTest
 			groundBody.Orientation = Matrix3.Identity;
 			groundBody.Shape = new PolygonShape()
 			{
-				Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, -10, 0), new Vector3(700, -30, 0) },
+				//Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, -10, 0), new Vector3(700, -30, 0) },
+				Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, 20, 0), new Vector3(700, 0, 0) },
 				Normals = new Vector3[] { -Vector3.Up, Vector3.Up, Vector3.Up, -Vector3.Up }
 			};
 
 			config = new Simulation.Config();
 			config.StepTime = STEP_TIME;
+			config.Gravity.Y = -111;
 
 			editorCanvas1.LookAt(new PointF(800, 200));
 		}
 
-		private void Timer_Tick(object sender, EventArgs e)
+		private void Simulate()
 		{
 			contacts.Clear();
 			Simulation.Simulate(scene, config, contacts);
+		}
+
+		private void Timer_Tick(object sender, EventArgs e)
+		{
+			if (doSimulation)
+				Simulate();
 
 			editorCanvas1.Refresh();
 		}
@@ -62,17 +74,26 @@ namespace DeterministicTest
 
 		private void editorCanvas1_MouseUp(object sender, MouseEventArgs e)
 		{
-			if (e.Button != MouseButtons.Left)
-				return;
-
 			PointF loc = editorCanvas1.ScreenToCanvas(e.Location);
 
-			Body body = new Body();
-			ArrayUtilities.Add(ref scene.Bodies, body);
-			body.Mass = 80;
-			body.Position = new Vector3(loc.X, loc.Y, 0);
-			body.Orientation = Matrix3.Identity;
-			body.Shape = new SphereShape() { Radius = 20 };
+			if (e.Button == MouseButtons.Left)
+			{
+				Body body = new Body();
+				ArrayUtilities.Add(ref scene.Bodies, body);
+				body.Mass = 8;
+				body.Inertia = 20;
+				body.Position = new Vector3(loc.X, loc.Y, 0);
+				body.Orientation = Matrix3.Identity;
+				body.Shape = new SphereShape() { Radius = 20 };
+			}
+		}
+
+		private void editorCanvas1_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			if (e.KeyChar == 's')
+				doSimulation = !doSimulation;
+			else if (e.KeyChar == ' ')
+				Simulate();
 		}
 	}
 }

@@ -1,5 +1,4 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using System.Runtime.CompilerServices;
 
 namespace GameFramework.Deterministic
 {
@@ -9,140 +8,170 @@ namespace GameFramework.Deterministic
 		public static readonly Number MinValue = -99999;
 		public static readonly Number Epsilon = 1.401298E-45F;
 
-		private const int SHIFT_AMOUNT = 12;
-		private const long ONE = 1 << SHIFT_AMOUNT;
+#if FIXED_POINT_MATH
+		private const int SHIFT_AMOUNT = 12; //12 is 4096
+		private const long One = 1 << SHIFT_AMOUNT;
 
-		[CompilerGenerated]
-		private long RawValue;
+		private long value;
 
-		public float Value
+		private float FloatValue
 		{
-			get { return RawValue / (float)ONE; }
-			set
-			{
-				value *= ONE;
-				RawValue = (int)System.Math.Round(value);
-			}
+			get { return value / (float)One; }
 		}
 
-		private Number(long Value)
+		private double DoubleValue
 		{
-			RawValue = Value;
+			get { return value / (double)One; }
 		}
 
-		public Number(double Value)
+		public long RawValue
 		{
-			Value *= ONE;
-			RawValue = (int)System.Math.Round(Value);
+			get { return value; }
 		}
 
-		public Number(float Value)
+		public Number(long RawValue)
 		{
-			Value *= ONE;
-			RawValue = (int)System.Math.Round(Value);
+			value = RawValue;
 		}
 
-		public static Number operator -(Number Other)
+		private Number(float Value)
 		{
-			return -Other.Value;
+			Value *= One;
+			value = (int)Value;
 		}
 
-		public static Number operator *(Number Left, Number Right)
+		private Number(double Value)
 		{
-			return new Number((Left.RawValue * Right.RawValue) >> SHIFT_AMOUNT);
+			Value *= One;
+			value = (int)Value;
 		}
 
-		public static Number operator /(Number Left, Number Right)
+		public static Number operator *(Number LeftHand, Number RightHand)
 		{
-			return new Number((Left.RawValue << SHIFT_AMOUNT) / (Right.RawValue));
+			return new Number((LeftHand.value * RightHand.value) >> SHIFT_AMOUNT);
 		}
 
-		public static Number operator %(Number Left, Number Right)
+		public static Number operator /(Number LeftHand, Number RightHand)
 		{
-			return new Number((Left.RawValue) % (Right.RawValue));
+			return new Number((LeftHand.value << SHIFT_AMOUNT) / RightHand.value);
 		}
 
-		public static Number operator +(Number Left, Number Right)
+		public static Number operator %(Number LeftHand, Number RightHand)
 		{
-			return new Number(Left.RawValue + Right.RawValue);
+			return new Number(LeftHand.value % RightHand.value);
 		}
 
-		public static Number operator -(Number Left, Number Right)
+		public static implicit operator float(Number Value)
 		{
-			return new Number(Left.RawValue - Right.RawValue);
+			return Value.FloatValue;
 		}
 
-		public static bool operator ==(Number Left, Number Right)
+		public static implicit operator double(Number Value)
 		{
-			return Left.RawValue == Right.RawValue;
-		}
-
-		public static bool operator !=(Number Left, Number Right)
-		{
-			return Left.RawValue != Right.RawValue;
-		}
-
-		public static bool operator >(Number Left, Number Right)
-		{
-			return Left.RawValue > Right.RawValue;
-		}
-
-		public static bool operator <(Number Left, Number Right)
-		{
-			return Left.RawValue < Right.RawValue;
-		}
-
-		public static implicit operator int(Number Other)
-		{
-			return (int)Other.Value;
-		}
-
-		public static implicit operator float(Number Other)
-		{
-			return Other.Value;
-		}
-
-		public static implicit operator double(Number Other)
-		{
-			return Other.Value;
-		}
-
-		public static implicit operator Number(float Other)
-		{
-			return new Number(Other);
-		}
-
-		public static implicit operator Number(double Other)
-		{
-			return new Number((float)Other);
-		}
-
-		public static implicit operator Number(int Other)
-		{
-			return new Number(Other << SHIFT_AMOUNT);
-		}
-
-		public static implicit operator Number(long Other)
-		{
-			return new Number(Other << SHIFT_AMOUNT);
-		}
-
-		public static implicit operator Number(ulong Other)
-		{
-			return new Number((long)Other << SHIFT_AMOUNT);
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj is Number)
-				return ((Number)obj).RawValue == RawValue;
-			else
-				return false;
+			return Value.DoubleValue;
 		}
 
 		public override string ToString()
 		{
-			return Value.ToString();
+			return FloatValue.ToString();
+		}
+#else
+		private double value;
+
+		private Number(float Value)
+		{
+			value = Value;
+		}
+
+		private Number(double Value)
+		{
+			value = Value;
+		}
+
+		public static Number operator *(Number LeftHand, Number RightHand)
+		{
+			return new Number(LeftHand.value * RightHand.value);
+		}
+
+		public static Number operator /(Number LeftHand, Number RightHand)
+		{
+			return new Number(LeftHand.value / RightHand.value);
+		}
+
+		public static Number operator %(Number LeftHand, Number RightHand)
+		{
+			return new Number(LeftHand.value % RightHand.value);
+		}
+
+		public static implicit operator float(Number Value)
+		{
+			return (float)Value.value;
+		}
+
+		public static implicit operator double(Number Value)
+		{
+			return Value.value;
+		}
+
+		public override string ToString()
+		{
+			return value.ToString();
+		}
+#endif
+
+		public static Number operator +(Number LeftHand, Number RightHand)
+		{
+			return new Number(LeftHand.value + RightHand.value);
+		}
+
+		public static Number operator -(Number LeftHand, Number RightHand)
+		{
+			return new Number(LeftHand.value - RightHand.value);
+		}
+
+		public static bool operator ==(Number LeftHand, Number RightHand)
+		{
+			return LeftHand.value == RightHand.value;
+		}
+
+		public static bool operator !=(Number LeftHand, Number RightHand)
+		{
+			return LeftHand.value != RightHand.value;
+		}
+
+		public static bool operator >(Number LeftHand, Number RightHand)
+		{
+			return LeftHand.value > RightHand.value;
+		}
+
+		public static bool operator >=(Number LeftHand, Number RightHand)
+		{
+			return LeftHand.value >= RightHand.value;
+		}
+
+		public static bool operator <(Number LeftHand, Number RightHand)
+		{
+			return LeftHand.value < RightHand.value;
+		}
+
+		public static bool operator <=(Number LeftHand, Number RightHand)
+		{
+			return LeftHand.value <= RightHand.value;
+		}
+
+		public static implicit operator Number(float Value)
+		{
+			return new Number(Value);
+		}
+
+		public static implicit operator Number(double Value)
+		{
+			return new Number((float)Value);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
 		}
 	}
 }

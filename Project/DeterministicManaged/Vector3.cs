@@ -69,7 +69,7 @@ namespace GameFramework.Deterministic
 
 		public static Vector3 operator *(Vector3 Left, Vector3 Right)
 		{
-			return new Vector3((Left.Y * Right.Z) - (Left.Z * Right.Y), (Left.X * Right.Z) - (Left.Z * Right.X), (Left.X * Right.Y) - (Left.Z * Right.X));
+			return new Vector3((Left.Y * Right.Z) - (Left.Z * Right.Y), (Left.Z * Right.X) - (Left.X * Right.Z), (Left.X * Right.Y) - (Left.Y * Right.X));
 		}
 
 		public static Vector3 operator /(Vector3 Left, Number Right)

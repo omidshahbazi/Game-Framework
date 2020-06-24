@@ -56,6 +56,7 @@
 			this.editorCanvas1.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
 			this.editorCanvas1.Zoom = 1F;
 			this.editorCanvas1.DrawCanvas += new GameFramework.GDIRenderer.Canvas.DrawCanvasHandler(this.editorCanvas1_DrawCanvas);
+			this.editorCanvas1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.editorCanvas1_KeyPress);
 			this.editorCanvas1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.editorCanvas1_MouseUp);
 			// 
 			// TestWindow
