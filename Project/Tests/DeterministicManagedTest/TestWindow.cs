@@ -85,7 +85,7 @@ namespace DeterministicTest
 				body.Inertia = 20;
 				body.Position = new Vector3(loc.X, loc.Y, 0);
 				body.Orientation = Matrix3.Identity;
-				body.Shape = Utilities.CreateSquareShape(new Vector2(70, 50), new Vector2(10, 10));
+				body.Shape = Utilities.CreateSquareShape(new Vector2(70, 50), Vector2.Zero);
 			}
 		}
 

@@ -177,15 +177,23 @@ namespace GameFramework.Deterministic.Physics
 				if (contactVel > 0)
 					return;
 
-				Number invMassA = (Manifold.BodyA.Mass == 0 ? (Number)0 : 1 / Manifold.BodyA.Mass);
-				Number invMassB = (Manifold.BodyB.Mass == 0 ? (Number)0 : 1 / Manifold.BodyB.Mass);
+				Number invMassA = (Manifold.BodyA.Mass == 0 ? 0 : 1 / Manifold.BodyA.Mass);
+				Number invMassB = (Manifold.BodyB.Mass == 0 ? 0 : 1 / Manifold.BodyB.Mass);
 
-				Number invInertiaA = (Manifold.BodyA.Inertia == 0 ? (Number)0 : 1 / Manifold.BodyA.Inertia);
-				Number invInertiaB = (Manifold.BodyB.Inertia == 0 ? (Number)0 : 1 / Manifold.BodyB.Inertia);
+				Number invInertiaA = (Manifold.BodyA.Inertia == 0 ? 0 : 1 / Manifold.BodyA.Inertia);
+				Number invInertiaB = (Manifold.BodyB.Inertia == 0 ? 0 : 1 / Manifold.BodyB.Inertia);
 
-				Vector3 rACrossN = rA * Manifold.Normal;
-				Vector3 rBCrossN = rB * Manifold.Normal;
-				Number invMassSum = ((rACrossN * rACrossN) * invInertiaA + (rBCrossN * rBCrossN) * invInertiaB + invMassA + invMassB).Magnitude;
+				Vector3 rACrossNormalSqr = rA * Manifold.Normal;
+				rACrossNormalSqr.X *= rACrossNormalSqr.X;
+				rACrossNormalSqr.Y *= rACrossNormalSqr.Y;
+				rACrossNormalSqr.Z *= rACrossNormalSqr.Z;
+
+				Vector3 rBCrossNormalSqr = rB * Manifold.Normal;
+				rBCrossNormalSqr.X *= rBCrossNormalSqr.X;
+				rBCrossNormalSqr.Y *= rBCrossNormalSqr.Y;
+				rBCrossNormalSqr.Z *= rBCrossNormalSqr.Z;
+
+				Number invMassSum = (rACrossNormalSqr * invInertiaA + rBCrossNormalSqr * invInertiaB + invMassA + invMassB).Magnitude;
 				invMassSum = Math.Max(1, invMassSum);
 
 				// Calculate impulse scalar
@@ -490,6 +498,10 @@ namespace GameFramework.Deterministic.Physics
 				sampleVector = Vector3.Up;
 			else if (sidePlaneNormal.Y != 0 && sidePlaneNormal.Z != 0)
 				sampleVector = Vector3.Right;
+			else if (sidePlaneNormal.X != 0)
+				sampleVector = Vector3.Forward;
+			else if (sidePlaneNormal.Y != 0)
+				sampleVector = Vector3.Forward;
 
 			Vector3 refFaceNormal = sidePlaneNormal * sampleVector.Normalized;
 
