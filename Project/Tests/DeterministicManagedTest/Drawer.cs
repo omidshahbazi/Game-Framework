@@ -58,8 +58,8 @@ namespace DeterministicTest
 
 			for (int i = 1; i < Shape.Vertices.Length; ++i)
 			{
-				Vector3 pointA = CenterPosition + Shape.Vertices[i - 1] * SCALE;
-				Vector3 pointB = CenterPosition + Shape.Vertices[i] * SCALE;
+				Vector3 pointA = CenterPosition + (Body.Orientation * Shape.Vertices[i - 1] * SCALE);
+				Vector3 pointB = CenterPosition + (Body.Orientation * Shape.Vertices[i] * SCALE);
 
 				DrawLine(Device, Pen, pointA, pointB);
 
@@ -67,7 +67,7 @@ namespace DeterministicTest
 				DrawVector(Device, Pen, pointB, Shape.Normals[i] * SCALE);
 			}
 
-			DrawLine(Device, Pen, CenterPosition + (Shape.Vertices[0] * SCALE), CenterPosition + (Shape.Vertices[Shape.Vertices.Length - 1] * SCALE));
+			DrawLine(Device, Pen, CenterPosition + (Body.Orientation * Shape.Vertices[0] * SCALE), CenterPosition + (Body.Orientation * Shape.Vertices[Shape.Vertices.Length - 1] * SCALE));
 		}
 
 		private static void DrawVector(IDevice Device, Pen Pen, Vector3 From, Vector3 Vector)

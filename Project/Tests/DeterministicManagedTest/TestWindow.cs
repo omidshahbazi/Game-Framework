@@ -3,7 +3,6 @@ using GameFramework.Common.Timing;
 using GameFramework.Deterministic;
 using GameFramework.Deterministic.Physics;
 using GameFramework.GDIRenderer;
-using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -32,23 +31,17 @@ namespace DeterministicTest
 			scene = new Scene();
 			contacts = new ContactList();
 
-			Body groundBody = new Body();
-			ArrayUtilities.Add(ref scene.Bodies, groundBody);
+			Body groundBody = Utilities.AddBody(scene);
 			groundBody.Mass = 0;
 			groundBody.Position = new Vector3(400, 25, 0);
 			groundBody.Orientation = Matrix3.Identity;
-			groundBody.Shape = new PolygonShape()
-			{
-				Vertices = new Vector3[] { new Vector3(-350, -10, 0), new Vector3(-350, 10, 0), new Vector3(350, 10, 0), new Vector3(350, -10, 0) },
-				//Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, -10, 0), new Vector3(700, -30, 0) },
-				//Vertices = new Vector3[] { new Vector3(100, 0, 0), new Vector3(100, 20, 0), new Vector3(700, 20, 0), new Vector3(700, 0, 0) },
-				Normals = new Vector3[] { -Vector3.Up, Vector3.Up, Vector3.Up, -Vector3.Up }
-			};
+			//groundBody.Orientation.SetRotation(new Vector3(0, 0, 10) * Math.DegreesToRadians);
+			groundBody.Shape = Utilities.CreateSquareShape(new Vector2(700, 20), new Vector2(0, 0));
 
 			config = new Simulation.Config();
 			config.StepTime = STEP_TIME;
 
-			editorCanvas1.LookAt(new PointF(800, 200));
+			editorCanvas1.LookAt(new PointF(400, 200));
 		}
 
 		private void Simulate()
@@ -57,7 +50,7 @@ namespace DeterministicTest
 			Simulation.Simulate(scene, config, contacts);
 		}
 
-		private void Timer_Tick(object sender, EventArgs e)
+		private void Timer_Tick(object sender, System.EventArgs e)
 		{
 			if (doSimulation)
 				Simulate();
@@ -78,13 +71,21 @@ namespace DeterministicTest
 
 			if (e.Button == MouseButtons.Left)
 			{
-				Body body = new Body();
-				ArrayUtilities.Add(ref scene.Bodies, body);
+				Body body = Utilities.AddBody(scene);
 				body.Mass = 80;
 				body.Inertia = 20;
 				body.Position = new Vector3(loc.X, loc.Y, 0);
 				body.Orientation = Matrix3.Identity;
-				body.Shape = new SphereShape() { Radius = 20 };
+				body.Shape = Utilities.CreateSphereShape(20);
+			}
+			else if (e.Button == MouseButtons.Right)
+			{
+				Body body = Utilities.AddBody(scene);
+				body.Mass = 180;
+				body.Inertia = 20;
+				body.Position = new Vector3(loc.X, loc.Y, 0);
+				body.Orientation = Matrix3.Identity;
+				body.Shape = Utilities.CreateSquareShape(new Vector2(70, 50), new Vector2(10, 10));
 			}
 		}
 

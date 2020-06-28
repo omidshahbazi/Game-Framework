@@ -403,14 +403,14 @@ namespace GameFramework.Deterministic.Physics
 			// Check for a separating axis with A's face planes
 			uint faceA;
 			Number penetrationA;
-			FindAxisLeastPenetration(Manifold, out faceA, out penetrationA);
+			FindAxisLeastPenetration(Manifold.BodyA, Manifold.BodyB, out faceA, out penetrationA);
 			if (penetrationA >= 0)
 				return;
 
 			// Check for a separating axis with B's face planes
 			uint faceB;
 			Number penetrationB;
-			FindAxisLeastPenetration(Manifold, out faceB, out penetrationB);
+			FindAxisLeastPenetration(Manifold.BodyB, Manifold.BodyA, out faceB, out penetrationB);
 			if (penetrationB >= 0)
 				return;
 
@@ -447,7 +447,7 @@ namespace GameFramework.Deterministic.Physics
 				flip = true;
 			}
 
-			Vector3 refBodyRotation = refBody.Orientation.EulerAngles;
+			Matrix3 refBodyOrientation = refBody.Orientation;
 
 			// World space incident face
 			Vector3[] incidentFace = new Vector3[2];
@@ -472,15 +472,26 @@ namespace GameFramework.Deterministic.Physics
 			Vector3 v2 = refPoly.Vertices[referenceIndex];
 
 			// Transform vertices to world space
-			v1 = refBodyRotation * v1 + refBody.Position;
-			v2 = refBodyRotation * v2 + refBody.Position;
+			v1 = refBodyOrientation * v1 + refBody.Position;
+			v2 = refBodyOrientation * v2 + refBody.Position;
 
 			// Calculate reference face side normal in world space
 			Vector3 sidePlaneNormal = (v2 - v1);
 			sidePlaneNormal.Normalize();
 
 			// Orthogonalize
-			Vector3 refFaceNormal = new Vector3(sidePlaneNormal.Y, -sidePlaneNormal.X, sidePlaneNormal.Z);
+			//Vector3 refFaceNormal = new Vector3(sidePlaneNormal.Y, -sidePlaneNormal.X, sidePlaneNormal.Z);
+			Vector3 sampleVector = Vector3.Zero;
+			if (sidePlaneNormal.X != 0 && sidePlaneNormal.Y != 0 && sidePlaneNormal.Z != 0)
+				sampleVector = Vector3.One;
+			else if (sidePlaneNormal.X != 0 && sidePlaneNormal.Y != 0)
+				sampleVector = Vector3.Forward;
+			else if (sidePlaneNormal.X != 0 && sidePlaneNormal.Z != 0)
+				sampleVector = Vector3.Up;
+			else if (sidePlaneNormal.Y != 0 && sidePlaneNormal.Z != 0)
+				sampleVector = Vector3.Right;
+
+			Vector3 refFaceNormal = sidePlaneNormal * sampleVector.Normalized;
 
 			// ax + by = c
 			// c is distance from origin
@@ -498,7 +509,7 @@ namespace GameFramework.Deterministic.Physics
 			//TODO: handle Z axis
 
 			// Flip
-			Manifold.Normal = flip ? -refFaceNormal : refFaceNormal;
+			Manifold.Normal = refFaceNormal * (flip ? -1 : 1);
 
 			// Keep points behind reference face
 			uint cp = 0; // clipped points behind reference face
@@ -525,25 +536,25 @@ namespace GameFramework.Deterministic.Physics
 			}
 		}
 
-		private static void FindAxisLeastPenetration(Manifold Manifold, out uint FaceIndex, out Number FaceDistance)
+		private static void FindAxisLeastPenetration(Body A, Body B, out uint FaceIndex, out Number FaceDistance)
 		{
 			FaceIndex = 0;
 			FaceDistance = Number.MinValue;
 
-			PolygonShape a = (PolygonShape)Manifold.BodyA.Shape;
-			PolygonShape b = (PolygonShape)Manifold.BodyB.Shape;
+			PolygonShape a = (PolygonShape)A.Shape;
+			PolygonShape b = (PolygonShape)B.Shape;
 
-			Vector3 bodyARotation = Manifold.BodyA.Orientation.EulerAngles;
+			Matrix3 bodyAOrientation = A.Orientation;
+			Matrix3 bodyBTransposedOrientation = B.Orientation.Transpose();
 
 			for (uint i = 0; i < a.Vertices.Length; ++i)
 			{
 				// Retrieve a face normal from A
 				Vector3 n = a.Normals[i];
-				Vector3 nw = bodyARotation * n;
+				Vector3 nw = bodyAOrientation * n;
 
 				// Transform face normal into B's model space
-				Matrix3 buT = Manifold.BodyB.Orientation.Transpose();
-				n = buT * nw;
+				n = bodyBTransposedOrientation * nw;
 
 				// Retrieve support point from B along -n
 				Vector3 s = GetSupport(b, -n);
@@ -551,9 +562,9 @@ namespace GameFramework.Deterministic.Physics
 				// Retrieve vertex on face from A, transform into
 				// B's model space
 				Vector3 v = a.Vertices[i];
-				v = bodyARotation * v + Manifold.BodyA.Position;
-				v -= Manifold.BodyB.Position;
-				v = buT * v;
+				v = bodyAOrientation * v + A.Position;
+				v -= B.Position;
+				v = bodyBTransposedOrientation * v;
 
 				// Compute penetration distance (in B's model space)
 				Number d = n.Dot(s - v);
@@ -572,7 +583,7 @@ namespace GameFramework.Deterministic.Physics
 			Vector3 referenceNormal = ReferencePolygon.Normals[ReferenceIndex];
 
 			// Calculate normal in incident's frame of reference
-			referenceNormal = ReferenceBody.Orientation.EulerAngles * referenceNormal; // To world space
+			referenceNormal = ReferenceBody.Orientation * referenceNormal; // To world space
 			referenceNormal = IncidentBody.Orientation.Transpose() * referenceNormal; // To incident's model space
 
 			// Find most anti-normal face on incident polygon
@@ -588,12 +599,12 @@ namespace GameFramework.Deterministic.Physics
 				}
 			}
 
-			Vector3 incidentBodyRotation = IncidentBody.Orientation.EulerAngles;
+			Matrix3 incidentBodyOrientation = IncidentBody.Orientation;
 
 			// Assign face vertices for incidentFace
-			Faces[0] = incidentBodyRotation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
+			Faces[0] = incidentBodyOrientation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
 			incidentFace = incidentFace + 1 >= IncidentPolygon.Vertices.Length ? 0 : incidentFace + 1;
-			Faces[1] = incidentBodyRotation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
+			Faces[1] = incidentBodyOrientation * IncidentPolygon.Vertices[incidentFace] + IncidentBody.Position;
 		}
 
 		private static uint Clip(Vector3 Normal, Number C, Vector3[] Faces)

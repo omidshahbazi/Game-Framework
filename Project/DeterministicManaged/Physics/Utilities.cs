@@ -1,8 +1,153 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using GameFramework.Common.Extensions;
+using System.Collections.Generic;
+using System.Diagnostics;
+
 namespace GameFramework.Deterministic.Physics
 {
 	public static class Utilities
 	{
+		public static Body AddBody(Scene Scene)
+		{
+			Body body = new Body();
+			ArrayUtilities.Add(ref Scene.Bodies, body);
+
+			body.Orientation = Matrix3.Identity;
+
+			return body;
+		}
+
+		public static SphereShape CreateSphereShape(Number Radius)
+		{
+			return new SphereShape() { Radius = Radius };
+		}
+
+		public static PolygonShape CreatePolygonShape(Vector3[] Vertices)
+		{
+			//TODO: handle Z axis
+
+			PolygonShape shape = new PolygonShape();
+
+			Debug.Assert(Vertices.Length > 3, "Vertices count must be greater than 3");
+
+			// Find the right most point on the hull
+			uint rightMost = 0;
+			Number highestXCoord = Vertices[0].X;
+			for (uint i = 1; i < Vertices.Length; ++i)
+			{
+				Number x = Vertices[i].X;
+				if (x > highestXCoord)
+				{
+					highestXCoord = x;
+					rightMost = i;
+				}
+
+				// If matching x then take farthest negative y
+				else if (x == highestXCoord)
+					if (Vertices[i].Y < Vertices[rightMost].Y)
+						rightMost = i;
+			}
+
+			List<uint> hull = new List<uint>();
+			uint indexHull = rightMost;
+
+			while (true)
+			{
+				hull.Add(indexHull);
+
+				// Search for next index that wraps around the hull
+				// by computing cross products to find the most counter-clockwise
+				// vertex in the set, given the previos hull index
+				uint nextHullIndex = 0;
+				for (uint i = 1; i < Vertices.Length; ++i)
+				{
+					// Skip if same coordinate as we need three unique
+					// points in the set to perform a cross product
+					if (nextHullIndex == indexHull)
+					{
+						nextHullIndex = i;
+						continue;
+					}
+
+					// Cross every set of three unique vertices
+					// Record each counter clockwise third vertex and add
+					// to the output hull
+					// See : http://www.oocities.org/pcgpe/math2d.html
+					Vector3 e1 = Vertices[nextHullIndex] - Vertices[indexHull];
+					Vector3 e2 = Vertices[i] - Vertices[indexHull];
+
+					//TODO: Fix for Z axis
+					Number c = (e1 * e2).Z;
+
+					if (c < 0.0f)
+						nextHullIndex = i;
+
+					// Cross product is zero then e vectors are on same line
+					// therefor want to record vertex farthest along that line
+					if (c == 0.0f && e2.SqrMagnitude > e1.SqrMagnitude)
+						nextHullIndex = i;
+				}
+
+				indexHull = nextHullIndex;
+
+				// Conclude algorithm upon wrap-around
+				if (nextHullIndex == rightMost)
+				{
+					shape.Vertices = new Vector3[hull.Count];
+					shape.Normals = new Vector3[hull.Count];
+					break;
+				}
+			}
+
+			// Copy vertices into shape's vertices
+			for (int i = 0; i < shape.Vertices.Length; ++i)
+				shape.Vertices[i] = Vertices[hull[i]];
+
+			// Compute face normals
+			for (uint i1 = 0; i1 < shape.Normals.Length; ++i1)
+			{
+				uint i2 = i1 + 1 < shape.Normals.Length ? i1 + 1 : 0;
+				Vector3 face = shape.Vertices[i2] - shape.Vertices[i1];
+
+				// Ensure no zero-length edges, because that's bad
+				Debug.Assert(face.SqrMagnitude > Math.Epsilon * Math.Epsilon);
+
+				// Calculate normal with 2D cross product between vector and scalar
+				shape.Normals[i1] = new Vector3(face.Y, -face.X, 0);
+				shape.Normals[i1].Normalize();
+			}
+
+			return shape;
+		}
+
+		public static PolygonShape CreateSquareShape(Vector2 Size, Vector2 Offset)
+		{
+			Vector2 halfSize = Size * 0.5F;
+			Vector3 offset = new Vector3(Offset.X, Offset.Y, 0);
+
+			return CreatePolygonShape(
+				new Vector3[] {
+					new Vector3(-halfSize.X, -halfSize.Y, 0) + offset,
+					new Vector3(-halfSize.X, halfSize.Y, 0) + offset,
+					new Vector3(halfSize.X, halfSize.Y, 0) + offset,
+					new Vector3(halfSize.X, -halfSize.Y, 0) + offset });
+		}
+
+		public static PolygonShape CreateCubeShape(Vector3 Size, Vector3 Offset)
+		{
+			//TODO: This is not a cube
+			//Vector3 halfSize = Size * 0.5F;
+
+			//return CreatePolygonShape(
+			//	new Vector3[] {
+			//		-halfSize + Offset,
+			//		new Vector3(-halfSize.X, halfSize.Y, 0) + Offset,
+			//		new Vector3(halfSize.X, halfSize.Y, 0) + Offset,
+			//		new Vector3(halfSize.X, -halfSize.Y, 0) + Offset });
+
+			return null;
+		}
+
 		public static Number CompareDistance(Vector3 A, Vector3 B, Number Distance)
 		{
 			A.Y = B.Y;
@@ -50,7 +195,7 @@ namespace GameFramework.Deterministic.Physics
 			return true;
 		}
 
-		public static bool LineIntersectsBounds( Vector3 StartPoint, Vector3 EndPoint, Vector3 Min, Vector3 Max)
+		public static bool LineIntersectsBounds(Vector3 StartPoint, Vector3 EndPoint, Vector3 Min, Vector3 Max)
 		{
 			Vector3 lowerLeft = Min;
 			Vector3 upperRight = Max;
