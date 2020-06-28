@@ -82,7 +82,7 @@ namespace GameFramework.Deterministic
 				coef = -1;
 			}
 
-			if (precision == 0)
+			if (precision <= Math.Epsilon)
 				return SinTable[index] * coef;
 
 			return Lerp(SinTable[index], SinTable[index + 1], precision) * coef;

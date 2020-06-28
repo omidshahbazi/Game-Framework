@@ -74,16 +74,11 @@ namespace GameFramework.Deterministic.Physics
 
 		public static void ApplyImpulse(Body Body, Vector3 Impulse, Vector3 ContactDirection)
 		{
-			Number invMass = (Body.Mass == 0 ? (Number)0 : 1 / Body.Mass);
-			Number invInertia = (Body.Inertia == 0 ? (Number)0 : 1 / Body.Inertia);
+			Number invMass = (Body.Mass == 0 ? 0 : 1 / Body.Mass);
+			Number invInertia = (Body.Inertia == 0 ? 0 : 1 / Body.Inertia);
 
 			Body.Velocity += Impulse * invMass;
 			Body.AngularVelocity += ContactDirection * Impulse * invInertia;
-
-			if (Body.Velocity.Magnitude >= 1000)
-			{
-				int a = 1;
-			}
 		}
 
 		private static void IntegrateForces(Body Body, Config Config)
@@ -91,15 +86,10 @@ namespace GameFramework.Deterministic.Physics
 			if (Body.Mass == 0)
 				return;
 
-			Number invInertia = (Body.Inertia == 0 ? (Number)0 : 1 / Body.Inertia);
+			Number invInertia = (Body.Inertia == 0 ? 0 : 1 / Body.Inertia);
 
 			Body.Velocity += (Body.Force / Body.Mass + Config.Gravity) * (Config.StepTime / 2.0f);
 			Body.AngularVelocity += Body.Torque * invInertia * (Config.StepTime / 2.0F);
-
-			if (Body.Velocity.Magnitude >= 1000)
-			{
-				int a = 1;
-			}
 		}
 
 		private static void DispatchManifold(Manifold Manifold)
@@ -197,7 +187,7 @@ namespace GameFramework.Deterministic.Physics
 				invMassSum = Math.Max(1, invMassSum);
 
 				// Calculate impulse scalar
-				Number j = -(1.0f + Manifold.MixedRestitution) * contactVel;
+				Number j = -(1.0F + Manifold.MixedRestitution) * contactVel;
 				j /= invMassSum;
 				j /= Manifold.Points.Length;
 

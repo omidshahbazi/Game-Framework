@@ -32,14 +32,23 @@ namespace DeterministicTest
 			contacts = new ContactList();
 
 			Body groundBody = Utilities.AddBody(scene);
-			groundBody.Mass = 0;
 			groundBody.Position = new Vector3(400, 25, 0);
-			groundBody.Orientation = Matrix3.Identity;
-			//groundBody.Orientation.SetRotation(new Vector3(0, 0, 10) * Math.DegreesToRadians);
+			groundBody.StaticFriction = 0.5F;
+			groundBody.DynamicFriction = 0.2F;
+			groundBody.Restitution = 0.2F;
 			groundBody.Shape = Utilities.CreateSquareShape(new Vector2(700, 20), new Vector2(0, 0));
+			groundBody.Shape = Utilities.CreatePolygonShape(new Vector3[] { new Vector3(-350, -10, 0), new Vector3(-350, 10, 0), new Vector3(350, 500, 0), new Vector3(350, -10, 0) });
+
+			Body obstacleBody = Utilities.AddBody(scene);
+			obstacleBody.Position = new Vector3(400, 300, 0);
+			obstacleBody.StaticFriction = 0.5F;
+			obstacleBody.DynamicFriction = 0.2F;
+			obstacleBody.Restitution = 0.2F;
+			obstacleBody.Shape = Utilities.CreateSphereShape(50);
 
 			config = new Simulation.Config();
 			config.StepTime = STEP_TIME;
+			config.Gravity = new Vector3(0, -980, 0);
 
 			editorCanvas1.LookAt(new PointF(400, 200));
 		}
@@ -73,18 +82,19 @@ namespace DeterministicTest
 			{
 				Body body = Utilities.AddBody(scene);
 				body.Mass = 80;
-				body.Inertia = 20;
+				body.Inertia = 50;
+				body.AngularVelocity = new Vector3(0, 0, 23);
 				body.Position = new Vector3(loc.X, loc.Y, 0);
-				body.Orientation = Matrix3.Identity;
 				body.Shape = Utilities.CreateSphereShape(20);
 			}
 			else if (e.Button == MouseButtons.Right)
 			{
 				Body body = Utilities.AddBody(scene);
-				body.Mass = 180;
-				body.Inertia = 20;
+				body.Mass = 20;
+				body.StaticFriction = 0.4F;
+				body.DynamicFriction = 0.2F;
+				body.Restitution = 0.2F;
 				body.Position = new Vector3(loc.X, loc.Y, 0);
-				body.Orientation = Matrix3.Identity;
 				body.Shape = Utilities.CreateSquareShape(new Vector2(70, 50), Vector2.Zero);
 			}
 		}
