@@ -1,6 +1,4 @@
-﻿using GameFramework.Common.Extensions;
-using GameFramework.Common.Timing;
-using GameFramework.Deterministic;
+﻿using GameFramework.Deterministic;
 using GameFramework.Deterministic.Physics2D;
 using GameFramework.GDIRenderer;
 using System.Drawing;
@@ -37,7 +35,7 @@ namespace DeterministicTest
 			groundBody.DynamicFriction = 0.2F;
 			groundBody.Restitution = 0.2F;
 			groundBody.Shape = Utilities.CreateSquareShape(new Vector2(700, 20), new Vector2(0, 0));
-			groundBody.Shape = Utilities.CreatePolygonShape(new Vector2[] { new Vector2(-350, -10), new Vector2(-350, 10), new Vector2(350, 500), new Vector2(350, -10) });
+			groundBody.Orientation.Rotation = 60 * Math.DegreesToRadians;
 
 			Body obstacleBody = Utilities.AddBody(scene);
 			obstacleBody.Position = new Vector2(400, 300);

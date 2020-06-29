@@ -239,7 +239,7 @@ namespace GameFramework.Deterministic.Physics2D
 			Body.Position += Body.Velocity * Config.StepTime;
 
 			Matrix2 rot = Matrix2.Zero;
-			rot.SetRotation(Body.AngularVelocity * Config.StepTime);
+			rot.Rotation = Body.AngularVelocity * Config.StepTime;
 			Body.Orientation *= rot;
 
 			IntegrateForces(Body, Config);

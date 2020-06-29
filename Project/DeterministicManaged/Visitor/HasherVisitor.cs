@@ -73,16 +73,34 @@ namespace GameFramework.Deterministic.Visitor
 
 		public void VisitMatrix2(Matrix2 Matrix2)
 		{
-			for (int i = 0; i < 2; ++i)
-				for (int j = 0; j < 2; ++j)
-					VisitNumber(Matrix2.Values[i, j]);
+			//for (int i = 0; i < 2; ++i)
+			//	for (int j = 0; j < 2; ++j)
+			//		VisitNumber(Matrix2.Values[i, j]);
+
+			VisitNumber(Matrix2.Value00);
+			VisitNumber(Matrix2.Value01);
+
+			VisitNumber(Matrix2.Value10);
+			VisitNumber(Matrix2.Value11);
 		}
 
 		public void VisitMatrix3(Matrix3 Matrix3)
 		{
-			for (int i = 0; i < 3; ++i)
-				for (int j = 0; j < 3; ++j)
-					VisitNumber(Matrix3.Values[i, j]);
+			//for (int i = 0; i < 3; ++i)
+			//	for (int j = 0; j < 3; ++j)
+			//		VisitNumber(Matrix3.Values[i, j]);
+
+			VisitNumber(Matrix3.Value00);
+			VisitNumber(Matrix3.Value01);
+			VisitNumber(Matrix3.Value02);
+
+			VisitNumber(Matrix3.Value10);
+			VisitNumber(Matrix3.Value11);
+			VisitNumber(Matrix3.Value12);
+
+			VisitNumber(Matrix3.Value20);
+			VisitNumber(Matrix3.Value21);
+			VisitNumber(Matrix3.Value22);
 		}
 
 		public void VisitBounds(Bounds Bounds)
