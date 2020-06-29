@@ -53,6 +53,11 @@ namespace GameFramework.Deterministic
 			return (X * Other.X) + (Y * Other.Y);
 		}
 
+		public Number Cross(Vector2 Other)
+		{
+			return (X * Other.Y) - (Y * Other.X);
+		}
+
 		public static Vector2 operator -(Vector2 Other)
 		{
 			return new Vector2(-Other.X, -Other.Y);
@@ -61,11 +66,6 @@ namespace GameFramework.Deterministic
 		public static Vector2 operator *(Vector2 Left, Number Right)
 		{
 			return new Vector2(Left.X * Right, Left.Y * Right);
-		}
-
-		public static Number operator *(Vector2 Left, Vector2 Right)
-		{
-			return (Left.X * Right.Y) - (Left.Y * Right.X);
 		}
 
 		public static Vector2 operator /(Vector2 Left, Number Right)

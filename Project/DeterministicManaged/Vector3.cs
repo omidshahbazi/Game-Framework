@@ -57,6 +57,11 @@ namespace GameFramework.Deterministic
 			return (X * Other.X) + (Y * Other.Y) + (Z * Other.Z);
 		}
 
+		public Vector3 Cross(Vector3 Other)
+		{
+			return new Vector3((Y * Other.Z) - (Z * Other.Y), (Z * Other.X) - (X * Other.Z), (X * Other.Y) - (Y * Other.X));
+		}
+
 		public static Vector3 operator -(Vector3 Other)
 		{
 			return new Vector3(-Other.X, -Other.Y, -Other.Z);
@@ -65,11 +70,6 @@ namespace GameFramework.Deterministic
 		public static Vector3 operator *(Vector3 Left, Number Right)
 		{
 			return new Vector3(Left.X * Right, Left.Y * Right, Left.Z * Right);
-		}
-
-		public static Vector3 operator *(Vector3 Left, Vector3 Right)
-		{
-			return new Vector3((Left.Y * Right.Z) - (Left.Z * Right.Y), (Left.Z * Right.X) - (Left.X * Right.Z), (Left.X * Right.Y) - (Left.Y * Right.X));
 		}
 
 		public static Vector3 operator /(Vector3 Left, Number Right)

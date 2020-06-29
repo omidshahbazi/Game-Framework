@@ -1,12 +1,12 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using GameFramework.Deterministic.Visitor;
 
-namespace GameFramework.Deterministic.Physics
+namespace GameFramework.Deterministic.Physics2D
 {
 	public class PolygonShape : Shape
 	{
-		public Vector3[] Vertices;
-		public Vector3[] Normals;
+		public Vector2[] Vertices;
+		public Vector2[] Normals;
 
 		public override Types GetType()
 		{

@@ -49,6 +49,17 @@ namespace GameFramework.Deterministic
 			return data;
 		}
 
+		public static Matrix2 ReadMatrix2(this BufferStream Buffer)
+		{
+			Matrix2 data = Matrix2.Zero;
+
+			for (int i = 0; i < 2; ++i)
+				for (int j = 0; j < 2; ++j)
+					data.Values[i, j] = Buffer.ReadNumber();
+
+			return data;
+		}
+
 		public static Bounds ReadBounds(this BufferStream Buffer)
 		{
 			Bounds data = new Bounds();

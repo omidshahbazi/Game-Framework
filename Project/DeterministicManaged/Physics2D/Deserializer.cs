@@ -2,7 +2,7 @@
 using GameFramework.BinarySerializer;
 using System;
 
-namespace GameFramework.Deterministic.Physics
+namespace GameFramework.Deterministic.Physics2D
 {
 	public static class Deserializer
 	{
@@ -29,17 +29,17 @@ namespace GameFramework.Deterministic.Physics
 		{
 			Body data = new Body();
 
-			data.Position = Buffer.ReadVector3();
-			data.Orientation = Buffer.ReadMatrix3();
+			data.Position = Buffer.ReadVector2();
+			data.Orientation = Buffer.ReadMatrix2();
 			data.Mass = Buffer.ReadNumber();
 			data.Inertia = Buffer.ReadNumber();
 			data.Restitution = Buffer.ReadNumber();
 			data.DynamicFriction = Buffer.ReadNumber();
 			data.StaticFriction = Buffer.ReadNumber();
 
-			data.Force = Buffer.ReadVector3();
-			data.Velocity = Buffer.ReadVector3();
-			data.AngularVelocity = Buffer.ReadVector3();
+			data.Force = Buffer.ReadVector2();
+			data.Velocity = Buffer.ReadVector2();
+			data.AngularVelocity = Buffer.ReadNumber();
 			data.Torque = Buffer.ReadNumber();
 
 			data.Shape = DeserializeShape(Buffer);
@@ -58,8 +58,8 @@ namespace GameFramework.Deterministic.Physics
 
 			switch (type)
 			{
-				case Shape.Types.Sphere:
-					return DeserializeSphereShape(Buffer);
+				case Shape.Types.Circle:
+					return DeserializeCircleShape(Buffer);
 
 				case Shape.Types.Polygon:
 					return DeserializePolygonShape(Buffer);
@@ -68,9 +68,9 @@ namespace GameFramework.Deterministic.Physics
 			throw new Exception("Unknow shape type");
 		}
 
-		public static SphereShape DeserializeSphereShape(BufferStream Buffer)
+		public static CircleShape DeserializeCircleShape(BufferStream Buffer)
 		{
-			SphereShape data = new SphereShape();
+			CircleShape data = new CircleShape();
 
 			data.Radius = Buffer.ReadNumber();
 

@@ -6,7 +6,7 @@ namespace GameFramework.Deterministic
 	{
 		public static readonly Number MaxValue = 99999;
 		public static readonly Number MinValue = -99999;
-		public static readonly Number Epsilon = 1.401298E-45F;
+		public static readonly Number Epsilon = 0.001F;
 
 #if FIXED_POINT_MATH
 		private const int SHIFT_AMOUNT = 12; //12 is 4096
@@ -29,18 +29,18 @@ namespace GameFramework.Deterministic
 			get { return value; }
 		}
 
-		public Number(long RawValue)
+		private Number(long RawValue)
 		{
 			value = RawValue;
 		}
 
-		private Number(float Value)
+		public Number(float Value)
 		{
 			Value *= One;
 			value = (int)Value;
 		}
 
-		private Number(double Value)
+		public Number(double Value)
 		{
 			Value *= One;
 			value = (int)Value;
@@ -59,6 +59,11 @@ namespace GameFramework.Deterministic
 		public static Number operator %(Number LeftHand, Number RightHand)
 		{
 			return new Number(LeftHand.value % RightHand.value);
+		}
+
+		public static implicit operator int(Number Value)
+		{
+			return (int)Value.FloatValue;
 		}
 
 		public static implicit operator float(Number Value)
@@ -103,6 +108,11 @@ namespace GameFramework.Deterministic
 			return new Number(LeftHand.value % RightHand.value);
 		}
 
+		public static implicit operator int(Number Value)
+		{
+			return (int)Value.FloatValue;
+		}
+
 		public static implicit operator float(Number Value)
 		{
 			return (float)Value.value;
@@ -118,6 +128,11 @@ namespace GameFramework.Deterministic
 			return value.ToString();
 		}
 #endif
+
+		public static Number operator -(Number Other)
+		{
+			return new Number(-Other.RawValue);
+		}
 
 		public static Number operator +(Number LeftHand, Number RightHand)
 		{

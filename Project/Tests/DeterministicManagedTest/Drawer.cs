@@ -1,5 +1,5 @@
 ﻿using GameFramework.Deterministic;
-using GameFramework.Deterministic.Physics;
+using GameFramework.Deterministic.Physics2D;
 using GameFramework.GDIRenderer;
 using System.Drawing;
 
@@ -36,30 +36,30 @@ namespace DeterministicTest
 
 		private static void DrawShape(IDevice Device, Body Body, Pen Pen)
 		{
-			if (Body.Shape is SphereShape)
-				DrawSphereShape(Device, Body, (SphereShape)Body.Shape, Body.Position, Pen);
+			if (Body.Shape is CircleShape)
+				DrawCircleShape(Device, Body, (CircleShape)Body.Shape, Body.Position, Pen);
 			else if (Body.Shape is PolygonShape)
 				DrawPolygonShape(Device, Body, (PolygonShape)Body.Shape, Body.Position, Pen);
 		}
 
-		private static void DrawSphereShape(IDevice Device, Body Body, SphereShape Shape, Vector3 CenterPosition, Pen Pen)
+		private static void DrawCircleShape(IDevice Device, Body Body, CircleShape Shape, Vector2 CenterPosition, Pen Pen)
 		{
 			Number radius = Shape.Radius * SCALE;
 
-			DrawCircle(Device, Pen, CenterPosition - (Vector3.One * radius), radius);
+			DrawCircle(Device, Pen, CenterPosition - (Vector2.One * radius), radius);
 
-			DrawVector(Device, Pen, CenterPosition, (Body.Orientation * Vector3.Right) * radius);
+			DrawVector(Device, Pen, CenterPosition, (Body.Orientation * Vector2.Right) * radius);
 		}
 
-		private static void DrawPolygonShape(IDevice Device, Body Body, PolygonShape Shape, Vector3 CenterPosition, Pen Pen)
+		private static void DrawPolygonShape(IDevice Device, Body Body, PolygonShape Shape, Vector2 CenterPosition, Pen Pen)
 		{
 			if (Shape.Vertices.Length < 2)
 				return;
 
 			for (int i = 1; i < Shape.Vertices.Length; ++i)
 			{
-				Vector3 pointA = CenterPosition + (Body.Orientation * Shape.Vertices[i - 1] * SCALE);
-				Vector3 pointB = CenterPosition + (Body.Orientation * Shape.Vertices[i] * SCALE);
+				Vector2 pointA = CenterPosition + (Body.Orientation * Shape.Vertices[i - 1] * SCALE);
+				Vector2 pointB = CenterPosition + (Body.Orientation * Shape.Vertices[i] * SCALE);
 
 				DrawLine(Device, Pen, pointA, pointB);
 
@@ -70,17 +70,17 @@ namespace DeterministicTest
 			DrawLine(Device, Pen, CenterPosition + (Body.Orientation * Shape.Vertices[0] * SCALE), CenterPosition + (Body.Orientation * Shape.Vertices[Shape.Vertices.Length - 1] * SCALE));
 		}
 
-		private static void DrawVector(IDevice Device, Pen Pen, Vector3 From, Vector3 Vector)
+		private static void DrawVector(IDevice Device, Pen Pen, Vector2 From, Vector2 Vector)
 		{
 			DrawLine(Device, Pen, From, From + Vector);
 		}
 
-		private static void DrawCircle(IDevice Device, Pen Pen, Vector3 Origin, Number Radius)
+		private static void DrawCircle(IDevice Device, Pen Pen, Vector2 Origin, Number Radius)
 		{
 			Device.DrawCircle(Origin.X, Origin.Y, Radius, Pen);
 		}
 
-		private static void DrawLine(IDevice Device, Pen Pen, Vector3 From, Vector3 To)
+		private static void DrawLine(IDevice Device, Pen Pen, Vector2 From, Vector2 To)
 		{
 			Device.DrawLine(From.X, From.Y, To.X, To.Y, Pen);
 		}

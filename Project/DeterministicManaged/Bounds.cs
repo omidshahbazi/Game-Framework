@@ -1,5 +1,5 @@
 ﻿// Copyright 2019. All Rights Reserved.
-using GameFramework.Deterministic.Physics;
+using GameFramework.Deterministic.Physics3D;
 using System.Runtime.CompilerServices;
 
 namespace GameFramework.Deterministic

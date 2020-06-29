@@ -1,5 +1,5 @@
 ﻿// Copyright 2015-2016 Zorvan Game Studio. All Rights Reserved.
-using GameFramework.Deterministic.Physics;
+using GameFramework.Deterministic.Physics3D;
 using System.Collections.Generic;
 
 namespace GameFramework.Deterministic.Navigation

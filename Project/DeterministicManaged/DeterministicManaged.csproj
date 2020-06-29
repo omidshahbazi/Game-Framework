@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="Matrix2.cs" />
     <Compile Include="Matrix3.cs" />
     <Compile Include="Navigation\GridBased\GridMapData.cs" />
     <Compile Include="Navigation\GridBased\GridNode.cs" />
@@ -47,16 +48,17 @@
     <Compile Include="Identifier.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="Bounds.cs" />
-    <Compile Include="Physics\Deserializer.cs" />
-    <Compile Include="Physics\Manifold.cs" />
-    <Compile Include="Physics\Contact.cs" />
-    <Compile Include="Physics\PolygonShape.cs" />
-    <Compile Include="Physics\SphereShape.cs" />
-    <Compile Include="Physics\Shape.cs" />
-    <Compile Include="Physics\Body.cs" />
-    <Compile Include="Physics\Scene.cs" />
-    <Compile Include="Physics\Simulation.cs" />
-    <Compile Include="Physics\Utilities.cs" />
+    <Compile Include="Physics3D\Utilities.cs" />
+    <Compile Include="Physics2D\Deserializer.cs" />
+    <Compile Include="Physics2D\Manifold.cs" />
+    <Compile Include="Physics2D\Contact.cs" />
+    <Compile Include="Physics2D\PolygonShape.cs" />
+    <Compile Include="Physics2D\CircleShape.cs" />
+    <Compile Include="Physics2D\Shape.cs" />
+    <Compile Include="Physics2D\Body.cs" />
+    <Compile Include="Physics2D\Scene.cs" />
+    <Compile Include="Physics2D\Simulation.cs" />
+    <Compile Include="Physics2D\Utilities.cs" />
     <Compile Include="Vector3.cs" />
     <Compile Include="Vector2.cs" />
     <Compile Include="Number.cs" />

@@ -1,7 +1,7 @@
 ﻿// Copyright 2019. All Rights Reserved.
 using System.Collections.Generic;
 
-namespace GameFramework.Deterministic.Physics
+namespace GameFramework.Deterministic.Physics2D
 {
 	class Manifold : Contact
 	{
