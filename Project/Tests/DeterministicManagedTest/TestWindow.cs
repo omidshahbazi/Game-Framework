@@ -8,7 +8,7 @@ namespace DeterministicTest
 {
 	public partial class TestWindow : Form
 	{
-		private const float STEP_TIME = 0.016F;
+		private const float STEP_TIME = 0.1F;
 
 		private Timer timer = null;
 		private Scene scene = null;
@@ -34,8 +34,7 @@ namespace DeterministicTest
 			groundBody.StaticFriction = 0.5F;
 			groundBody.DynamicFriction = 0.2F;
 			groundBody.Restitution = 0.2F;
-			groundBody.Shape = Utilities.CreateSquareShape(new Vector2(700, 20), new Vector2(0, 0));
-			groundBody.Orientation.Rotation = 60 * Math.DegreesToRadians;
+			groundBody.Shape = Utilities.CreateSquareShape(new Vector2(20, 5), new Vector2(0, 0));
 
 			Body obstacleBody = Utilities.AddBody(scene);
 			obstacleBody.Position = new Vector2(400, 300);
@@ -78,10 +77,10 @@ namespace DeterministicTest
 			if (e.Button == MouseButtons.Left)
 			{
 				Body body = Utilities.AddBody(scene);
-				body.Mass = 80;
-				body.Inertia = 50;
+				body.Mass = 50;
+				body.Inertia = 10;
 				body.Position = new Vector2(loc.X, loc.Y);
-				body.Shape = Utilities.CreateCircleShape(20);
+				body.Shape = Utilities.CreateCircleShape(2.5);
 			}
 			else if (e.Button == MouseButtons.Right)
 			{
