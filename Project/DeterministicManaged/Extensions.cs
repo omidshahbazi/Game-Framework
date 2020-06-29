@@ -38,6 +38,23 @@ namespace GameFramework.Deterministic
 			return data;
 		}
 
+		public static Matrix2 ReadMatrix2(this BufferStream Buffer)
+		{
+			Matrix2 data = Matrix2.Zero;
+
+			//for (int i = 0; i < 2; ++i)
+			//	for (int j = 0; j < 2; ++j)
+			//		data.Values[i, j] = Buffer.ReadNumber();
+
+			data.Value00 = Buffer.ReadNumber();
+			data.Value01 = Buffer.ReadNumber();
+
+			data.Value10 = Buffer.ReadNumber();
+			data.Value11 = Buffer.ReadNumber();
+
+			return data;
+		}
+
 		public static Matrix3 ReadMatrix3(this BufferStream Buffer)
 		{
 			Matrix3 data = Matrix3.Zero;
@@ -57,23 +74,6 @@ namespace GameFramework.Deterministic
 			data.Value20 = Buffer.ReadNumber();
 			data.Value21 = Buffer.ReadNumber();
 			data.Value22 = Buffer.ReadNumber();
-
-			return data;
-		}
-
-		public static Matrix2 ReadMatrix2(this BufferStream Buffer)
-		{
-			Matrix2 data = Matrix2.Zero;
-
-			//for (int i = 0; i < 2; ++i)
-			//	for (int j = 0; j < 2; ++j)
-			//		data.Values[i, j] = Buffer.ReadNumber();
-
-			data.Value00 = Buffer.ReadNumber();
-			data.Value01 = Buffer.ReadNumber();
-
-			data.Value10 = Buffer.ReadNumber();
-			data.Value11 = Buffer.ReadNumber();
 
 			return data;
 		}
