@@ -26,7 +26,7 @@ namespace GameFramework.Deterministic.Physics2D
 			public Vector2 Point;
 		}
 
-		private static readonly Func<Body, Vector2, Vector2, DispatchResult>[] Dispatchers = new Func<Body, Vector2, Vector2, DispatchResult>[] { DispatchCircleShape, DispatchPolygonShape };
+		private static readonly Func<Body, Vector2, Vector2, Vector2, DispatchResult>[] Dispatchers = new Func<Body, Vector2, Vector2, Vector2, DispatchResult>[] { DispatchCircleShape, DispatchPolygonShape };
 
 		public static bool Raycast(Body[] Bodies, Vector2 Origin, Vector2 Direction, Number Distance, ref Result Result)
 		{
@@ -46,7 +46,7 @@ namespace GameFramework.Deterministic.Physics2D
 			{
 				Body body = Info.Scene.Bodies[i];
 
-				DispatchResult result = DispatchShape(body, Info.Origin, endPoint);
+				DispatchResult result = DispatchShape(body, Info.Origin, endPoint, Info.Direction);
 				if (!result.Hit)
 					continue;
 
@@ -59,87 +59,53 @@ namespace GameFramework.Deterministic.Physics2D
 			return false;
 		}
 
-		private static DispatchResult DispatchShape(Body Body, Vector2 LineStartPoint, Vector2 LineEndPoint)
+		private static DispatchResult DispatchShape(Body Body, Vector2 LineStartPoint, Vector2 LineEndPoint, Vector2 Direction)
 		{
-			return Dispatchers[(int)Body.Shape.GetType()](Body, LineStartPoint, LineEndPoint);
+			return Dispatchers[(int)Body.Shape.GetType()](Body, LineStartPoint, LineEndPoint, Direction);
 		}
 
-		//private static DispatchResult DispatchCircleShape(Body Body, Vector2 LineStartPoint, Vector2 LineEndPoint)
-		//{
-		//	CircleShape shape = (CircleShape)Body.Shape;
-
-		//	Vector2 lineDiff = LineEndPoint - LineStartPoint;
-		//	Number lineLenSqr = lineDiff.SqrMagnitude;
-		//	if (lineLenSqr == 0)
-		//		return false;
-
-		//	Vector2 centerDiff = Body.Position - LineStartPoint;
-		//	Number centerLenSqr = centerDiff.SqrMagnitude - (shape.Radius * shape.Radius);
-
-		//	Number lineCenterDot = lineDiff.Dot(centerDiff);
-		//	Number pBy2 = lineCenterDot / lineLenSqr;
-
-		//	Number q = centerLenSqr / lineLenSqr;
-
-		//	Number disc = pBy2 * pBy2 - q;
-		//	if (disc < 0)
-		//		return false;
-
-		//	Number tmpSqrt = Math.Sqrt(disc);
-		//	Number abScalingFactor1 = -pBy2 + tmpSqrt;
-		//	Number abScalingFactor2 = -pBy2 - tmpSqrt;
-
-		//	Vector2 p1 = (LineStartPoint - lineDiff) * abScalingFactor1;
-		//	if (disc == 0)
-		//	{
-		//		//return Collections.singletonList(p1);
-
-		//		return true;
-		//	}
-
-		//	Vector2 p2 = (LineStartPoint - lineDiff) * abScalingFactor2;
-
-		//	//return Arrays.asList(p1, p2);
-
-		//	return true;
-		//}
-
-		private static DispatchResult DispatchCircleShape(Body Body, Vector2 LineStartPoint, Vector2 LineEndPoint)
+		private static DispatchResult DispatchCircleShape(Body Body, Vector2 LineStartPoint, Vector2 LineEndPoint, Vector2 Direction)
 		{
 			CircleShape shape = (CircleShape)Body.Shape;
 
-			Vector2 diff = LineEndPoint - LineStartPoint;
+			Vector2 lineDiff = LineEndPoint - LineStartPoint;
+			Number lineDiffSqr = lineDiff.SqrMagnitude;
 
-			Vector2 centerDiff = -(Body.Position - LineStartPoint);
+			Vector2 centerDiff = Body.Position - LineStartPoint;
+			Number centerDiffSqr = centerDiff.SqrMagnitude;
 
-			Number A = diff.SqrMagnitude;
-			Number B = 2 * ((diff.X * centerDiff.X) + (diff.Y * centerDiff.Y));
-			Number C = (centerDiff.X * centerDiff.X) + (centerDiff.Y * centerDiff.Y) - (shape.Radius * shape.Radius);
+			Number radiusSqr = shape.Radius * shape.Radius;
 
-			Number det = B * B - 4 * A * C;
-
-			if ((A <= Math.Epsilon) || (det < 0))
+			if (((LineStartPoint + (Direction * centerDiff.Magnitude)) - Body.Position).SqrMagnitude > radiusSqr)
 				return new DispatchResult() { Hit = false };
 
-			Number t = 0;
+			centerDiff *= -1;
 
-			if (det == 0)
+			Number B = 2 * ((lineDiff.X * centerDiff.X) + (lineDiff.Y * centerDiff.Y));
+			Number C = centerDiffSqr - radiusSqr;
+
+			Number det = B * B - 4 * lineDiffSqr * C;
+
+			if ((lineDiffSqr <= Math.Epsilon) || (det < 0))
+				return new DispatchResult() { Hit = false };
+
+			Number distance = 0;
+
+			if (det == 0) // One solution
+				distance = -B / (2 * lineDiffSqr);
+			else // Two solutions
 			{
-				// One solution.
-				t = -B / (2 * A);
+				// Farest point
+				//distance = (-B + Math.Sqrt(det)) / (2 * A);
 
-				return new DispatchResult() { Hit = true, Distance = 0, Point = LineStartPoint + (diff * t) };
+				// Nearest point
+				distance = (float)((-B - Math.Sqrt(det)) / (2 * lineDiffSqr));
 			}
 
-			// Two solutions.
-			t = (-B + Math.Sqrt(det)) / (2 * A);
-
-			t = (float)((-B - Math.Sqrt(det)) / (2 * A));
-
-			return new DispatchResult() { Hit = true, Distance = 0, Point = LineStartPoint + (diff * t) };
+			return new DispatchResult() { Hit = true, Distance = distance, Point = LineStartPoint + (lineDiff * distance) };
 		}
 
-		private static DispatchResult DispatchPolygonShape(Body Body, Vector2 LineStartPoint, Vector2 LineEndPoint)
+		private static DispatchResult DispatchPolygonShape(Body Body, Vector2 LineStartPoint, Vector2 LineEndPoint, Vector2 Direction)
 		{
 			return new DispatchResult() { Hit = false };
 		}
