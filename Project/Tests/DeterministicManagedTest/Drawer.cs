@@ -21,6 +21,16 @@ namespace DeterministicTest
 				DrawContact(Device, Contacts[i], Pens.Red);
 		}
 
+		public static void Draw(IDevice Device, Raycaster.Info Info)
+		{
+			DrawVector(Device, Pens.Blue, Info.Origin, Info.Direction * Info.Distance);
+		}
+
+		public static void Draw(IDevice Device, Raycaster.Result Result)
+		{
+			DrawCircle(Device, Pens.Red, Result.Point, 2);
+		}
+
 		private static void DrawContact(IDevice Device, Contact Contact, Pen Pen)
 		{
 			for (int i = 0; i < Contact.Points.Length; ++i)

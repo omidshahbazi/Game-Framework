@@ -15,7 +15,7 @@ namespace GameFramework.Deterministic
 
 		public Number SqrMagnitude
 		{
-			get { return Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2); }
+			get { return (X * X) + (Y * Y) + (Z * Z); }
 		}
 
 		public Number Magnitude

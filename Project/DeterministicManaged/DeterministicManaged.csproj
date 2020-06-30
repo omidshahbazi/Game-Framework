@@ -48,6 +48,7 @@
     <Compile Include="Identifier.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="Bounds.cs" />
+    <Compile Include="Physics2D\Raycaster.cs" />
     <Compile Include="Physics3D\Utilities.cs" />
     <Compile Include="Physics2D\Deserializer.cs" />
     <Compile Include="Physics2D\Manifold.cs" />
