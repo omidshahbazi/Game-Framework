@@ -125,6 +125,8 @@ namespace GameFramework.Deterministic.Physics2D
 
 			int index = -1;
 			return FindMinimumDistanced(results, ref index);
+
+			//TODO: Problem with distances and selected face
 		}
 
 		private static DispatchResult TestLineIntersectsLine(Vector2 Line1StartPoint, Vector2 Line1EndPoint, Vector2 Line2StartPoint, Vector2 Line2EndPoint)
