@@ -152,7 +152,14 @@ namespace GameFramework.BinarySerializer
 
 				bool containsValueTypeInfo = Buffer.ReadBool();
 				if (containsValueTypeInfo)
-					Type = Type.GetType(Buffer.ReadString());
+				{
+					string typeName = Buffer.ReadString();
+
+					Type = Type.GetType();
+
+					if (Type == null)
+						throw new ArgumentException(string.Format("Couldn't find Specified type {0}", typeName));
+				}
 
 				object instance = Activator.CreateInstance(Type);
 

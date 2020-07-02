@@ -110,7 +110,14 @@ namespace GameFramework.ASCIISerializer
 					ISerializeObject obj = (ISerializeObject)Data;
 
 					if (obj.Contains(TYPE_FIELD_NAME))
-						elementType = Type.GetType(obj.Get<string>(TYPE_FIELD_NAME));
+					{
+						string typeName = obj.Get<string>(TYPE_FIELD_NAME);
+
+						elementType = Type.GetType(typeName);
+
+						if (elementType == null)
+							throw new ArgumentException(string.Format("Couldn't find Specified type {0}", typeName), TYPE_FIELD_NAME);
+					}
 
 					return Bind(obj, elementType);
 				}
