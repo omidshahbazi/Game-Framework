@@ -211,7 +211,7 @@ namespace GameFramework.Networking
 
 		protected abstract void Receive();
 
-		protected virtual void SendOverSocket(Socket Target, BufferStream Buffer)
+		protected virtual bool SendOverSocket(Socket Target, BufferStream Buffer)
 		{
 			try
 			{
@@ -222,6 +222,8 @@ namespace GameFramework.Networking
 
 					Statistics.AddBandwidthOut(Buffer.Size);
 				}
+
+				return true;
 			}
 			catch (SocketException e)
 			{
@@ -231,7 +233,7 @@ namespace GameFramework.Networking
 				{
 					HandleDisconnection(Target);
 
-					return;
+					return false;
 				}
 
 				throw e;
@@ -239,6 +241,8 @@ namespace GameFramework.Networking
 			catch (ObjectDisposedException e)
 			{
 				HandleDisconnection(Target);
+
+				return false;
 			}
 			catch (Exception e)
 			{
@@ -246,7 +250,7 @@ namespace GameFramework.Networking
 			}
 		}
 
-		protected virtual void SendOverSocket(IPEndPoint EndPoint, BufferStream Buffer)
+		protected virtual bool SendOverSocket(IPEndPoint EndPoint, BufferStream Buffer)
 		{
 			try
 			{
@@ -254,6 +258,8 @@ namespace GameFramework.Networking
 					Socket.SendTo(Buffer.Buffer, EndPoint);
 
 				Statistics.AddBandwidthOut(Buffer.Size);
+
+				return true;
 			}
 			catch (SocketException e)
 			{
@@ -261,7 +267,7 @@ namespace GameFramework.Networking
 					e.SocketErrorCode == SocketError.ConnectionAborted ||
 					e.SocketErrorCode == SocketError.ConnectionRefused)
 				{
-					return;
+					return false;
 				}
 
 				throw e;
@@ -324,8 +330,9 @@ namespace GameFramework.Networking
 					if (Timestamp < command.SendTime + (LatencySimulation / 1000.0F))
 						continue;
 
-					if (!HandleSendCommand(sendCommands[i]))
-						continue;
+					//if (!HandleSendCommand(sendCommands[i]))
+					//	continue;
+					HandleSendCommand(sendCommands[i]);
 
 					sendCommands.RemoveAt(i--);
 				}

@@ -227,14 +227,24 @@ namespace GameFramework.Networking
 			ServerSendCommand sendCommand = (ServerSendCommand)Command;
 			TCPClient client = (TCPClient)sendCommand.Client;
 
-			if (!client.IsReady)
-				return false;
+			//if (!client.IsReady)
+			//	return false;
 
 			client.Statistics.AddBandwidthOut(Command.Buffer.Size);
 
 			client.Statistics.SetLastTouchTime(Time.CurrentEpochTime);
 
-			SendOverSocket(client.Socket, Command.Buffer);
+			if (!SendOverSocket(client.Socket, Command.Buffer))
+			{
+				HandleClientDisconnection(client);
+
+				lock (clients)
+				{
+					clients.Remove(client);
+				}
+
+				return false;
+			}
 
 			return true;
 		}
