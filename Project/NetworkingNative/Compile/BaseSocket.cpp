@@ -114,7 +114,7 @@ namespace GameFramework::Networking
 		m_SendThread = new thread(GlobalSendWorker, this);
 	}
 
-	void BaseSocket::SendOverSocket(Socket Target, const BufferStream& Buffer)
+	bool BaseSocket::SendOverSocket(Socket Target, const BufferStream& Buffer)
 	{
 		try
 		{
@@ -122,6 +122,8 @@ namespace GameFramework::Networking
 				SocketUtilities::Send(Target, Buffer.GetBuffer(), Buffer.GetSize());
 
 			m_Statistics.AddBandwidthOut(Buffer.GetSize());
+
+			return true;
 		}
 		catch (PlatformNetwork::SocketException e)
 		{
@@ -131,14 +133,14 @@ namespace GameFramework::Networking
 			{
 				HandleDisconnection(Target);
 
-				return;
+				return false;
 			}
 
 			throw e;
 		}
 	}
 
-	void BaseSocket::SendOverSocket(const IPEndPoint& EndPoint, const BufferStream& Buffer)
+	bool BaseSocket::SendOverSocket(const IPEndPoint& EndPoint, const BufferStream& Buffer)
 	{
 		try
 		{
@@ -146,6 +148,8 @@ namespace GameFramework::Networking
 				SocketUtilities::SendTo(m_Socket, EndPoint, Buffer.GetBuffer(), Buffer.GetSize());
 
 			m_Statistics.AddBandwidthOut(Buffer.GetSize());
+
+			return true;
 		}
 		catch (PlatformNetwork::SocketException e)
 		{
@@ -153,7 +157,7 @@ namespace GameFramework::Networking
 				e.GetError() == PlatformNetwork::Errors::ConnectionAborted ||
 				e.GetError() == PlatformNetwork::Errors::ConnectionRefused)
 			{
-				return;
+				return false;
 			}
 
 			throw e;

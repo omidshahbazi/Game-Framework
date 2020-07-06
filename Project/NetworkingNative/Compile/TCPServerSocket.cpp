@@ -172,14 +172,22 @@ namespace GameFramework::Networking
 		ServerSendCommand* sendCommand = reinterpret_cast<ServerSendCommand*>(Command);
 		TCPClient* client = reinterpret_cast<TCPClient*>(sendCommand->GetClient());
 
-		if (!client->GetIsReady())
-			return false;
+		//if (!client->GetIsReady())
+		//	return false;
 
 		client->GetStatistics().AddBandwidthOut(Command->GetBuffer().GetSize());
 
 		client->GetStatistics().SetLastTouchTime(Time::GetCurrentEpochTime());
 
-		BaseSocket::SendOverSocket(client->GetSocket(), Command->GetBuffer());
+		if (!BaseSocket::SendOverSocket(client->GetSocket(), Command->GetBuffer()))
+		{
+			HandleClientDisconnection(client);
+
+			WAIT_FOR_BOOL(m_ClientsLock);
+			m_Clients.remove(client);
+
+			return false;
+		}
 
 		return true;
 	}
