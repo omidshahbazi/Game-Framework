@@ -77,7 +77,7 @@ namespace GameFramework.DatabaseManaged
 			return id;
 		}
 
-		public override DataTable ExecuteWithReturnDataTable(string Query, params object[] Parameters)
+		public override DataTable QueryDataTable(string Query, params object[] Parameters)
 		{
 			MySqlConnection connection = CreateConnection();
 

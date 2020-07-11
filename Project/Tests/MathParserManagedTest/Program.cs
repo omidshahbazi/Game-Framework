@@ -1,6 +1,8 @@
 ﻿using GameFramework.ASCIISerializer;
 using GameFramework.BinarySerializer;
 using GameFramework.Common.Extensions;
+using GameFramework.DatabaseManaged;
+using GameFramework.DatabaseManaged.Migration;
 using GameFramework.Deterministic;
 using GameFramework.Deterministic.Physics2D;
 using System;
@@ -61,6 +63,10 @@ namespace MathParserTest
 
 		static void Main(string[] args)
 		{
+			Database db = new MySQLDatabase("localhost", "root", "!QAZ2wsx", "bourse_analyzer");
+
+			MigrationManager.Migrate(db, null, null);
+
 			long num = 1000;
 			object obj = Activator.CreateInstance(typeof(Number), num);
 

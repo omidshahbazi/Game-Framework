@@ -190,7 +190,7 @@ namespace GameFramework.DatabaseManaged.Generator
 
 			public static Column[] GetColumns(Database Database, string TableName)
 			{
-				DataTable table = Database.ExecuteWithReturnDataTable("DESCRIBE `" + TableName + "`");
+				DataTable table = Database.QueryDataTable("DESCRIBE `" + TableName + "`");
 
 				List<Column> columns = new List<Column>();
 
@@ -206,7 +206,7 @@ namespace GameFramework.DatabaseManaged.Generator
 
 			public static Index[] GetIndecies(Database Database, string TableName)
 			{
-				DataTable table = Database.ExecuteWithReturnDataTable("SHOW INDEX FROM `" + TableName + "`");
+				DataTable table = Database.QueryDataTable("SHOW INDEX FROM `" + TableName + "`");
 
 				DataTable nameTable = table.DefaultView.ToTable(true, "Key_name");
 

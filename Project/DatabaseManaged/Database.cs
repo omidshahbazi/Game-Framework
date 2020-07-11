@@ -36,11 +36,11 @@ namespace GameFramework.DatabaseManaged
 
 		public abstract int ExecuteInsert(string Query, params object[] Parameters);
 
-		public abstract DataTable ExecuteWithReturnDataTable(string Query, params object[] Parameters);
+		public abstract DataTable QueryDataTable(string Query, params object[] Parameters);
 
-		public virtual ISerializeArray ExecuteWithReturnISerializeArray(string Query, params object[] Parameters)
+		public virtual ISerializeArray QueryISerializeArray(string Query, params object[] Parameters)
 		{
-			return BuildISerializeData(ExecuteWithReturnDataTable(Query, Parameters));
+			return BuildISerializeData(QueryDataTable(Query, Parameters));
 		}
 
 		protected ISerializeArray BuildISerializeData(DataTable Table)

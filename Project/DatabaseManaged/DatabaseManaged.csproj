@@ -53,6 +53,8 @@
     <Compile Include="Generator\DataType.cs" />
     <Compile Include="Generator\Table.cs" />
     <Compile Include="Generator\Generator.cs" />
+    <Compile Include="Migration\Constants.cs" />
+    <Compile Include="Migration\MigrationManager.cs" />
     <Compile Include="MySQLDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
