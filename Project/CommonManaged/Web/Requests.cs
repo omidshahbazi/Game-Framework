@@ -1,7 +1,9 @@
 ﻿// Copyright 2019. All Rights Reserved.
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 
 namespace GameFramework.Common.Web
@@ -50,6 +52,23 @@ namespace GameFramework.Common.Web
 			NameValueCollection parameters = BuildParameters(Parameters);
 
 			return client.Encoding.GetString(client.UploadValues(URI, "POST", parameters));
+		}
+
+		public static byte[] DownloadFile(string URI, int MaxReadSize = short.MaxValue)
+		{
+			HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(URI);
+
+			Request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+			Request.Proxy = null;
+			Request.Method = "GET";
+
+			using (WebResponse response = Request.GetResponse())
+			{
+				using (BinaryReader reader = new BinaryReader(response.GetResponseStream()))
+				{
+					return reader.ReadBytes(MaxReadSize);
+				}
+			}
 		}
 
 		private static void FillHeaders(WebClient Client, HeaderMap Headers)
