@@ -113,6 +113,22 @@ namespace GameFramework.Deterministic.Physics2D
 		{
 			PolygonShape shape = (PolygonShape)Body.Shape;
 
+			int hitCount = 0;
+			Vector2 rightMostPoint = new Vector2(Number.MaxValue, Info.Origin.Y);
+			for (int i = 0; i < shape.Vertices.Length; ++i)
+			{
+				Vector2 vertex1 = Body.Position + (Body.Orientation * shape.Vertices[i == 0 ? shape.Vertices.Length - 1 : i - 1]);
+				Vector2 vertex2 = Body.Position + (Body.Orientation * shape.Vertices[i]);
+
+				Number distance;
+				Vector2 point;
+				if (TestLineIntersectsLine(vertex1, vertex2, Info.Origin, LineEndPoint, out distance, out point))
+					++hitCount;
+			}
+
+			if (hitCount % 2 == 1)
+				return new DispatchResult() { Hit = false };
+
 			DispatchResult[] results = new DispatchResult[shape.Vertices.Length];
 
 			for (int i = 0; i < shape.Vertices.Length; ++i)
@@ -131,12 +147,24 @@ namespace GameFramework.Deterministic.Physics2D
 
 		private static DispatchResult TestLineIntersectsLine(Vector2 Line1StartPoint, Vector2 Line1EndPoint, Vector2 Line2StartPoint, Vector2 Line2EndPoint)
 		{
+			DispatchResult result = new DispatchResult();
+
+			result.Hit = TestLineIntersectsLine(Line1StartPoint, Line1EndPoint, Line2StartPoint, Line2EndPoint, out result.Distance, out result.Point);
+
+			return result;
+		}
+
+		private static bool TestLineIntersectsLine(Vector2 Line1StartPoint, Vector2 Line1EndPoint, Vector2 Line2StartPoint, Vector2 Line2EndPoint, out Number Distance, out Vector2 Point)
+		{
+			Distance = 0;
+			Point = Vector2.Zero;
+
 			Vector2 diffLine1 = Line1EndPoint - Line1StartPoint;
 			Vector2 diffLine2 = Line2EndPoint - Line2StartPoint;
 
 			Number x = (-diffLine2.X * diffLine1.Y) + (diffLine2.Y * diffLine1.X);
 			if (x == 0)
-				return new DispatchResult() { Hit = false };
+				return false;
 
 			Vector2 diffStartPoint = Line1StartPoint - Line2StartPoint;
 
@@ -148,10 +176,13 @@ namespace GameFramework.Deterministic.Physics2D
 			{
 				Vector2 vec = diffLine1 * t;
 
-				return new DispatchResult() { Hit = true, Distance = vec.Magnitude, Point = Line1StartPoint + vec };
+				Distance = vec.Magnitude;
+				Point = Line1StartPoint + vec;
+
+				return true;
 			}
 
-			return new DispatchResult() { Hit = false };
+			return false;
 		}
 
 		private static DispatchResult FindMinimumDistanced(DispatchResult[] Results, ref int Index)
