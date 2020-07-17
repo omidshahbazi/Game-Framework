@@ -80,6 +80,9 @@ namespace GameFramework.Deterministic.Physics2D
 
 			Number radiusSqr = shape.Radius * shape.Radius;
 
+			if ((Info.Origin - Body.Position).SqrMagnitude <= radiusSqr)
+				return new DispatchResult() { Hit = false };
+
 			if ((Info.Origin + (Info.Direction * Math.Min(Info.Distance, centerDiff.Magnitude)) - Body.Position).SqrMagnitude > radiusSqr)
 				return new DispatchResult() { Hit = false };
 
