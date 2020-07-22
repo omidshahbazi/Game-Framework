@@ -81,17 +81,24 @@ namespace GameFramework.Common.Utilities
 			if (Arguments == null)
 				return args;
 
-			for (int i = 0; i < Arguments.Length; i += 2)
+			for (int i = 0; i < Arguments.Length;)
 			{
-				if (i + 1 >= Arguments.Length)
-					break;
-
 				string key = Arguments[i];
 
 				if (!key.StartsWith("-"))
 					throw new ArgumentException("Arguemnt should start with '-'", key);
 
-				args.values[key.Substring(1)] = Arguments[i + 1];
+				++i;
+
+				string value = "";
+				if (i < Arguments.Length)
+					if (!Arguments[i].StartsWith("-"))
+					{
+						value = Arguments[i];
+						++i;
+					}
+
+				args.values[key.Substring(1)] = value;
 			}
 
 			return args;
