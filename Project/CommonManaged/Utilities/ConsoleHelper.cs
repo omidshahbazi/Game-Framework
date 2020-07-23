@@ -69,10 +69,12 @@ namespace GameFramework.Common.Utilities
 
 		public static void WriteInfo(string Format, params object[] Args)
 		{
+			ConsoleColor defaultBackColor = Console.BackgroundColor;
+
 			Console.BackgroundColor = ConsoleColor.Gray;
 			Console.ForegroundColor = ConsoleColor.Black;
 			Console.Write("Info");
-			Console.BackgroundColor = ConsoleColor.Black;
+			Console.BackgroundColor = defaultBackColor;
 
 			Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -85,10 +87,12 @@ namespace GameFramework.Common.Utilities
 
 		public static void WriteWarning(string Format, params object[] Args)
 		{
+			ConsoleColor defaultBackColor = Console.BackgroundColor;
+
 			Console.BackgroundColor = ConsoleColor.DarkYellow;
 			Console.ForegroundColor = ConsoleColor.Black;
 			Console.Write("Warning");
-			Console.BackgroundColor = ConsoleColor.Black;
+			Console.BackgroundColor = defaultBackColor;
 
 			Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -101,10 +105,12 @@ namespace GameFramework.Common.Utilities
 
 		public static void WriteError(string Format, params object[] Args)
 		{
+			ConsoleColor defaultBackColor = Console.BackgroundColor;
+
 			Console.BackgroundColor = ConsoleColor.DarkRed;
 			Console.ForegroundColor = ConsoleColor.Black;
 			Console.Write("Error");
-			Console.BackgroundColor = ConsoleColor.Black;
+			Console.BackgroundColor = defaultBackColor;
 
 			Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -117,10 +123,12 @@ namespace GameFramework.Common.Utilities
 
 		public static void WriteDebug(string Format, params object[] Args)
 		{
+			ConsoleColor defaultBackColor = Console.BackgroundColor;
+
 			Console.BackgroundColor = ConsoleColor.Cyan;
 			Console.ForegroundColor = ConsoleColor.Black;
 			Console.Write("Debug");
-			Console.BackgroundColor = ConsoleColor.Black;
+			Console.BackgroundColor = defaultBackColor;
 
 			Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -133,10 +141,12 @@ namespace GameFramework.Common.Utilities
 
 		public static void WriteCritical(string Format, params object[] Args)
 		{
+			ConsoleColor defaultBackColor = Console.BackgroundColor;
+
 			Console.BackgroundColor = ConsoleColor.Red;
 			Console.ForegroundColor = ConsoleColor.Black;
 			Console.Write("Critical");
-			Console.BackgroundColor = ConsoleColor.Black;
+			Console.BackgroundColor = defaultBackColor;
 
 			Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -149,10 +159,12 @@ namespace GameFramework.Common.Utilities
 
 		public static void WriteException(Exception E, string Format, params object[] Args)
 		{
+			ConsoleColor defaultBackColor = Console.BackgroundColor;
+
 			Console.BackgroundColor = ConsoleColor.Red;
 			Console.ForegroundColor = ConsoleColor.Black;
 			Console.Write("Exception");
-			Console.BackgroundColor = ConsoleColor.Black;
+			Console.BackgroundColor = defaultBackColor;
 
 			Console.ForegroundColor = ConsoleColor.Gray;
 
