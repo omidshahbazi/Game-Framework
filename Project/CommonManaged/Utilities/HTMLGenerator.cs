@@ -7,9 +7,21 @@ namespace GameFramework.Common.Utilities
 {
 	public static class HTMLGenerator
 	{
+		public class HTMLStyle
+		{
+			public Color Color = Color.Black;
+			public Font Font;
+		}
+
+		public static HTMLStyle Style
+		{
+			get;
+			set;
+		}
+
 		public static void BeginHTML(StringBuilder Builder)
 		{
-			Builder.Append("<html>");
+			BeginMarkup(Builder, "html");
 		}
 
 		public static void EndHTML(StringBuilder Builder)
@@ -19,7 +31,7 @@ namespace GameFramework.Common.Utilities
 
 		public static void BeginBody(StringBuilder Builder)
 		{
-			Builder.Append("<body>");
+			BeginMarkup(Builder, "body");
 		}
 
 		public static void EndBody(StringBuilder Builder)
@@ -42,12 +54,9 @@ namespace GameFramework.Common.Utilities
 			Builder.Append("&nbsp;");
 		}
 
-		public static void BeginHeader2(StringBuilder Builder, Color Color = new Color())
+		public static void BeginHeader2(StringBuilder Builder)
 		{
-			Builder.Append("<h2 ");
-			Builder.Append("style =\"color:");
-			Builder.Append(Color.ToHex());
-			Builder.Append("\">");
+			BeginMarkup(Builder, "h2");
 		}
 
 		public static void EndHeader2(StringBuilder Builder)
@@ -57,7 +66,7 @@ namespace GameFramework.Common.Utilities
 
 		public static void BeginTable(StringBuilder Builder)
 		{
-			Builder.Append("<table>");
+			BeginMarkup(Builder, "table");
 		}
 
 		public static void EndTable(StringBuilder Builder)
@@ -67,7 +76,7 @@ namespace GameFramework.Common.Utilities
 
 		public static void BeginTableHeader(StringBuilder Builder)
 		{
-			Builder.Append("<thead>");
+			BeginMarkup(Builder, "thead");
 		}
 
 		public static void EndTableHeader(StringBuilder Builder)
@@ -77,7 +86,7 @@ namespace GameFramework.Common.Utilities
 
 		public static void BeginTableRow(StringBuilder Builder)
 		{
-			Builder.Append("<tr>");
+			BeginMarkup(Builder, "tr");
 		}
 
 		public static void EndTableRow(StringBuilder Builder)
@@ -87,12 +96,48 @@ namespace GameFramework.Common.Utilities
 
 		public static void BeginTableData(StringBuilder Builder)
 		{
-			Builder.Append("<td>");
+			BeginMarkup(Builder, "td");
 		}
 
 		public static void EndTableData(StringBuilder Builder)
 		{
 			Builder.Append("</td>");
+		}
+
+		private static void BeginMarkup(StringBuilder Builder, string Markup)
+		{
+			Builder.Append('<');
+			Builder.Append(Markup);
+			Builder.Append(' ');
+
+			WriterStyle(Builder);
+
+			Builder.Append('>');
+		}
+
+		private static void WriterStyle(StringBuilder Builder)
+		{
+			if (Style == null)
+				return;
+
+			Builder.Append("style =\"");
+
+			Builder.Append("color:");
+			Builder.Append(Style.Color.ToHex());
+			Builder.Append("; ");
+
+			if (Style.Font != null)
+			{
+				Builder.Append("font-family:");
+				Builder.Append(Style.Font.FontFamily.Name);
+				Builder.Append("; ");
+
+				Builder.Append("font-size:");
+				Builder.Append(Style.Font.Size);
+				Builder.Append("px; ");
+			}
+
+			Builder.Append('\"');
 		}
 	}
 }
