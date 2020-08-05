@@ -64,8 +64,7 @@ namespace GameFramework::Networking
 		{
 			WAIT_FOR_BOOL(m_EventsLock);
 
-			uint32_t eventCount = m_Events.size();
-			for (uint32_t i = 0; i < eventCount; ++i)
+			for (uint32_t i = 0; i < m_Events.size(); ++i)
 			{
 				EventBase* ev = m_Events[i];
 
@@ -74,7 +73,7 @@ namespace GameFramework::Networking
 				delete ev;
 			}
 
-			for (uint32_t i = 0; i < eventCount; ++i)
+			for (uint32_t i = 0; i < m_Events.size(); ++i)
 				m_Events.removeAt(0);
 		}
 	}

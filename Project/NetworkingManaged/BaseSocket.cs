@@ -166,11 +166,10 @@ namespace GameFramework.Networking
 			{
 				lock (events)
 				{
-					int eventCount = events.Count;
-					for (int i = 0; i < eventCount; ++i)
+					for (int i = 0; i < events.Count; ++i)
 						ProcessEvent(events[i]);
 
-					for (int i = 0; i < eventCount; ++i)
+					for (int i = 0; i < events.Count; ++i)
 						events.RemoveAt(0);
 				}
 			}
