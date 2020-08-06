@@ -218,7 +218,7 @@ namespace GameFramework.BinarySerializer
 		public void WriteBytes(byte[] Buffer, uint Index, uint Length)
 		{
 			stream.Write(Buffer, (int)Index, (int)Length);
-			Size += (uint)Buffer.Length;
+			Size += (uint)Length;
 		}
 
 		public void BeginWriteArray(uint Length)
