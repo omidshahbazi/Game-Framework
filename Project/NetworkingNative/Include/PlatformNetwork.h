@@ -333,6 +333,7 @@ namespace GameFramework::Networking
 
 		static uint64_t GetAvailableBytes(Handle Handle);
 		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t& Length, ReceiveModes Mode);
+		static bool Receive(Handle Handle, std::byte* Buffer, uint32_t Index, uint32_t& Length, ReceiveModes Mode);
 		static bool ReceiveFrom(Handle Handle, std::byte* Buffer, uint32_t& Length, AddressFamilies AddressFamily, std::string& Address, uint16_t& Port, ReceiveModes Mode);
 
 		static void ResolveDomain(const std::string& Domain, AddressFamilies& AddressFamily, std::string& Address);

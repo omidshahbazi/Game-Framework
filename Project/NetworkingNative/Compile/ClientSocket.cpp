@@ -62,7 +62,9 @@ namespace GameFramework::Networking
 
 		try
 		{
-			if (SocketUtilities::GetAvailableBytes(socket) == 0)
+			int availableSize = SocketUtilities::GetAvailableBytes(socket);
+
+			if (availableSize == 0)
 			{
 				if (!GetIsReady())
 					HandleDisconnection(socket);
@@ -72,19 +74,26 @@ namespace GameFramework::Networking
 
 			std::byte* receiveBuffer = GetReceiveBuffer();
 
-			uint32_t size = Constants::RECEIVE_BUFFER_SIZE;
-			if (!SocketUtilities::Receive(socket, receiveBuffer, size))
+			uint32_t receiveBufferIndex = GetReceiveBufferIndex();
+
+			uint32_t receiveSize = availableSize;
+			if (!SocketUtilities::Receive(socket, receiveBuffer, receiveBufferIndex, receiveSize))
 				return;
 
-			GetStatistics().AddBandwidthIn(size);
+			GetStatistics().AddBandwidthIn(receiveSize);
+
+			uint32_t totalSize = receiveBufferIndex + receiveSize;
 
 			uint32_t index = 0;
-			while (index != size)
+			while (index != totalSize)
 			{
 				uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
 
-				if (packetSize > size)
-					throw exception("Incoming packet is invalid");
+				if (totalSize < packetSize)
+				{
+					SetReceiveBufferIndex(totalSize);
+					return;
+				}
 
 				index += Packet::PACKET_SIZE_SIZE;
 
@@ -94,6 +103,8 @@ namespace GameFramework::Networking
 
 				index += packetSize;
 			}
+
+			SetReceiveBufferIndex(0);
 		}
 		catch (PlatformNetwork::SocketException e)
 		{

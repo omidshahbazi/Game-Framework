@@ -142,9 +142,9 @@ namespace GameFramework::Networking
 		return PlatformNetwork::GetAvailableBytes(Socket);
 	}
 
-	bool SocketUtilities::Receive(Socket Socket, std::byte* Buffer, uint32_t& Length)
+	bool SocketUtilities::Receive(Socket Socket, std::byte* Buffer, uint32_t Index, uint32_t& Length)
 	{
-		return PlatformNetwork::Receive(Socket, Buffer, Length, PlatformNetwork::ReceiveModes::None);
+		return PlatformNetwork::Receive(Socket, Buffer, Index, Length, PlatformNetwork::ReceiveModes::None);
 	}
 
 	bool SocketUtilities::ReceiveFrom(Socket Socket, std::byte* Buffer, uint32_t& Length, IPEndPoint& EndPoint)

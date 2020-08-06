@@ -6,11 +6,11 @@ namespace ServerNetworkingManagedTest
 {
 	class Program
 	{
-		private static TCPServerSocket server = null;
+		private static UDPServerSocket server = null;
 
 		static void Main(string[] args)
 		{
-			server = new TCPServerSocket();
+			server = new UDPServerSocket();
 			Console.WriteLine("Server created");
 
 			server.ReceiveBufferSize = server.SendBufferSize = 10485760;

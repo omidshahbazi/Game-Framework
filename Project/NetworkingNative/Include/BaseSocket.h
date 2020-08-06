@@ -111,6 +111,15 @@ namespace GameFramework::Networking
 			return m_ReceiveBuffer;
 		}
 
+		uint32_t GetReceiveBufferIndex(void) const
+		{
+			return m_ReceiveBufferIndex;
+		}
+		void SetReceiveBufferIndex(uint32_t Value)
+		{
+			m_ReceiveBufferIndex = Value;
+		}
+
 	public:
 		PlatformNetwork::IPProtocols GetType(void) const
 		{
@@ -129,6 +138,24 @@ namespace GameFramework::Networking
 		const NetworkingStatistics& GetStatistics(void) const
 		{
 			return m_Statistics;
+		}
+
+		uint32_t GetSendBufferSize(void) const
+		{
+			return m_SendBufferSize;
+		}
+		void SetSendBufferSize(uint32_t Value)
+		{
+			m_SendBufferSize = Value;
+		}
+
+		uint32_t GetReceiveBufferSize(void) const
+		{
+			return m_ReceiveBufferSize;
+		}
+		void SetReceiveBufferSize(uint32_t Value)
+		{
+			m_ReceiveBufferSize = Value;
 		}
 
 		bool GetMultithreadedCallbacks(void) const
@@ -190,8 +217,12 @@ namespace GameFramework::Networking
 		Socket m_Socket;
 
 		std::byte* m_ReceiveBuffer;
+		uint32_t m_ReceiveBufferIndex;
 
 		NetworkingStatistics m_Statistics;
+
+		uint32_t m_SendBufferSize;
+		uint32_t m_ReceiveBufferSize;
 
 		bool m_MultithreadedCallbacks;
 		bool m_MultithreadedReceive;

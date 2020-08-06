@@ -100,7 +100,8 @@ namespace GameFramework::Networking
 			{
 				Socket clientSocket = client->GetSocket();
 
-				if (SocketUtilities::GetAvailableBytes(clientSocket) == 0)
+				uint32_t availableSize = SocketUtilities::GetAvailableBytes(clientSocket);
+				if (availableSize == 0)
 				{
 					if (!client->GetIsReady())
 						disconnectedClients.push_back(client);
@@ -108,11 +109,11 @@ namespace GameFramework::Networking
 					continue;
 				}
 
-				uint32_t size = Constants::RECEIVE_BUFFER_SIZE;
-				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, size))
+				uint32_t receiveSize = availableSize;
+				if (!SocketUtilities::Receive(clientSocket, receiveBuffer, GetReceiveBufferIndex(), receiveSize))
 					continue;
 
-				ServerSocket::ProcessReceivedBuffer(client, size);
+				ServerSocket::ProcessReceivedBuffer(client, receiveSize);
 			}
 			catch (PlatformNetwork::SocketException e)
 			{

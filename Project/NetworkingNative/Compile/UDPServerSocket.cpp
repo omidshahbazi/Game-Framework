@@ -172,7 +172,7 @@ namespace GameFramework::Networking
 
 		try
 		{
-			uint32_t size = Constants::RECEIVE_BUFFER_SIZE;
+			uint32_t size = GetReceiveBufferSize();
 
 			//lock(Socket)
 			{

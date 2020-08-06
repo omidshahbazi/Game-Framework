@@ -625,7 +625,12 @@ namespace GameFramework::Networking
 
 	bool PlatformNetwork::Receive(Handle Handle, std::byte* Buffer, uint32_t& Length, ReceiveModes Mode)
 	{
-		int32_t result = recv(Handle, reinterpret_cast<char*>(Buffer), Length, GetReceiveFlags(Mode));
+		return Receive(Handle, Buffer, 0, Length, Mode);
+	}
+
+	bool PlatformNetwork::Receive(Handle Handle, std::byte* Buffer, uint32_t Index, uint32_t& Length, ReceiveModes Mode)
+	{
+		int32_t result = recv(Handle, reinterpret_cast<char*>(Buffer + Index), Length, GetReceiveFlags(Mode));
 
 		if (result == SOCKET_ERROR)
 			throw SocketException(GetLastError());

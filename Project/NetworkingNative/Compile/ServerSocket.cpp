@@ -71,13 +71,18 @@ namespace GameFramework::Networking
 		GetStatistics().AddBandwidthIn(Size);
 		Client->GetStatistics().AddBandwidthIn(Size);
 
+		uint32_t totalSize = GetReceiveBufferIndex() + Size;
+
 		uint32_t index = 0;
-		while (index < Size)
+		while (index < totalSize)
 		{
 			uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
 
-			if (Size < packetSize)
-				throw exception("Incoming packet is invalid");
+			if (totalSize < packetSize)
+			{
+				SetReceiveBufferIndex(totalSize);
+				return;
+			}
 
 			index += Packet::PACKET_SIZE_SIZE;
 
@@ -87,6 +92,8 @@ namespace GameFramework::Networking
 
 			index += packetSize;
 		}
+
+		SetReceiveBufferIndex(0);
 	}
 
 	void ServerSocket::ProcessEvent(EventBase* Event)

@@ -151,7 +151,7 @@ namespace GameFramework::Networking
 
 		static uint64_t GetAvailableBytes(Socket Socket);
 
-		static bool Receive(Socket Socket, std::byte* Buffer, uint32_t& Length);
+		static bool Receive(Socket Socket, std::byte* Buffer, uint32_t Index, uint32_t& Length);
 
 		static bool ReceiveFrom(Socket Socket, std::byte* Buffer, uint32_t& Length, IPEndPoint& EndPoint);
 
