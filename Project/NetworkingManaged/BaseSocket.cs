@@ -68,6 +68,12 @@ namespace GameFramework.Networking
 			private set;
 		}
 
+		protected uint ReceiveBufferIndex
+		{
+			get;
+			set;
+		}
+
 		public abstract bool IsReady
 		{
 			get;

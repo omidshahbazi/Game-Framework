@@ -160,13 +160,18 @@ namespace GameFramework.Networking
 			Statistics.AddBandwidthIn(Size);
 			Client.Statistics.AddBandwidthIn(Size);
 
+			uint totalSize = ReceiveBufferIndex + Size;
+
 			uint index = 0;
-			while (index < Size)
+			while (index < totalSize)
 			{
 				uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
-				if (packetSize > Size)
-					throw new Exception("Incoming packet is invalid");
+				if (totalSize < packetSize)
+				{
+					ReceiveBufferIndex = totalSize;
+					return;
+				}
 
 				index += Packet.PACKET_SIZE_SIZE;
 
@@ -174,6 +179,8 @@ namespace GameFramework.Networking
 
 				index += packetSize;
 			}
+
+			ReceiveBufferIndex = 0;
 		}
 
 		protected abstract void HandleIncomingBuffer(Client Client, BufferStream Buffer);

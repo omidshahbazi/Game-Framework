@@ -147,11 +147,12 @@ namespace GameFramework.Networking
 
 					try
 					{
-						int size = 0;
+						int receiveSize = 0;
+						int availableSize = client.Socket.Available;
 
 						lock (client.Socket)
 						{
-							if (client.Socket.Available == 0)
+							if (availableSize == 0)
 							{
 								if (!client.IsReady)
 								{
@@ -163,12 +164,12 @@ namespace GameFramework.Networking
 								continue;
 							}
 
-							size = client.Socket.Receive(ReceiveBuffer);
+							receiveSize = client.Socket.Receive(ReceiveBuffer, (int)ReceiveBufferIndex, availableSize, SocketFlags.None);
 						}
 
 						client.Statistics.AddReceivedPacketFromLastSecond();
 
-						ProcessReceivedBuffer(client, (uint)size);
+						ProcessReceivedBuffer(client, (uint)receiveSize);
 					}
 					catch (SocketException e)
 					{

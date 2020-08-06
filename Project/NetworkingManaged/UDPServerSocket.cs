@@ -272,7 +272,7 @@ namespace GameFramework.Networking
 					if (Socket.Available == 0)
 						return;
 
-					size = Socket.ReceiveFrom(ReceiveBuffer, ref endPoint);
+					size = Socket.ReceiveFrom(ReceiveBuffer, Socket.Available, SocketFlags.None, ref endPoint);
 
 					ipEndPoint = (IPEndPoint)endPoint;
 				}

@@ -76,7 +76,7 @@ namespace GameFramework::Networking
 		{
 			uint32_t packetSize = *(reinterpret_cast<uint32_t*>(receiveBuffer + index));
 
-			if (packetSize > Size)
+			if (Size < packetSize)
 				throw exception("Incoming packet is invalid");
 
 			index += Packet::PACKET_SIZE_SIZE;

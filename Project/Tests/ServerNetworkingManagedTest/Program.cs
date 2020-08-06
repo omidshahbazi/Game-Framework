@@ -13,6 +13,8 @@ namespace ServerNetworkingManagedTest
 			server = new TCPServerSocket();
 			Console.WriteLine("Server created");
 
+			server.ReceiveBufferSize = server.SendBufferSize = 10485760;
+
 			server.MultithreadedCallbacks = true;
 			server.MultithreadedReceive = true;
 			server.MultithreadedSend = true;
@@ -21,7 +23,7 @@ namespace ServerNetworkingManagedTest
 			server.OnClientDisconnected += Server_OnClientDisconnected;
 			server.OnBufferReceived += Server_OnBufferReceived;
 
-			server.Bind("::0", 80);
+			server.Bind("::0", 5000);
 			Console.WriteLine("Server bound");
 
 			server.Listen();

@@ -119,7 +119,8 @@ namespace GameFramework.Networking
 		{
 			try
 			{
-				int size = 0;
+				int receiveSize = 0;
+				int availableSize = Socket.Available;
 
 				lock (Socket)
 				{
@@ -131,18 +132,23 @@ namespace GameFramework.Networking
 						return;
 					}
 
-					size = Socket.Receive(ReceiveBuffer);
+					receiveSize = Socket.Receive(ReceiveBuffer, (int)ReceiveBufferIndex, availableSize, SocketFlags.None);
 				}
 
-				Statistics.AddBandwidthIn((uint)size);
+				Statistics.AddBandwidthIn((uint)receiveSize);
+
+				uint totalSize = ReceiveBufferIndex + (uint)receiveSize;
 
 				uint index = 0;
-				while (index < size)
+				while (index < totalSize)
 				{
 					uint packetSize = BitConverter.ToUInt32(ReceiveBuffer, (int)index);
 
-					if (packetSize > size)
-						throw new Exception("Incoming packet is invalid");
+					if (totalSize < packetSize)
+					{
+						ReceiveBufferIndex = totalSize;
+						return;
+					}
 
 					index += Packet.PACKET_SIZE_SIZE;
 
@@ -150,6 +156,8 @@ namespace GameFramework.Networking
 
 					index += packetSize;
 				}
+
+				ReceiveBufferIndex = 0;
 			}
 			catch (SocketException e)
 			{
@@ -162,7 +170,7 @@ namespace GameFramework.Networking
 
 				throw e;
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				HandleDisconnection(Socket);
 			}
