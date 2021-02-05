@@ -57,7 +57,13 @@ namespace GameFramework.ASCIISerializer.JSONSerializer
 					else if (value is string)
 					{
 						str.Append('"');
-						str.Append(value.ToString().Replace("\"", "\\\""));
+
+						string strValue = value.ToString();
+						strValue = strValue.Replace("\\", "\\\\");
+						strValue = strValue.Replace("\"", "\\\"");
+
+						str.Append(strValue);
+
 						str.Append('"');
 					}
 					else if (value is bool)
