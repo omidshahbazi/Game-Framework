@@ -394,6 +394,9 @@ namespace GameFramework.ASCIISerializer
 
 		public static object Bind(Type Type, ISerializeData Data)
 		{
+			if (Data == null)
+				return null;
+
 			if (Data.GetType() == Type)
 				return Data;
 
