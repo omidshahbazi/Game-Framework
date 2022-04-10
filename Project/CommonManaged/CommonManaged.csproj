@@ -64,6 +64,7 @@
     <Compile Include="Utilities\FileHelper.cs" />
     <Compile Include="Utilities\CRC32.cs" />
     <Compile Include="FileManagement\LogManager.cs" />
+    <Compile Include="Utilities\IconMaker.cs" />
     <Compile Include="Utilities\MathHelper.cs" />
     <Compile Include="Utilities\OUID.cs" />
     <Compile Include="Utilities\Random.cs" />
